@@ -1,0 +1,142 @@
+<svg width="640" height="180" viewBox="0 0 640 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Markor Data Matrix Logo</title>
+  <desc id="desc">A real Data Matrix styled symbol with MARKOR wordmark</desc>
+
+  <rect width="640" height="180" rx="20" fill="#FFFFFF"/>
+
+  <!-- Data Matrix symbol (14x14 modules with 1-module quiet zone) -->
+  <g transform="translate(24 20)">
+    <rect x="0" y="0" width="140" height="140" rx="16" fill="#0F172A"/>
+
+    <!-- quiet zone -->
+    <rect x="14" y="14" width="112" height="112" fill="#FFFFFF"/>
+
+    <!-- module size: 8, origin: (22,22), 14x14 grid -->
+    <g fill="#0F172A">
+      <!-- left solid border -->
+      <rect x="22" y="22" width="8" height="8"/>
+      <rect x="22" y="30" width="8" height="8"/>
+      <rect x="22" y="38" width="8" height="8"/>
+      <rect x="22" y="46" width="8" height="8"/>
+      <rect x="22" y="54" width="8" height="8"/>
+      <rect x="22" y="62" width="8" height="8"/>
+      <rect x="22" y="70" width="8" height="8"/>
+      <rect x="22" y="78" width="8" height="8"/>
+      <rect x="22" y="86" width="8" height="8"/>
+      <rect x="22" y="94" width="8" height="8"/>
+      <rect x="22" y="102" width="8" height="8"/>
+      <rect x="22" y="110" width="8" height="8"/>
+      <rect x="22" y="118" width="8" height="8"/>
+      <rect x="22" y="126" width="8" height="8"/>
+
+      <!-- bottom solid border -->
+      <rect x="22" y="126" width="8" height="8"/>
+      <rect x="30" y="126" width="8" height="8"/>
+      <rect x="38" y="126" width="8" height="8"/>
+      <rect x="46" y="126" width="8" height="8"/>
+      <rect x="54" y="126" width="8" height="8"/>
+      <rect x="62" y="126" width="8" height="8"/>
+      <rect x="70" y="126" width="8" height="8"/>
+      <rect x="78" y="126" width="8" height="8"/>
+      <rect x="86" y="126" width="8" height="8"/>
+      <rect x="94" y="126" width="8" height="8"/>
+      <rect x="102" y="126" width="8" height="8"/>
+      <rect x="110" y="126" width="8" height="8"/>
+      <rect x="118" y="126" width="8" height="8"/>
+      <rect x="126" y="126" width="8" height="8"/>
+
+      <!-- top alternating border -->
+      <rect x="30" y="22" width="8" height="8"/>
+      <rect x="46" y="22" width="8" height="8"/>
+      <rect x="62" y="22" width="8" height="8"/>
+      <rect x="78" y="22" width="8" height="8"/>
+      <rect x="94" y="22" width="8" height="8"/>
+      <rect x="110" y="22" width="8" height="8"/>
+      <rect x="126" y="22" width="8" height="8"/>
+
+      <!-- right alternating border -->
+      <rect x="126" y="30" width="8" height="8"/>
+      <rect x="126" y="46" width="8" height="8"/>
+      <rect x="126" y="62" width="8" height="8"/>
+      <rect x="126" y="78" width="8" height="8"/>
+      <rect x="126" y="94" width="8" height="8"/>
+      <rect x="126" y="110" width="8" height="8"/>
+
+      <!-- payload modules (fixed pattern for brand mark) -->
+      <rect x="38" y="38" width="8" height="8"/>
+      <rect x="46" y="38" width="8" height="8"/>
+      <rect x="62" y="38" width="8" height="8"/>
+      <rect x="70" y="38" width="8" height="8"/>
+      <rect x="86" y="38" width="8" height="8"/>
+      <rect x="94" y="38" width="8" height="8"/>
+
+      <rect x="38" y="46" width="8" height="8"/>
+      <rect x="54" y="46" width="8" height="8"/>
+      <rect x="70" y="46" width="8" height="8"/>
+      <rect x="78" y="46" width="8" height="8"/>
+      <rect x="102" y="46" width="8" height="8"/>
+
+      <rect x="46" y="54" width="8" height="8"/>
+      <rect x="54" y="54" width="8" height="8"/>
+      <rect x="62" y="54" width="8" height="8"/>
+      <rect x="86" y="54" width="8" height="8"/>
+      <rect x="94" y="54" width="8" height="8"/>
+      <rect x="110" y="54" width="8" height="8"/>
+
+      <rect x="38" y="62" width="8" height="8"/>
+      <rect x="54" y="62" width="8" height="8"/>
+      <rect x="70" y="62" width="8" height="8"/>
+      <rect x="86" y="62" width="8" height="8"/>
+      <rect x="102" y="62" width="8" height="8"/>
+
+      <rect x="46" y="70" width="8" height="8"/>
+      <rect x="62" y="70" width="8" height="8"/>
+      <rect x="78" y="70" width="8" height="8"/>
+      <rect x="94" y="70" width="8" height="8"/>
+      <rect x="102" y="70" width="8" height="8"/>
+      <rect x="110" y="70" width="8" height="8"/>
+
+      <rect x="38" y="78" width="8" height="8"/>
+      <rect x="54" y="78" width="8" height="8"/>
+      <rect x="70" y="78" width="8" height="8"/>
+      <rect x="78" y="78" width="8" height="8"/>
+      <rect x="94" y="78" width="8" height="8"/>
+
+      <rect x="46" y="86" width="8" height="8"/>
+      <rect x="54" y="86" width="8" height="8"/>
+      <rect x="62" y="86" width="8" height="8"/>
+      <rect x="86" y="86" width="8" height="8"/>
+      <rect x="102" y="86" width="8" height="8"/>
+
+      <rect x="38" y="94" width="8" height="8"/>
+      <rect x="70" y="94" width="8" height="8"/>
+      <rect x="78" y="94" width="8" height="8"/>
+      <rect x="94" y="94" width="8" height="8"/>
+      <rect x="110" y="94" width="8" height="8"/>
+
+      <rect x="46" y="102" width="8" height="8"/>
+      <rect x="54" y="102" width="8" height="8"/>
+      <rect x="62" y="102" width="8" height="8"/>
+      <rect x="86" y="102" width="8" height="8"/>
+      <rect x="94" y="102" width="8" height="8"/>
+      <rect x="110" y="102" width="8" height="8"/>
+
+      <rect x="38" y="110" width="8" height="8"/>
+      <rect x="54" y="110" width="8" height="8"/>
+      <rect x="70" y="110" width="8" height="8"/>
+      <rect x="86" y="110" width="8" height="8"/>
+      <rect x="102" y="110" width="8" height="8"/>
+
+      <rect x="46" y="118" width="8" height="8"/>
+      <rect x="62" y="118" width="8" height="8"/>
+      <rect x="78" y="118" width="8" height="8"/>
+      <rect x="94" y="118" width="8" height="8"/>
+      <rect x="110" y="118" width="8" height="8"/>
+    </g>
+  </g>
+
+  <g transform="translate(184 52)">
+    <text x="0" y="56" fill="#0F172A" font-family="Montserrat, Poppins, Arial, sans-serif" font-size="56" font-weight="800" letter-spacing="2">MARKOR</text>
+    <text x="2" y="86" fill="#334155" font-family="Montserrat, Poppins, Arial, sans-serif" font-size="16" font-weight="500" letter-spacing="1.6">CHESTNY ZNAK WORKFLOW PLATFORM</text>
+  </g>
+</svg>

@@ -15,6 +15,28 @@
     <!-- StyleSheets  -->
     <link rel="stylesheet" href="assets/css/dashlite.css?ver=2.9.1">
     <link id="skin-default" rel="stylesheet" href="assets/css/theme.css?ver=2.9.1">
+    <style>
+        html,
+        body,
+        .nk-app-root {
+            height: 100%;
+        }
+
+        body.nk-body {
+            overflow: hidden;
+        }
+
+        .nk-app-root>.nk-wrap {
+            height: 100vh;
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr) auto;
+        }
+
+        .nk-app-root>.nk-wrap>.nk-content {
+            min-height: 0;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 
 <body class="nk-body bg-lighter ">
@@ -31,20 +53,20 @@
                         </div>
                         <div class="nk-header-brand">
                             <a href="html/index.html" class="logo-link">
-                                <img class="logo-light logo-img" src="images/logo.png" srcset="images/logo2x.png 2x"
+                                <img class="logo-light logo-img" src="images/brand/markor-logo.svg" srcset="images/brand/markor-logo.svg 2x"
                                     alt="logo">
-                                <img class="logo-dark logo-img" src="images/logo-dark.png"
-                                    srcset="images/logo-dark2x.png 2x" alt="logo-dark">
+                                <img class="logo-dark logo-img" src="images/brand/markor-logo.svg"
+                                    srcset="images/brand/markor-logo.svg 2x" alt="logo-dark">
                             </a>
                         </div><!-- .nk-header-brand -->
                         <div class="nk-header-menu ml-auto" data-content="headerNav">
                             <div class="nk-header-mobile">
                                 <div class="nk-header-brand">
                                     <a href="html/index.html" class="logo-link">
-                                        <img class="logo-light logo-img" src="images/logo.png"
-                                            srcset="images/logo2x.png 2x" alt="logo">
-                                        <img class="logo-dark logo-img" src="images/logo-dark.png"
-                                            srcset="images/logo-dark2x.png 2x" alt="logo-dark">
+                                        <img class="logo-light logo-img" src="images/brand/markor-logo.svg"
+                                            srcset="images/brand/markor-logo.svg 2x" alt="logo">
+                                        <img class="logo-dark logo-img" src="images/brand/markor-logo.svg"
+                                            srcset="images/brand/markor-logo.svg 2x" alt="logo-dark">
                                     </a>
                                 </div>
                                 <div class="nk-menu-trigger mr-n2">

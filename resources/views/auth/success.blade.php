@@ -8,7 +8,7 @@
     <meta name="description"
         content="A powerful and conceptual apps base dashboard template that especially build for developers and programmers.">
     <link rel="shortcut icon" href="{{ asset('images/favicon.png') }}">
-    <title>Reset Password | Markor</title>
+    <title>{{ $pageTitle ?? 'Success' }} | Markor</title>
     <link rel="stylesheet" href="{{ asset('assets/css/dashlite.css') }}">
     <link id="skin-default" rel="stylesheet" href="{{ asset('assets/css/theme.css') }}">
 </head>
@@ -18,8 +18,8 @@
         <div class="nk-main">
             <div class="nk-wrap nk-wrap-nosidebar">
                 <div class="nk-content">
-                    <div class="nk-block nk-block-middle nk-auth-body wide-xs">
-                        <div class="brand-logo pb-4 text-center">
+                    <div class="nk-block nk-block-middle nk-auth-body">
+                        <div class="brand-logo pb-5">
                             <a href="{{ url('/') }}" class="logo-link">
                                 <img class="logo-light logo-img logo-img-lg" src="{{ asset('images/brand/markor-logo.svg') }}"
                                     srcset="{{ asset('images/brand/markor-logo.svg') }} 2x" alt="logo">
@@ -27,56 +27,20 @@
                                     srcset="{{ asset('images/brand/markor-logo.svg') }} 2x" alt="logo-dark">
                             </a>
                         </div>
-                        <div class="card card-bordered">
-                            <div class="card-inner card-inner-lg">
-                                <div class="nk-block-head">
-                                    <div class="nk-block-head-content">
-                                        <h5 class="nk-block-title">Reset password</h5>
-                                        <div class="nk-block-des">
-                                            <p>We will email you instructions to reset your password.</p>
-                                        </div>
-                                    </div>
+                        <div class="nk-block-head">
+                            <div class="nk-block-head-content">
+                                <h4 class="nk-block-title">{{ $title ?? 'Success' }}</h4>
+                                <div class="nk-block-des text-success">
+                                    <p>{{ $message ?? 'Your request completed successfully.' }}</p>
                                 </div>
-
-                                @if (session('status'))
-                                    <div class="alert alert-success">
-                                        {{ session('status') }}
-                                    </div>
-                                @endif
-
-                                <form method="POST" action="{{ route('password.email') }}">
-                                    @csrf
-                                    <div class="form-group">
-                                        <div class="form-label-group">
-                                            <label class="form-label" for="email">Email</label>
-                                        </div>
-                                        <div class="form-control-wrap">
-                                            <input id="email" type="email"
-                                                class="form-control form-control-lg @error('email') is-invalid @enderror"
-                                                name="email" value="{{ old('email') }}" required autocomplete="email"
-                                                autofocus placeholder="Enter your email address">
-                                        </div>
-                                        @error('email')
-                                            <span class="invalid-feedback d-block" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-                                    <div class="form-group">
-                                        <button class="btn btn-lg btn-primary btn-block" type="submit">Send Reset
-                                            Link</button>
-                                    </div>
-                                </form>
-
                                 @if (Route::has('login'))
-                                    <div class="form-note-s2 text-center pt-4">
-                                        <a href="{{ route('login') }}"><strong>Return to login</strong></a>
+                                    <div class="pt-3">
+                                        <a class="btn btn-primary" href="{{ route('login') }}">Go to Login</a>
                                     </div>
                                 @endif
                             </div>
                         </div>
                     </div>
-
                     <div class="nk-footer nk-auth-footer-full">
                         <div class="container wide-lg">
                             <div class="row g-3">

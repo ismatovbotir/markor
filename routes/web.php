@@ -9,6 +9,8 @@ Route::get('/', function () {
 
 Auth::routes();
 
+Route::view('/auth/success', 'auth.success')->name('auth.success');
+
 //Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 require __DIR__ . '/admin.php';
