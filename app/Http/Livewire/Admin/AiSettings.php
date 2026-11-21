@@ -41,6 +41,9 @@ class AiSettings extends Component
 
     public function render(Claude $claude)
     {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('ai_usages')) {
+            return view('livewire.admin.ai-settings-missing'); // the server has not run `php artisan migrate` yet
+        }
         $month = AiUsage::where('created_at', '>=', now()->startOfMonth());
 
         return view('livewire.admin.ai-settings', [

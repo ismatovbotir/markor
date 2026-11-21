@@ -188,11 +188,11 @@ class Claude
     private function log(string $feature, int $in, int $out, string $status, ?string $error, string $model): void
     {
         [$priceIn, $priceOut] = config('ai.prices.' . app(ModelResolver::class)->lineOf($model), [0, 0]);
-        AiUsage::create([
+        rescue(fn () => AiUsage::create([
             'feature' => $feature, 'model' => $model,
             'input_tokens' => $in, 'output_tokens' => $out,
             'cost_usd' => ($in * (float) $priceIn + $out * (float) $priceOut) / 1_000_000,
             'status' => $status, 'error' => $error,
-        ]);
+        ]), report: false); // logging must never break a feature (e.g. table not migrated yet)
     }
 }

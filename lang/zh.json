@@ -735,5 +735,6 @@
     "ai.pinned": "已固定（.env）",
     "ai.models_refreshed": "模型列表已更新。",
     "ai.refresh_models": "更新模型",
-    "ai.auto_hint": "每个级别自动选择最新的 Claude 模型（列表每天更新一次）。新版本发布后会自动切换。"
+    "ai.auto_hint": "每个级别自动选择最新的 Claude 模型（列表每天更新一次）。新版本发布后会自动切换。",
+    "ai.needs_migrate": "数据库未更新。请在服务器上运行："
 }

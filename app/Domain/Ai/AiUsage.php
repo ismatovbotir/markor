@@ -17,6 +17,10 @@ class AiUsage extends Model
 
     public static function monthCost(): float
     {
-        return (float) static::where('created_at', '>=', now()->startOfMonth())->sum('cost_usd');
+        try {
+            return (float) static::where('created_at', '>=', now()->startOfMonth())->sum('cost_usd');
+        } catch (\Throwable) {
+            return 0.0; // table not migrated yet
+        }
     }
 }

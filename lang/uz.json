@@ -735,5 +735,6 @@
     "ai.pinned": "qat'iy belgilangan (.env)",
     "ai.models_refreshed": "Modellar ro'yxati yangilandi.",
     "ai.refresh_models": "Modellarni yangilash",
-    "ai.auto_hint": "Har bir daraja uchun eng yangi Claude modeli avtomatik tanlanadi (ro'yxat kuniga bir marta yangilanadi). Yangi versiya chiqsa — o'zi o'tadi."
+    "ai.auto_hint": "Har bir daraja uchun eng yangi Claude modeli avtomatik tanlanadi (ro'yxat kuniga bir marta yangilanadi). Yangi versiya chiqsa — o'zi o'tadi.",
+    "ai.needs_migrate": "Ma'lumotlar bazasi yangilanmagan. Serverda buyruqni bajaring:"
 }
