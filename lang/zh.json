@@ -944,5 +944,6 @@
     "contact.bot": "Telegram 机器人（Asl Belgisi）",
     "contact.offers_hint": "打印机、碳带、标签和服务",
     "contact.register_hint": "注册公司",
-    "contact.studio_hint": "免费标签设计器"
+    "contact.studio_hint": "免费标签设计器",
+    "banners.publish": "发布"
 }

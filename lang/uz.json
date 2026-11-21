@@ -944,5 +944,6 @@
     "contact.bot": "Telegram bot (Asl Belgisi)",
     "contact.offers_hint": "Printerlar, ribbonlar, etiketkalar va xizmat",
     "contact.register_hint": "Kompaniyani ro'yxatdan o'tkazish",
-    "contact.studio_hint": "Bepul etiketka dizayneri"
+    "contact.studio_hint": "Bepul etiketka dizayneri",
+    "banners.publish": "Saytda"
 }

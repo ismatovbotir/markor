@@ -31,7 +31,10 @@
                     <div class="flex items-center gap-1 shrink-0 text-xs">
                         <button wire:click="move({{ $b->id }}, -1)" class="px-1.5 text-stone-400 hover:text-stone-800" title="↑">↑</button>
                         <button wire:click="move({{ $b->id }}, 1)" class="px-1.5 text-stone-400 hover:text-stone-800" title="↓">↓</button>
-                        <button wire:click="toggle({{ $b->id }})" class="px-2 {{ $b->is_active ? 'text-emerald-700' : 'text-stone-400' }}">{{ $b->is_active ? __('common.active') : __('banners.hidden') }}</button>
+                        <label class="inline-flex items-center gap-1.5 px-2 cursor-pointer select-none {{ $b->is_active ? 'text-emerald-700' : 'text-stone-500' }}" title="{{ __('banners.publish') }}">
+                            <input type="checkbox" wire:click="toggle({{ $b->id }})" @checked($b->is_active) class="rounded border-stone-300 text-emerald-600">
+                            {{ __('banners.publish') }}
+                        </label>
                         <button wire:click="openEdit({{ $b->id }})" class="px-2 text-stone-500 hover:text-amber-700">{{ __('common.edit') }}</button>
                         <button wire:click="delete({{ $b->id }})" wire:confirm="{{ __('common.confirm_delete') }}" class="px-2 text-stone-500 hover:text-rose-600">{{ __('common.delete') }}</button>
                     </div>

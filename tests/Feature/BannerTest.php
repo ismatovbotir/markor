@@ -17,8 +17,9 @@ class BannerTest extends TestCase
     {
         parent::setUp();
         $this->seed(\Database\Seeders\BannerSeeder::class);
-        $this->assertSame(4, Banner::where('is_default', false)->count(), 'Zebra printer, Godex, DS2278, MC3300 seeded');
-        foreach (Banner::where('is_default', false)->get() as $b) {
+        $this->assertSame(4, Banner::where('is_default', false)->where('is_active', true)->count(), 'Zebra printer, Godex, DS2278, MC3300 published');
+        $this->assertSame(2, Banner::where('is_active', false)->count(), 'labels and ribbons seeded unpublished');
+        foreach (Banner::where('is_default', false)->whereNotNull('image_path')->get() as $b) {
             $this->assertFileExists(public_path($b->image_path), 'seeded picture ships with the code');
             $this->assertSame('/' . $b->image_path, $b->imageUrl());
         }
@@ -44,6 +45,10 @@ class BannerTest extends TestCase
 
     public function test_default_banner_cannot_be_edited_or_deleted_here(): void
     {
+        $other = Banner::create(['title_uz' => 'Ribbon', 'is_active' => false]);
+        Livewire::test(BannerIndex::class)->call('toggle', $other->id);
+        $this->assertTrue($other->fresh()->is_active, 'publish checkbox');
+
         $default = Banner::where('is_default', true)->firstOrFail();
         Livewire::test(BannerIndex::class)->call('delete', $default->id)->assertNotFound();
         $this->assertNotNull(Banner::find($default->id));

@@ -944,5 +944,6 @@
     "contact.bot": "Telegram-бот (Asl Belgisi)",
     "contact.offers_hint": "Принтеры, риббоны, этикетки и сервис",
     "contact.register_hint": "Регистрация компании",
-    "contact.studio_hint": "Бесплатный конструктор этикеток"
+    "contact.studio_hint": "Бесплатный конструктор этикеток",
+    "banners.publish": "Опубликован"
 }

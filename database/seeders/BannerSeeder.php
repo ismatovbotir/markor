@@ -18,9 +18,9 @@ class BannerSeeder extends Seeder
 
         foreach ($this->brands() as $i => $banner) {
             $row = Banner::firstOrCreate(['is_default' => false, 'title_uz' => $banner['title_uz']], $banner + [
-                'url' => '/#offers', 'is_sponsored' => false, 'is_active' => true, 'sort_order' => $i + 1,
+                'url' => '/#offers', 'is_sponsored' => false, 'is_active' => true, 'sort_order' => $i + 1, // $banner's own is_active wins
             ]);
-            if (!$row->image_path) {
+            if (!$row->image_path && !empty($banner['image_path'])) {
                 $row->update(['image_path' => $banner['image_path']]); // a banner seeded before the pictures existed
             }
         }
@@ -80,6 +80,35 @@ class BannerSeeder extends Seeder
                 'button_uz' => 'TSD tanlash',
                 'button_ru' => 'Подобрать ТСД',
                 'button_zh' => '选择 PDA',
+            ],
+            // consumables: created unpublished — the admin adds a picture and ticks "publish" in Admin → Bannerlar
+            [
+                'style'     => 'light',
+                'is_active' => false,
+                'image_path'=> null,
+                'title_uz'  => "Etiketkalar — har qanday o'lchamda",
+                'title_ru'  => 'Этикетки — любого размера',
+                'title_zh'  => '各种尺寸的标签',
+                'text_uz'   => "Termo va termotransfer etiketkalar rulonlarda: Asl Belgisi DataMatrix uchun 20×20 mm dan tortib katta logistika etiketkalarigacha. Printeringizga mos o'lcham va vtulka tanlab beramiz.",
+                'text_ru'   => 'Термо- и термотрансферные этикетки в рулонах: от 20×20 мм для DataMatrix Asl Belgisi до больших логистических. Подберём размер и втулку под ваш принтер.',
+                'text_zh'   => '卷装热敏和热转印标签：从用于 Asl Belgisi DataMatrix 的 20×20 毫米到大尺寸物流标签。按您的打印机选择尺寸和卷芯。',
+                'button_uz' => 'Etiketka tanlash',
+                'button_ru' => 'Подобрать этикетки',
+                'button_zh' => '选择标签',
+            ],
+            [
+                'style'     => 'amber',
+                'is_active' => false,
+                'image_path'=> null,
+                'title_uz'  => 'Ribbonlar — wax, wax/resin, resin',
+                'title_ru'  => 'Риббоны — wax, wax/resin, resin',
+                'title_zh'  => '碳带：蜡基、混合基、树脂基',
+                'text_uz'   => "Termotransfer printerlar uchun ribbonlar: qog'oz etiketkalar uchun wax, chidamli va sintetik etiketkalar uchun wax/resin va resin. Etiketka va printeringizga mosini tanlab beramiz.",
+                'text_ru'   => 'Риббоны для термотрансферных принтеров: wax для бумажных этикеток, wax/resin и resin — для стойких и синтетических. Подберём под вашу этикетку и принтер.',
+                'text_zh'   => '热转印打印机碳带：纸质标签用蜡基，耐用和合成材料标签用混合基和树脂基。按您的标签和打印机推荐合适型号。',
+                'button_uz' => 'Ribbon tanlash',
+                'button_ru' => 'Подобрать риббон',
+                'button_zh' => '选择碳带',
             ],
         ];
     }
