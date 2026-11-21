@@ -985,7 +985,6 @@
     "drivers.faq.3.a": "需要。Markor 生成 PDF 或打印页面，由电脑上的驱动发送到打印机。打印机指令语言：:language。",
     "drivers.faq.4.q": ":name 适合哪些碳带和标签？",
     "drivers.faq.4.a": "取决于标签材料和打印模式：纸质标签用蜡基，耐用和合成材料标签用混合基或树脂基碳带。可在下方选择或咨询我们。",
-    "drivers.supplies_h2": "适用于 :name 的碳带和标签",
     "drivers.siblings_h2": "其他 :brand 驱动",
     "drivers.missing_title": "列表中没有您的型号？",
     "drivers.missing_text": "告诉我们打印机型号，我们会找到官方驱动链接并协助安装。",
@@ -1148,5 +1147,6 @@
     "nav.group.clients": "客户",
     "nav.group.site": "网站",
     "nav.group.system": "系统",
-    "offers.slug_hint_fixed": "地址固定不变，链接和搜索结果始终有效。"
+    "offers.slug_hint_fixed": "地址固定不变，链接和搜索结果始终有效。",
+    "drivers.all_items": "全部"
 }

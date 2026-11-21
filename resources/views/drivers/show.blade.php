@@ -100,18 +100,26 @@
         </section>
     @endif
 
-    @if($supplies->isNotEmpty())
-        <section class="mt-12">
-            <h2 class="font-display font-bold text-xl text-stone-900">{{ __('drivers.supplies_h2', ['name' => $name]) }}</h2>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                @foreach($supplies as $item)
-                    <a href="{{ HomeController::localizedUrl('marketplace.item', $loc, ['offer' => $item->slug]) }}" class="bg-white border border-stone-200 rounded-xl p-3 hover:border-amber-400 transition">
-                        @if($item->image_url)<img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy" class="h-24 w-full object-contain">@else<div class="h-24 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">@svg($item->icon ?: 'heroicon-o-cube', 'w-8 h-8')</div>@endif
-                        <p class="font-semibold text-sm text-stone-900 mt-3 leading-snug">{{ $item->title }}</p>
-                        <p class="text-xs text-stone-500 mt-1">{{ $item->price ?: __('offers.price_on_request') }}</p>
-                    </a>
-                @endforeach
-            </div>
+    @if($categories->isNotEmpty())
+        {{-- marketplace: each category, one row of random items (2 on phones, 3 on tablets, 4 on desktop) --}}
+        <section class="mt-12 space-y-8">
+            <h2 class="font-display font-bold text-xl text-stone-900">{{ __('home.offers.title') }}</h2>
+            @foreach($categories as $cat)
+                <div>
+                    <div class="flex items-center justify-between gap-4">
+                        <h3 class="font-semibold text-stone-900 flex items-center gap-2">@svg($cat->icon ?: 'heroicon-o-cube', 'w-5 h-5 text-amber-700') {{ $cat->name }}</h3>
+                        <a href="{{ HomeController::localizedUrl('marketplace', $loc) }}" class="text-sm text-amber-700 hover:underline whitespace-nowrap">{{ __('drivers.all_items') }} →</a>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-3">
+                        @foreach($cat->offers as $i => $item)
+                            <a href="{{ HomeController::localizedUrl('marketplace.item', $loc, ['offer' => $item->slug]) }}" @class(['bg-white border border-stone-200 rounded-xl p-3 hover:border-amber-400 transition', 'hidden sm:block' => $i === 2, 'hidden lg:block' => $i === 3])>
+                                @if($item->image_url)<img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy" class="h-24 w-full object-contain">@else<div class="h-24 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">@svg($item->icon ?: 'heroicon-o-cube', 'w-8 h-8')</div>@endif
+                                <p class="font-semibold text-sm text-stone-900 mt-3 leading-snug line-clamp-2">{{ $item->title }}</p>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
         </section>
     @endif
 

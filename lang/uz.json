@@ -985,7 +985,6 @@
     "drivers.faq.3.a": "Ha. Markor PDF yoki chop etish sahifasini tayyorlaydi, chop etish esa kompyuterdagi drayver orqali bo'ladi. Printer buyruq tili — :language.",
     "drivers.faq.4.q": ":name uchun qaysi ribbon va etiketka mos?",
     "drivers.faq.4.a": "Etiketka materiali va chop etish rejimiga bog'liq: qog'oz etiketkaga wax, chidamli va sintetik etiketkaga wax/resin yoki resin ribbon. Quyidagi mahsulotlardan tanlang yoki bizdan so'rang.",
-    "drivers.supplies_h2": ":name uchun ribbon va etiketkalar",
     "drivers.siblings_h2": "Boshqa :brand drayverlari",
     "drivers.missing_title": "Modelingiz ro'yxatda yo'qmi?",
     "drivers.missing_text": "Printer modelini yozing — rasmiy drayver havolasini topib beramiz va o'rnatishda yordam beramiz.",
@@ -1148,5 +1147,6 @@
     "nav.group.clients": "Mijozlar",
     "nav.group.site": "Sayt",
     "nav.group.system": "Tizim",
-    "offers.slug_hint_fixed": "Manzil o'zgarmaydi — havolalar va qidiruv natijalari doim ishlaydi."
+    "offers.slug_hint_fixed": "Manzil o'zgarmaydi — havolalar va qidiruv natijalari doim ishlaydi.",
+    "drivers.all_items": "Barchasi"
 }

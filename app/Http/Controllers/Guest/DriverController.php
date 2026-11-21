@@ -24,9 +24,11 @@ class DriverController extends Controller
             'driver'  => $driver,
             'products'=> $driver->offers()->active()->orderBy('sort_order')->get(),
             'siblings'=> PrinterDriver::active()->where('brand', $driver->brand)->whereKeyNot($driver->id)->orderBy('sort_order')->limit(6)->get(),
-            // consumables that fit any label printer: ribbons and labels from our catalog
-            'supplies'=> Offer::where('is_active', true)->whereHas('offerCategory', fn ($q) => $q->where('is_active', true)->whereIn('slug', ['ribbons', 'labels']))
-                ->orderBy('sort_order')->limit(4)->get(),
+            // the marketplace: every category with a few random items (one row; no compatibility claim)
+            'categories' => \App\Domain\Offers\Models\OfferCategory::active()->orderBy('sort_order')->orderBy('id')
+                ->with(['offers' => fn ($q) => $q->where('is_active', true)])->get()
+                ->each(fn ($c) => $c->setRelation('offers', $c->offers->shuffle()->take(4)->values()))
+                ->filter(fn ($c) => $c->offers->isNotEmpty())->values(),
         ]);
     }
 }

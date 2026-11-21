@@ -109,4 +109,18 @@ class PrinterDriverTest extends TestCase
         $this->get(route('drivers.show', $driver))->assertOk()->assertSee('Godex GX4300i printer');
         $this->get(route('drivers'))->assertOk()->assertSee('godexgx4300i', false); // search index includes product names
     }
+
+    public function test_driver_page_shows_each_category_with_one_row_of_items(): void
+    {
+        $this->seed(\Database\Seeders\OfferSeeder::class);
+        $d = PrinterDriver::create(['brand' => 'Godex', 'model' => 'G500', 'slug' => 'godex-g500', 'driver_url' => 'https://www.godexintl.com/downloads', 'is_active' => true]);
+
+        $html = $this->get(route('drivers.show', $d))->assertOk()->getContent();
+        foreach (\App\Domain\Offers\Models\OfferCategory::active()->whereHas('offers', fn ($q) => $q->where('is_active', true))->get() as $c) {
+            $this->assertStringContainsString(e($c->name), $html, "category {$c->slug} shown");
+        }
+        $this->assertStringNotContainsString('uchun ribbon va etiketkalar', $html, 'no "for this printer" claim');
+        // at most one row (4) per category
+        $this->assertLessThanOrEqual(4 * \App\Domain\Offers\Models\OfferCategory::count(), substr_count($html, '/marketplace/'));
+    }
 }
