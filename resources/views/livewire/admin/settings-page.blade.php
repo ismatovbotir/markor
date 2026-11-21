@@ -10,6 +10,8 @@
             'telegram' => ['Telegram', 'markor_uz', 'text', 'settings.telegram_hint'],
             'telegram_bot' => ['settings.telegram_bot', 'markor_bot', 'text', 'settings.bot_hint'],
             'email' => ['auth.email', 'sales@markor.uz', 'email', 'settings.email_hint'],
+            'wechat' => ['WeChat', 'wechat_id', 'text', 'settings.wechat_hint'],
+            'wechat_link' => ['settings.wechat_link', 'https://u.wechat.com/…', 'url', 'settings.wechat_link_hint'],
         ] as $key => [$label, $placeholder, $type, $hint])
             <div>
                 <label class="block text-xs font-medium text-stone-600 mb-1" for="c-{{ $key }}">{{ __($label) }}</label>

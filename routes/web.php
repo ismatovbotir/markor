@@ -34,6 +34,10 @@ Route::get('/llms.txt', [HomeController::class, 'llms'])->name('llms');
 Route::get('/llms-full.txt', [HomeController::class, 'llmsFull'])->name('llms.full');
 // public guides (the same Markdown guides as inside the client area)
 Route::get('/guide/{page?}', [HomeController::class, 'guide'])->name('guide');
+// landing page for Chinese manufacturers / exporters marking goods for Uzbekistan
+Route::view('/uzbekistan-marking', 'china')->name('china');
+// public page of a Marketplace item
+Route::get('/marketplace/{offer:slug}', [\App\Http\Controllers\Guest\MarketplaceController::class, 'show'])->name('marketplace.item');
 Route::get('/label-image/{w}x{h}.svg', [\App\Http\Controllers\Guest\LabelImageController::class, 'show'])->whereNumber(['w', 'h'])->name('label-image');
 Route::post('/telegram/webhook/{secret}', function (string $secret, \Illuminate\Http\Request $request, \App\Domain\Telegram\BotHandler $bot) {
     abort_unless(filled(config('telegram.webhook_secret')) && hash_equals(config('telegram.webhook_secret'), $secret), 404);
@@ -115,6 +119,7 @@ Route::middleware(['auth', 'can:admin'])->prefix('admin')->group(function () {
     Route::get('/template-requests', \App\Http\Livewire\Admin\TemplateRequestIndex::class)->name('admin.template-requests');
     Route::get('/settings', \App\Http\Livewire\Admin\SettingsPage::class)->name('admin.settings');
     Route::get('/seo', \App\Http\Livewire\Admin\SeoPage::class)->name('admin.seo');
+    Route::get('/banners', \App\Http\Livewire\Admin\BannerIndex::class)->name('admin.banners');
     Route::get('/telegram', \App\Http\Livewire\Admin\TelegramPage::class)->name('admin.telegram');
     Route::get('/payments', \App\Http\Livewire\Admin\PaymentIndex::class)->name('admin.payments');
     Route::get('/templates', LabelTemplateIndex::class)->name('label-templates.index');

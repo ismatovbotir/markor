@@ -9,7 +9,7 @@ use App\Http\Middleware\SetLocale;
 class HomeController extends Controller
 {
     /** Public pages that search engines should index. */
-    private const PUBLIC_ROUTES = ['home', 'studio'];
+    private const PUBLIC_ROUTES = ['home', 'studio', 'china'];
 
     public function index()
     {
@@ -134,6 +134,17 @@ class HomeController extends Controller
                 $xml .= '    <xhtml:link rel="alternate" hreflang="x-default" href="' . e(route($name)) . '"/>' . "\n";
                 $xml .= "    <lastmod>$lastmod</lastmod>\n";
                 $xml .= "    <changefreq>weekly</changefreq>\n    <priority>" . ($name === 'home' ? '1.0' : '0.9') . "</priority>\n  </url>\n";
+            }
+        }
+
+        $items = Offer::where('is_active', true)->whereHas('offerCategory', fn ($q) => $q->where('is_active', true))->get(['slug', 'updated_at']);
+        foreach ($items as $item) {
+            foreach (array_keys(SetLocale::LOCALES) as $locale) {
+                $xml .= "  <url>\n    <loc>" . e(self::localizedUrl('marketplace.item', $locale, ['offer' => $item->slug])) . "</loc>\n";
+                foreach (SetLocale::HREFLANG as $alt => $hreflang) {
+                    $xml .= '    <xhtml:link rel="alternate" hreflang="' . $hreflang . '" href="' . e(self::localizedUrl('marketplace.item', $alt, ['offer' => $item->slug])) . '"/>' . "\n";
+                }
+                $xml .= '    <lastmod>' . $item->updated_at?->toDateString() . "</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n";
             }
         }
 

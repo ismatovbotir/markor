@@ -7,7 +7,7 @@ use App\Domain\Settings\Setting;
 /**
  * SEO values edited by the super admin (Admin → SEO), stored in the settings table:
  *   seo.{page}.{field}.{locale}  — title / description override per public page and language
- *   seo.google | seo.yandex | seo.bing — site verification codes (meta tags)
+ *   seo.google | seo.yandex | seo.bing | seo.baidu — site verification codes (meta tags)
  *   seo.ga4 | seo.metrika          — Google Analytics 4 / Yandex Metrika counter ids
  *   seo.noindex                    — "1": hide the whole site from search engines
  *   seo.robots_extra               — extra lines appended to robots.txt

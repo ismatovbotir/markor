@@ -15,7 +15,7 @@ class SeoPage extends Component
     public string $locale = 'uz';
     /** [page][field][locale] => override text */
     public array $texts = [];
-    public array $codes = ['google' => '', 'yandex' => '', 'bing' => '', 'ga4' => '', 'metrika' => ''];
+    public array $codes = ['google' => '', 'yandex' => '', 'bing' => '', 'baidu' => '', 'ga4' => '', 'metrika' => ''];
     public bool $noindex = false;
     public string $robotsExtra = '';
     public string $aiAgents = 'all';
@@ -46,6 +46,7 @@ class SeoPage extends Component
             'codes.google'  => ['nullable', 'regex:/^[A-Za-z0-9_\-]{10,100}$/'],
             'codes.yandex'  => ['nullable', 'regex:/^[A-Za-z0-9]{8,40}$/'],
             'codes.bing'    => ['nullable', 'regex:/^[A-Za-z0-9]{8,40}$/'],
+            'codes.baidu'   => ['nullable', 'regex:/^[A-Za-z0-9\-]{6,40}$/'],
             'codes.ga4'     => ['nullable', 'regex:/^G-[A-Z0-9]{4,15}$/'],
             'codes.metrika' => ['nullable', 'regex:/^\d{5,12}$/'],
             'robotsExtra'   => ['nullable', 'string', 'max:2000', 'regex:/^((User-agent|Disallow|Allow|Crawl-delay|Sitemap|Host|Clean-param):[^\r\n]*|#[^\r\n]*|\s*)(\r?\n((User-agent|Disallow|Allow|Crawl-delay|Sitemap|Host|Clean-param):[^\r\n]*|#[^\r\n]*|\s*))*$/i'],

@@ -235,8 +235,176 @@
         "uz": "etiketka yaratish onlayn",
         "ru": "конструктор этикеток онлайн",
         "zh": "在线标签设计器"
+      },
+      "china_landing": {
+        "zh": "乌兹别克斯坦标识码打印",
+        "ru": "маркировка Asl Belgisi для поставщиков из Китая",
+        "uz": "Asl Belgisi kodlarini Xitoyda chop etish"
       }
     },
-    "updated": "2026-11-21: added direct print without PDF, design saved in browser Local Storage, Asl Belgisi codes recognised in the designer (first 10 free), /guide pages, Telegram bot as available, marketplace; FAQ extended to 8."
+    "updated": "2026-11-21: added direct print without PDF, design saved in browser Local Storage, Asl Belgisi codes recognised in the designer (first 10 free), /guide pages, Telegram bot as available, marketplace; FAQ extended to 8. | 2026-11-21: added china_landing (/uzbekistan-marking) for Chinese exporters: zh/ru/uz title, description, H1, 8 FAQ, keywords, Baidu notes."
+  },
+  "china_landing": {
+    "slug": "uzbekistan-marking",
+    "audience": "Chinese manufacturers, exporters and trading companies selling into Uzbekistan, plus their Russian-speaking staff in Uzbekistan; search engines Baidu and Google (zh), Google/Yandex (ru).",
+    "zh": {
+      "title": "乌兹别克斯坦标识码打印｜Asl Belgisi｜Markor",
+      "description": "出口乌兹别克斯坦：上传Asl Belgisi标识码CSV，生成带FNC1和GS的GS1 DataMatrix标签PDF，可在国内工厂打印。中文界面，首月免费。",
+      "h1": "出口乌兹别克斯坦：把Asl Belgisi标识码打印成GS1 DataMatrix标签",
+      "keywords": [
+        "乌兹别克斯坦标识码打印",
+        "乌兹别克斯坦 强制标识",
+        "乌兹别克斯坦 数字标识",
+        "Asl Belgisi 标识码",
+        "Asl Belgisi 标签",
+        "出口乌兹别克斯坦 标签",
+        "乌兹别克斯坦 家电 标识码",
+        "GS1 DataMatrix 打印",
+        "数据矩阵码 打印",
+        "DataMatrix 扫描 不识别 FNC1",
+        "标识码 CSV 打印",
+        "CRPT Turon 标识码"
+      ],
+      "faq": [
+        {
+          "q": "标识码可以在我们中国的工厂打印和贴标吗？",
+          "a": "可以。根据乌兹别克斯坦第148号决议（2022年4月2日），家用电器的标识码可在境外生产商处、在跨越乌兹别克斯坦边境之前加贴，也可在海关仓库放行前或在乌兹别克斯坦境内加贴。标识码应印在消费包装上，对比区域不小于14×14毫米，并且可扫描。"
+        },
+        {
+          "q": "标识码由谁订购？Markor会发放标识码吗？",
+          "a": "标识码由乌兹别克斯坦进口商向Asl Belgisi运营方（CRPT Turon）订购。Markor不发放标识码，只负责把已有的标识码正确打印成标签。"
+        },
+        {
+          "q": "标识码以什么格式提供？",
+          "a": "进口商从运营方收到的标识码是CSV文件。每个码是GS1 DataMatrix数据：GTIN、序列号、验证密钥和验证码。把CSV上传到Markor后，文件在后台队列中处理，并按GTIN创建商品。"
+        },
+        {
+          "q": "为什么扫描枪读不出标识码？FNC1是什么？",
+          "a": "标识码必须编码为GS1 DataMatrix：开头有FNC1，可变长度字段之间有GS分隔符。如果打印成普通DataMatrix，扫描枪无法将其识别为标识码。Markor打印的Asl Belgisi标识码带有正确的FNC1和GS。"
+        },
+        {
+          "q": "标签尺寸是多少？用什么打印机？",
+          "a": "默认模板为20×20毫米，只包含DataMatrix码，其他尺寸可按需定制。PDF按标签卷大小分批生成，便于在标签打印机上打印。Markor所属公司在乌兹别克斯坦销售标签打印机、碳带、标签、二维扫描枪和数据采集终端（PDA），并提供技术服务。"
+        },
+        {
+          "q": "可以免费试用吗？",
+          "a": "可以。免费的标签设计器 /label-design 中，文件里的前10个Asl Belgisi标识码可免费打印成真正的GS1 DataMatrix。Asl Belgisi板块对按税号识别的公司首月免费（最多5 000个码）。"
+        },
+        {
+          "q": "有中文界面吗？多人可以同时使用吗？",
+          "a": "有。界面支持中文、俄语和乌兹别克语。一家公司可添加多个用户，各公司数据相互隔离；还可以通过Telegram机器人发送CSV文件。"
+        },
+        {
+          "q": "价格是多少？如何付费？",
+          "a": "首月免费（最多5 000个码），之后每个码9苏姆，预付费：先充值余额，再打印标识码。"
+        }
+      ]
+    },
+    "ru": {
+      "title": "Маркировка Asl Belgisi для поставщиков из Китая | Markor",
+      "description": "Поставляете из Китая в Узбекистан? Загрузите CSV с кодами Asl Belgisi от импортёра и получите PDF-этикетки GS1 DataMatrix с FNC1 и GS. Интерфейс на китайском.",
+      "h1": "Маркировка Asl Belgisi для товаров из Китая: печать кодов GS1 DataMatrix",
+      "keywords": [
+        "маркировка Asl Belgisi для поставщиков из Китая",
+        "маркировка товаров из Китая Узбекистан",
+        "печать кодов маркировки Asl Belgisi",
+        "маркировка бытовой техники Узбекистан",
+        "нанесение кода маркировки у производителя",
+        "GS1 DataMatrix FNC1 печать",
+        "Asl Belgisi CSV коды печать",
+        "этикетка DataMatrix 20x20"
+      ],
+      "faq": [
+        {
+          "q": "Можно ли печатать и наносить коды на нашем заводе в Китае?",
+          "a": "Да. По постановлению № 148 от 02.04.2022 для бытовой техники код можно нанести у производителя за рубежом до пересечения границы Узбекистана, на таможенном складе до выпуска или в Узбекистане. Код наносится на потребительскую упаковку, контрастная зона — не меньше 14×14 мм, код должен считываться."
+        },
+        {
+          "q": "Кто заказывает коды? Markor выдаёт коды?",
+          "a": "Коды заказывает узбекский импортёр у оператора Asl Belgisi (CRPT Turon). Markor коды не выдаёт — он печатает уже полученные коды на этикетки."
+        },
+        {
+          "q": "В каком формате приходят коды?",
+          "a": "Импортёр получает коды от оператора в CSV-файле. Каждый код — данные GS1 DataMatrix: GTIN, серийный номер, ключ и код проверки. После загрузки CSV в Markor файл обрабатывается в фоновой очереди, товары создаются по GTIN."
+        },
+        {
+          "q": "Почему сканер не читает код как код маркировки? Что такое FNC1?",
+          "a": "Код маркировки должен быть закодирован как GS1 DataMatrix: FNC1 в начале и разделители GS между полями переменной длины. Если напечатать его как обычный DataMatrix, сканер не распознает код маркировки. Markor печатает коды Asl Belgisi с правильными FNC1 и GS."
+        },
+        {
+          "q": "Какой размер этикетки и какой принтер нужен?",
+          "a": "Шаблон по умолчанию — 20×20 мм, только DataMatrix; другие размеры — по запросу. PDF готовится частями под размер рулона для печати на принтере этикеток. Компания-владелец Markor продаёт в Узбекистане принтеры этикеток, риббоны, этикетки, 2D-сканеры и ТСД и оказывает техническое обслуживание."
+        },
+        {
+          "q": "Можно ли попробовать бесплатно?",
+          "a": "Да. В бесплатном конструкторе /label-design первые 10 кодов Asl Belgisi из файла печатаются как настоящий GS1 DataMatrix бесплатно. В разделе Asl Belgisi первый месяц бесплатный (до 5 000 кодов) для компании, найденной по ИНН."
+        },
+        {
+          "q": "Есть ли интерфейс на китайском? Могут ли работать несколько сотрудников?",
+          "a": "Да, интерфейс на китайском, русском и узбекском. В компании может быть несколько пользователей, данные каждой компании изолированы; CSV можно отправить и через Telegram-бот."
+        },
+        {
+          "q": "Сколько стоит и как оплачивать?",
+          "a": "Первый месяц бесплатно (до 5 000 кодов), затем 9 сумов за код по предоплате: сначала пополняется баланс, потом печатаются коды."
+        }
+      ]
+    },
+    "uz": {
+      "title": "Asl Belgisi kodlarini Xitoyda chop etish | Markor",
+      "description": "Xitoydan O'zbekistonga tovar yetkazasizmi? Importyor bergan Asl Belgisi CSV faylini yuklang va FNC1, GS bilan GS1 DataMatrix etiketka PDF oling.",
+      "h1": "Xitoydan keladigan tovarlar uchun Asl Belgisi etiketka — GS1 DataMatrix",
+      "keywords": [
+        "Asl Belgisi kodlarini Xitoyda chop etish",
+        "Xitoydan import markirovka",
+        "Asl Belgisi etiketka",
+        "maishiy texnika markirovka",
+        "GS1 DataMatrix chop etish",
+        "markirovka kodi CSV"
+      ],
+      "faq": [
+        {
+          "q": "Kodlarni Xitoydagi zavodimizda chop etib, yopishtirsa bo'ladimi?",
+          "a": "Ha. 02.04.2022 yildagi 148-son qarorga ko'ra maishiy texnika uchun kod chet eldagi ishlab chiqaruvchida O'zbekiston chegarasini kesib o'tishdan oldin, bojxona omborida chiqarilishdan oldin yoki O'zbekistonda qo'yilishi mumkin. Kod iste'mol qadog'iga qo'yiladi, kontrast maydoni kamida 14×14 mm va skanerda o'qiladigan bo'lishi kerak."
+        },
+        {
+          "q": "Kodlarni kim buyurtma qiladi? Markor kod beradimi?",
+          "a": "Kodlarni O'zbekistondagi importyor Asl Belgisi operatoridan (CRPT Turon) buyurtma qiladi. Markor kod bermaydi — u olingan kodlarni etiketkaga chop etadi."
+        },
+        {
+          "q": "Kodlar qanday formatda keladi?",
+          "a": "Importyor kodlarni operatordan CSV fayl ko'rinishida oladi. Har bir kod GS1 DataMatrix ma'lumoti: GTIN, seriya raqami, tekshiruv kaliti va kodi. CSV Markorga yuklangach, fayl fon navbatida qayta ishlanadi va mahsulotlar GTIN bo'yicha yaratiladi."
+        },
+        {
+          "q": "Nega skaner kodni markirovka kodi sifatida o'qimaydi? FNC1 nima?",
+          "a": "Markirovka kodi GS1 DataMatrix bo'lib kodlanishi kerak: boshida FNC1 va o'zgaruvchan uzunlikdagi maydonlar orasida GS ajratuvchisi. Oddiy DataMatrix qilib chop etilsa, skaner uni markirovka kodi deb tanimaydi. Markor Asl Belgisi kodlarini to'g'ri FNC1 va GS bilan chop etadi."
+        },
+        {
+          "q": "Etiketka o'lchami qanday, qaysi printer kerak?",
+          "a": "Standart shablon 20×20 mm, faqat DataMatrix; boshqa o'lchamlar so'rov bo'yicha. PDF etiketka printeri uchun rulon o'lchamidagi qismlarga bo'lib tayyorlanadi. Markor egasi bo'lgan kompaniya O'zbekistonda etiketka printerlari, lentalar, etiketkalar, 2D skanerlar va TSD sotadi hamda texnik xizmat ko'rsatadi."
+        },
+        {
+          "q": "Bepul sinab ko'rsa bo'ladimi?",
+          "a": "Ha. Bepul /label-design konstruktorida fayldagi birinchi 10 ta Asl Belgisi kodi haqiqiy GS1 DataMatrix sifatida bepul chop etiladi. Asl Belgisi bo'limida STIR bo'yicha topilgan kompaniya uchun birinchi oy bepul (5 000 tagacha kod)."
+        },
+        {
+          "q": "Interfeys xitoy tilidami? Bir nechta xodim ishlay oladimi?",
+          "a": "Ha, interfeys xitoy, rus va o'zbek tillarida. Kompaniyada bir nechta foydalanuvchi bo'lishi mumkin, har bir kompaniya ma'lumotlari alohida; CSV faylni Telegram bot orqali ham yuborish mumkin."
+        },
+        {
+          "q": "Narxi qancha va qanday to'lanadi?",
+          "a": "Birinchi oy bepul (5 000 tagacha kod), keyin har bir kod uchun 9 so'm, oldindan to'lov: avval balans to'ldiriladi, keyin kodlar chop etiladi."
+        }
+      ]
+    },
+    "baidu_notes": [
+      "Register the site in Baidu Search Resource Platform (ziyuan.baidu.com) and add the <meta name=\"baidu-site-verification\" content=\"...\"> tag to the page head (or upload the verification file).",
+      "Submit an XML sitemap that includes the Chinese URL of this page there; also use Baidu's active push (普通收录 API) for new or changed URLs, since Baidu crawls overseas sites rarely.",
+      "Serve a fully Chinese title, meta description and H1 in the server-rendered HTML with <html lang=\"zh-CN\">; Baidu reads Chinese snippets of about 30 title / 80 description characters and gives little weight to JS-rendered text.",
+      "Baidu still reads <meta name=\"keywords\">: add 3–5 Chinese keywords on the zh version (ignored by Google, harmless).",
+      "Use hreflang alternates (zh-CN / ru / uz) for Google; Baidu ignores hreflang, so the zh page should have its own crawlable URL rather than a cookie/session locale switch.",
+      "Page speed from mainland China: do not load Google Fonts, Google Analytics, reCAPTCHA or other Google-hosted resources on this page (blocked in China, they stall rendering); self-host fonts and scripts, compress images, keep the page light.",
+      "Without ICP filing and a China-hosted server, Baidu ranking for an overseas site is limited; expect Google/Bing (and WeChat/word-of-mouth links) to bring most Chinese traffic, and measure with Baidu Tongji only if the owner agrees.",
+      "Mobile: most Baidu traffic is mobile; keep the responsive layout and add <meta name=\"applicable-device\" content=\"pc,mobile\">."
+    ]
   }
 }

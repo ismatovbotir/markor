@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
         \Livewire\Livewire::addPersistentMiddleware([\App\Http\Middleware\CompanyRequired::class]);
 
         // the cached home page shows Marketplace items and label sizes: refresh it when they change
-        foreach ([\App\Domain\Offers\Models\Offer::class, \App\Domain\Offers\Models\OfferCategory::class, \App\Domain\Printing\Models\LabelTemplate::class] as $model) {
+        foreach ([\App\Domain\Offers\Models\Offer::class, \App\Domain\Offers\Models\OfferCategory::class, \App\Domain\Printing\Models\LabelTemplate::class, \App\Domain\Content\Banner::class] as $model) {
             $model::saved(fn () => \App\Support\PageCache::bump());
             $model::deleted(fn () => \App\Support\PageCache::bump());
         }

@@ -35,12 +35,15 @@
                         </article>
                     @else
                         <article class="bg-white border border-stone-200 rounded-xl p-3 flex flex-col">
-                            @if($item->image_url)
-                                <img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy" class="h-28 w-full object-contain rounded-lg bg-white">
-                            @else
-                                <div class="h-28 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">@svg($item->icon ?: $category->icon ?: 'heroicon-o-cube', 'w-9 h-9')</div>
-                            @endif
-                            <h4 class="font-semibold text-sm text-stone-900 mt-3 leading-snug">{{ $item->title }}</h4>
+                            @php $itemUrl = \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace.item', app()->getLocale(), ['offer' => $item->slug]); @endphp
+                            <a href="{{ $itemUrl }}" class="block group">
+                                @if($item->image_url)
+                                    <img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy" class="h-28 w-full object-contain rounded-lg bg-white">
+                                @else
+                                    <div class="h-28 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">@svg($item->icon ?: $category->icon ?: 'heroicon-o-cube', 'w-9 h-9')</div>
+                                @endif
+                                <h4 class="font-semibold text-sm text-stone-900 mt-3 leading-snug group-hover:text-amber-700">{{ $item->title }}</h4>
+                            </a>
                             <p class="text-xs text-stone-600 mt-1 leading-relaxed flex-1">{{ $item->description }}</p>
                             @if($faq = $item->localizedFaq())
                                 <details class="mt-2 text-xs group">

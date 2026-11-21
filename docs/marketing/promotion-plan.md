@@ -320,6 +320,44 @@ Telefon: {{TELEFON}}
 
 Assalomu alaykum. Biz O'zbekistonda etiketka printerlari va sarf materiallari sotamiz. Asl Belgisi kodlarini chop etadiganlar uchun Markor xizmatini ishga tushirdik: operatordan olingan CSV ni yuklaysiz va etiketkalar PDF faylini olasiz, kod GS1 DataMatrix sifatida kodlanadi, mahsulot nomlari soliq klassifikatoridan olinadi. Birinchi oy bepul. Agar kodlarni chop etish hozir ko'p vaqt olayotgan bo'lsa yoki skaner ularni har doim ham o'qimayotgan bo'lsa, o'z faylingizda 10 daqiqada ko'rsatib beraman. Sayt: {{SAYT}}, telefon: {{TELEFON}}.
 
+### Для китайских партнёров (WeChat / LinkedIn)
+
+> **Публиковать только с согласия владельца** — на конкретный канал и конкретный текст. Перед публикацией подставить {{SAYT}} и проверить, что китайская страница уже открыта на сайте.
+
+Кому: китайские заводы, экспортёры и торговые компании, которые поставляют товары в Узбекистан. Коды им заказывает узбекский импортёр; регистрация компании в Markor идёт по узбекскому ИНН (STIR) — китайскому партнёру проще работать через аккаунт импортёра.
+
+**Пост 1 — WeChat / LinkedIn, объясняющий**
+
+出口乌兹别克斯坦的家电，可以在中国工厂就贴好标识码。
+
+乌兹别克斯坦实行 Asl Belgisi 国家数字标识制度，运营方为 CRPT Turon。家用电器、烟草、酒类、药品、饮料等商品的包装上必须有标识码。
+
+根据乌兹别克斯坦内阁第 148 号决议，家电的标识码可以在国外生产工厂加贴，时间是商品跨越乌兹别克斯坦边境之前。也就是说，货在中国出厂时就可以贴好，到了乌兹别克斯坦不用再拆箱补贴。
+
+需要注意：标识码必须按 GS1 DataMatrix 编码，带 FNC1 和 GS 分隔符，贴在包装上颜色对比明显、不小于 14×14 毫米的位置。普通 DataMatrix 看起来一样，但不会被识别为标识码。
+
+标识码由乌兹别克斯坦的进口商向运营方订购，以 CSV 文件发放。Markor 可以把这个 CSV 直接变成标签 PDF：编码规范，默认 20×20 毫米，PDF 按卷拆分。界面支持中文。
+
+了解更多：{{SAYT}}
+
+**Пост 2 — короткий, с призывом попробовать**
+
+您的乌兹别克斯坦客户发来了一个 Asl Belgisi 标识码的 CSV 文件，不知道怎么打印？
+
+用 Markor：
+• 上传 CSV，后台自动导入，按 GTIN 自动创建商品
+• 每个码按 GS1 DataMatrix 编码（FNC1 + GS），扫描枪可读
+• 默认 20×20 毫米标签，其他尺寸可申请
+• PDF 按整排拆分，每部分约一卷
+• 也可以通过 Telegram 机器人发送 CSV、接收 PDF
+• 界面有中文、俄语和乌兹别克语
+
+想先试试？在免费的标签设计器中上传含标识码的文件，前 10 个码免费按真正的 GS1 DataMatrix 打印，用您的扫描枪检查即可。
+
+注：Markor 不发放标识码，只打印您已有的标识码。
+
+{{SAYT}}
+
 ## 5. Что измерять
 
 Смотреть раз в неделю, 15 минут. Главная цифра — первая.

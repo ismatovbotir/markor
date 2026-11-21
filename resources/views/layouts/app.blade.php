@@ -107,6 +107,10 @@
                     @svg('heroicon-o-cog-6-tooth', 'w-5 h-5 mr-3')
                     <span>{{ __('nav.settings') }}</span>
                 </a>
+                <a href="{{ route('admin.banners') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.banners') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
+                    @svg('heroicon-o-photo', 'w-5 h-5 mr-3')
+                    <span>{{ __('nav.banners') }}</span>
+                </a>
                 <a href="{{ route('admin.seo') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.seo') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
                     @svg('heroicon-o-magnifying-glass', 'w-5 h-5 mr-3')
                     <span class="flex-1">SEO</span>

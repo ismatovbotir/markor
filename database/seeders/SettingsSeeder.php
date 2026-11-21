@@ -17,6 +17,8 @@ class SettingsSeeder extends Seeder
         'contact.phone'        => '+998 90 175 40 01',   // shown on "Call" buttons, e.g. +998 90 123 45 67
         'contact.telegram'     => 'posuz',   // Telegram username or channel, without @
         'contact.telegram_bot' => 'markor_uz_bot',   // bot username, without @
+        'contact.wechat'       => 'BotirIsmatov',   // WeChat ID (Chinese clients)
+        'contact.wechat_link'  => 'https://u.wechat.com/kG1sdLqQOGwNVC8caNoiLS8?s=2', // link inside the WeChat QR code
         'contact.email'        => 'info@pos.uz',   // order requests are sent here
         'billing.card_number'  => '9860600401849101',   // card clients transfer prepayments to (16 digits)
         'billing.card_holder'  => 'Ismatov B',   // name on the card

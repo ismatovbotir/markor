@@ -1,0 +1,48 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Domain\Offers\Models\Offer;
+use App\Domain\Offers\Models\OfferCategory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class MarketplaceItemPageTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function item(array $extra = []): Offer
+    {
+        $category = OfferCategory::create(['slug' => 'printers-page', 'name_uz' => 'Printerlar', 'name_ru' => 'Принтеры', 'icon' => 'heroicon-o-printer', 'is_active' => true, 'sort_order' => 1]);
+
+        return Offer::create($extra + ['offer_category_id' => $category->id, 'slug' => 'xprinter-xp-365b', 'category' => 'printers-page', 'title_uz' => 'Xprinter XP-365B',
+            'title_ru' => 'Термопринтер Xprinter XP-365B', 'description_uz' => '20–80 mm etiketkalar uchun.', 'price' => "1 250 000 so'm", 'action' => 'order', 'is_active' => true,
+            'faq' => [['q_uz' => 'Qaysi etiketkalar mos?', 'a_uz' => '20–80 mm.']]]);
+    }
+
+    public function test_item_page_with_seo_product_data_and_faq(): void
+    {
+        $offer = $this->item();
+        $html = $this->get(route('marketplace.item', $offer->slug))->assertOk()
+            ->assertSee('<h1', false)->assertSee('Xprinter XP-365B')->assertSee("1 250 000 so'm")
+            ->assertSee('<link rel="canonical" href="' . route('marketplace.item', 'xprinter-xp-365b') . '">', false)
+            ->assertSee('Qaysi etiketkalar mos?')->getContent();
+        $this->assertStringContainsString('"@type":"Product"', $html);
+        $this->assertStringContainsString('"price":1250000', $html);
+        $this->assertStringContainsString('"@type":"BreadcrumbList"', $html);
+        $this->assertStringContainsString('"@type":"FAQPage"', $html);
+
+        $this->get(route('marketplace.item', $offer->slug) . '?lang=ru')->assertOk()->assertSee('Термопринтер Xprinter XP-365B');
+    }
+
+    public function test_hidden_items_are_not_public_and_items_are_in_the_sitemap(): void
+    {
+        $offer = $this->item();
+        $this->get(route('sitemap'))->assertSee(route('marketplace.item', 'xprinter-xp-365b'), false);
+        $this->get('/')->assertSee(route('marketplace.item', 'xprinter-xp-365b'), false); // card links to the page
+
+        $offer->update(['is_active' => false]);
+        $this->get(route('marketplace.item', $offer->slug))->assertNotFound();
+        $this->get(route('marketplace.item', 'no-such-item'))->assertNotFound();
+    }
+}

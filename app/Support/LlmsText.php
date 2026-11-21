@@ -44,6 +44,7 @@ class LlmsText
         $out[] = '- ' . $t('home.aslbelgi.topup');
         $out[] = '- ' . $t('home.aslbelgi.telegram');
         $out[] = '- ' . $t('home.aslbelgi.register') . ': ' . route('register');
+        $out[] = '- ' . $t('china.nav') . ': ' . HomeController::localizedUrl('china', $l) . ' — ' . $t('seo.china.description');
 
         $catalog = OfferCategory::catalog();
         if ($catalog->isNotEmpty()) {
@@ -59,7 +60,7 @@ class LlmsText
                     continue;
                 }
                 foreach ($category->offers as $item) {
-                    $line = '- ' . $item->title . ($item->description ? ': ' . $item->description : '') . ($item->price ? ' (' . $item->price . ')' : '');
+                    $line = '- [' . $item->title . '](' . HomeController::localizedUrl('marketplace.item', $l, ['offer' => $item->slug]) . ')' . ($item->description ? ': ' . $item->description : '') . ($item->price ? ' (' . $item->price . ')' : '');
                     $out[] = $line;
                     if ($full) {
                         foreach ($item->localizedFaq() as $f) {

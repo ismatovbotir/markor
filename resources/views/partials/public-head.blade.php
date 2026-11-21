@@ -15,7 +15,7 @@
 @if(\App\Support\Seo::noindex())
 <meta name="robots" content="noindex, nofollow">
 @endif
-@foreach(['google' => 'google-site-verification', 'yandex' => 'yandex-verification', 'bing' => 'msvalidate.01'] as $key => $meta)
+@foreach(['google' => 'google-site-verification', 'yandex' => 'yandex-verification', 'bing' => 'msvalidate.01', 'baidu' => 'baidu-site-verification'] as $key => $meta)
 @if($code = \App\Support\Seo::get($key))
 <meta name="{{ $meta }}" content="{{ $code }}">
 @endif

@@ -7,4 +7,6 @@ return [
     'telegram'     => env('CONTACT_TELEGRAM'),     // username without @
     'telegram_bot' => env('CONTACT_TELEGRAM_BOT'), // bot username without @
     'email'        => env('CONTACT_EMAIL'),        // order requests are sent here
+    'wechat'       => env('CONTACT_WECHAT'),       // WeChat ID, shown to Chinese visitors
+    'wechat_link'  => env('CONTACT_WECHAT_LINK'),  // the link inside the personal WeChat QR code (https://u.wechat.com/…)
 ];

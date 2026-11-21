@@ -21,6 +21,8 @@ class SettingsPage extends Component
             'telegram'     => config('contact.telegram'),
             'telegram_bot' => config('contact.telegram_bot'),
             'email'        => config('contact.email'),
+            'wechat'       => config('contact.wechat'),
+            'wechat_link'  => config('contact.wechat_link'),
         ];
         $this->cardNumber = config('billing.card_number');
         $this->cardHolder = config('billing.card_holder');
@@ -37,6 +39,8 @@ class SettingsPage extends Component
             'contact.telegram'     => ['nullable', 'string', 'max:40', 'regex:/^[A-Za-z0-9_]{4,}$/'],
             'contact.telegram_bot' => ['nullable', 'string', 'max:40', 'regex:/^[A-Za-z0-9_]{4,}bot$/i'],
             'contact.email'        => ['nullable', 'email', 'max:120'],
+            'contact.wechat'       => ['nullable', 'regex:/^[A-Za-z][A-Za-z0-9_\-]{5,19}$/'],
+            'contact.wechat_link'  => ['nullable', 'url:https', 'max:200', 'regex:#^https://(u\.wechat\.com|weixin\.qq\.com)/#i'],
         ])['contact'];
 
         $this->cardNumber = filled($this->cardNumber) ? preg_replace('/\D/', '', $this->cardNumber) : null;

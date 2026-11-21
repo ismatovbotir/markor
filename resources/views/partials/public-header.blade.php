@@ -12,13 +12,25 @@
             <a href="{{ route('home') }}#aslbelgi" class="hover:text-amber-700">Asl Belgisi</a>
             <a href="{{ route('home') }}#offers" class="hover:text-amber-700">{{ __('nav.offers') }}</a>
             <a href="{{ route('home') }}#faq" class="hidden lg:inline hover:text-amber-700">{{ __('home.nav.faq') }}</a>
+            @if(app()->getLocale() === 'zh')<a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('china', 'zh') }}" class="hover:text-amber-700 {{ request()->routeIs('china') ? 'text-amber-700 font-medium' : '' }}">{{ __('china.nav') }}</a>@endif
             <a href="{{ route('guide') }}" class="hover:text-amber-700 {{ request()->routeIs('guide') ? 'text-amber-700 font-medium' : '' }}">{{ __('guide.title') }}</a>
         </nav>
         <div class="flex items-center gap-3 text-sm">
             @include('partials.locale-switcher')
             @if($headerTel)<a href="{{ $headerTel }}" class="text-stone-600 hover:text-amber-700 hidden xl:inline font-mono text-xs whitespace-nowrap">{{ $headerPhone }}</a>@endif
             @guest
-                <a href="{{ route('register') }}" class="hidden sm:inline text-stone-600 hover:text-amber-700">{{ __('auth.register') }}</a>
+                {{-- Register: a new person with a "+" badge, label shows on hover --}}
+                <a href="{{ route('register') }}" title="{{ __('auth.register') }}" aria-label="{{ __('auth.register') }}"
+                   class="group relative inline-flex items-center justify-center w-9 h-9 rounded-lg bg-amber-700 text-white shadow-sm hover:bg-amber-800 transition">
+                    <svg viewBox="0 0 24 24" class="w-6 h-6" fill="currentColor" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4.5"/>
+                        <path d="M3.5 21c0-4.6 3.8-7.5 8.5-7.5s8.5 2.9 8.5 7.5a.6.6 0 0 1-.6.6H4.1a.6.6 0 0 1-.6-.6Z"/>
+                    </svg>
+                    <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white flex items-center justify-center">
+                        <svg viewBox="0 0 12 12" class="w-2.5 h-2.5" aria-hidden="true"><path d="M6 2.5v7M2.5 6h7" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+                    </span>
+                    <span class="pointer-events-none absolute top-full mt-2 right-0 whitespace-nowrap rounded-md bg-stone-900 text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 transition">{{ __('auth.register') }}</span>
+                </a>
             @endguest
             <a href="{{ auth()->check() ? route('import-batches.index') : route('login') }}"
                class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-stone-900 text-stone-900 rounded-lg font-medium hover:bg-stone-900 hover:text-stone-50 transition">

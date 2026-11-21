@@ -58,6 +58,7 @@
                 'google'  => ['Google Search Console', 'abc123…', 'seo_admin.google_hint'],
                 'yandex'  => ['Yandex Webmaster', '1a2b3c4d5e6f7a8b', 'seo_admin.yandex_hint'],
                 'bing'    => ['Bing Webmaster', 'A1B2C3D4E5F6…', 'seo_admin.bing_hint'],
+                'baidu'   => ['Baidu 站长平台 (Baidu Webmaster)', 'codeva-AbCd1234', 'seo_admin.baidu_hint'],
                 'ga4'     => ['Google Analytics 4', 'G-XXXXXXXXXX', 'seo_admin.ga4_hint'],
                 'metrika' => ['Yandex Metrika', '12345678', 'seo_admin.metrika_hint'],
             ] as $key => [$label, $placeholder, $hint])
