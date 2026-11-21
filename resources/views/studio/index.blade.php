@@ -5,9 +5,15 @@
     'seoTitle' => \App\Support\Seo::text('studio', 'title'),
     'seoDescription' => \App\Support\Seo::text('studio', 'description'),
     'seoRoute' => 'studio',
-    'jsonLd' => ($studioFaq = $catalog->flatMap(fn ($c) => $c->isTemplates() ? [] : $c->offers)->flatMap(fn ($o) => $o->localizedFaq())->take(30))->isNotEmpty()
+    'jsonLd' => [[
+        '@context' => 'https://schema.org', '@type' => 'BreadcrumbList',
+        'itemListElement' => [
+            ['@type' => 'ListItem', 'position' => 1, 'name' => config('app.name'), 'item' => route('home')],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => __('nav.studio'), 'item' => route('studio')],
+        ],
+    ], ...(($studioFaq = $catalog->flatMap(fn ($c) => $c->isTemplates() ? [] : $c->offers)->flatMap(fn ($o) => $o->localizedFaq())->take(30))->isNotEmpty()
         ? [['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => $studioFaq->map(fn ($f) => ['@type' => 'Question', 'name' => $f['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f['a']]])->values()->all()]]
-        : [],
+        : [])],
 ])
 @livewireStyles
 </head>

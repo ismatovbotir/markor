@@ -7,6 +7,13 @@
     'seoRoute' => 'guide',
     'seoParams' => ['page' => $page],
     'jsonLd' => [[
+        '@context' => 'https://schema.org', '@type' => 'BreadcrumbList',
+        'itemListElement' => [
+            ['@type' => 'ListItem', 'position' => 1, 'name' => config('app.name'), 'item' => route('home')],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => __('guide.title'), 'item' => route('guide')],
+            ['@type' => 'ListItem', 'position' => 3, 'name' => $title, 'item' => route('guide', $page)],
+        ],
+    ], [
         '@context' => 'https://schema.org', '@type' => 'HowTo', 'name' => $title,
         'inLanguage' => \App\Http\Middleware\SetLocale::HREFLANG[app()->getLocale()] ?? 'uz',
         'step' => collect(preg_match_all('#<li>(.*?)</li>#s', $html, $m) ? $m[1] : [])->take(12)

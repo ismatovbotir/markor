@@ -8,6 +8,12 @@
 
     $jsonLd = [
         [
+            // the site name Google shows above the result ("Markor" instead of the bare address)
+            '@context' => 'https://schema.org', '@type' => 'WebSite',
+            'name' => config('app.name'), 'alternateName' => ['markor.uz', 'Markor etiketka'],
+            'url' => route('home'), 'inLanguage' => ['uz', 'ru', 'zh-Hans'],
+        ],
+        [
             '@context' => 'https://schema.org', '@type' => 'Organization',
             'name' => config('app.name'), 'url' => route('home'), 'logo' => url('/icon-512.png'),
         ] + ($phone ? ['telephone' => $phone] : []),
