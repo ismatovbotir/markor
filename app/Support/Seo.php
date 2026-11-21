@@ -12,6 +12,7 @@ use App\Domain\Settings\Setting;
  *   seo.noindex                    — "1": hide the whole site from search engines
  *   seo.robots_extra               — extra lines appended to robots.txt
  *   seo.updated_at                 — last change, used as <lastmod> in the sitemap
+ *   seo.ai_agents                  — all (default) / search (no model training) / none
  * Without an override the texts come from lang/*.json (seo.home.title …).
  */
 class Seo
@@ -32,6 +33,21 @@ class Seo
         $locale ??= app()->getLocale();
 
         return self::get("$page.$field.$locale") ?? __("seo.$page.$field", [], $locale);
+    }
+
+    /** Known AI crawlers: search = AI search / user-requested fetch, training = collects data for model training. */
+    public const AI_BOTS = [
+        'ClaudeBot' => 'training', 'Claude-User' => 'search', 'Claude-SearchBot' => 'search',
+        'GPTBot' => 'training', 'OAI-SearchBot' => 'search', 'ChatGPT-User' => 'search',
+        'PerplexityBot' => 'search', 'Perplexity-User' => 'search',
+        'Google-Extended' => 'training', 'Applebot-Extended' => 'training', 'CCBot' => 'training',
+    ];
+
+    public static function aiAgents(): string
+    {
+        $value = self::get('ai_agents');
+
+        return in_array($value, ['all', 'search', 'none'], true) ? $value : 'all';
     }
 
     public static function noindex(): bool

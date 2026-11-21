@@ -77,6 +77,16 @@
                 <span><span class="font-medium {{ $noindex ? 'text-rose-700' : '' }}">{{ __('seo_admin.noindex') }}</span>
                     <span class="block text-xs text-stone-500">{{ __('seo_admin.noindex_hint') }}</span></span>
             </label>
+            <div class="space-y-2">
+                <p class="text-xs font-medium text-stone-600">{{ __('seo_admin.ai_agents') }}</p>
+                @foreach(['all', 'search', 'none'] as $opt)
+                    <label class="flex items-start gap-2 text-sm">
+                        <input wire:model="aiAgents" type="radio" value="{{ $opt }}" class="mt-0.5 border-stone-300 text-amber-600">
+                        <span>{{ __('seo_admin.ai.' . $opt) }}<span class="block text-[11px] text-stone-500">{{ __('seo_admin.ai.' . $opt . '_hint') }}</span></span>
+                    </label>
+                @endforeach
+                <p class="text-[11px] text-stone-500">{{ __('seo_admin.ai_files') }} <a href="{{ route('llms') }}" target="_blank" class="text-amber-700 hover:underline">llms.txt ↗</a> · <a href="{{ route('llms.full') }}" target="_blank" class="text-amber-700 hover:underline">llms-full.txt ↗</a></p>
+            </div>
             <label class="block text-xs font-medium text-stone-600">{{ __('seo_admin.robots_extra') }}
                 <textarea wire:model="robotsExtra" rows="4" placeholder="Disallow: /tmp/&#10;Clean-param: utm_source /" class="{{ $field }} mt-1 font-mono text-xs"></textarea>
                 <span class="block text-[11px] text-stone-500 font-normal mt-1">{{ __('seo_admin.robots_hint') }}</span>

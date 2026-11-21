@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title>{{ __('auth.register') }} — {{ config('app.name') }}</title>
+    @include('partials.icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-stone-50 min-h-screen flex items-center justify-center py-10 px-4">
 @php $field = 'w-full border border-stone-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400'; @endphp
 <div class="w-full max-w-sm">
     <div class="text-center mb-8">
-        <a href="{{ route('home') }}" class="text-2xl font-bold text-amber-700">{{ config('app.name') }}</a>
+        <a href="{{ route('home') }}" class="inline-flex"><img src="/images/logo.png" alt="{{ config('app.name') }}" width="160" height="40" class="h-10 w-auto"></a>
         <p class="text-stone-500 text-sm mt-1">{{ __('auth.register_title') }}</p>
         <div class="mt-3">@include('partials.locale-switcher')</div>
     </div>

@@ -4,19 +4,19 @@
 @endphp
 <header class="sticky top-0 z-30 border-b border-stone-200/80 bg-stone-50/90 backdrop-blur">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-        <a href="{{ route('home') }}" class="font-display font-bold text-lg tracking-tight text-stone-900 flex items-center gap-2">
-            <span class="inline-block w-5 h-5 bg-amber-700 rounded-[5px] relative after:absolute after:inset-[5px] after:bg-stone-50 after:rounded-[1px]"></span>
-            {{ config('app.name') }}
+        <a href="{{ route('home') }}" class="flex items-center shrink-0" aria-label="{{ config('app.name') }}">
+            <img src="/images/logo.png" alt="{{ config('app.name') }}" width="112" height="28" class="h-7 w-auto">
         </a>
-        <nav class="hidden md:flex items-center gap-7 text-sm text-stone-600">
+        <nav class="hidden md:flex items-center gap-4 lg:gap-6 text-sm text-stone-600 whitespace-nowrap">
             <a href="{{ route('studio') }}" class="hover:text-amber-700 {{ request()->routeIs('studio') ? 'text-amber-700 font-medium' : '' }}">{{ __('nav.studio') }}</a>
             <a href="{{ route('home') }}#aslbelgi" class="hover:text-amber-700">Asl Belgisi</a>
             <a href="{{ route('home') }}#offers" class="hover:text-amber-700">{{ __('nav.offers') }}</a>
-            <a href="{{ route('home') }}#faq" class="hover:text-amber-700">{{ __('home.nav.faq') }}</a>
+            <a href="{{ route('home') }}#faq" class="hidden lg:inline hover:text-amber-700">{{ __('home.nav.faq') }}</a>
+            <a href="{{ route('guide') }}" class="hover:text-amber-700 {{ request()->routeIs('guide') ? 'text-amber-700 font-medium' : '' }}">{{ __('guide.title') }}</a>
         </nav>
         <div class="flex items-center gap-3 text-sm">
             @include('partials.locale-switcher')
-            @if($headerTel)<a href="{{ $headerTel }}" class="text-stone-600 hover:text-amber-700 hidden lg:inline font-mono text-xs">{{ $headerPhone }}</a>@endif
+            @if($headerTel)<a href="{{ $headerTel }}" class="text-stone-600 hover:text-amber-700 hidden xl:inline font-mono text-xs whitespace-nowrap">{{ $headerPhone }}</a>@endif
             @guest
                 <a href="{{ route('register') }}" class="hidden sm:inline text-stone-600 hover:text-amber-700">{{ __('auth.register') }}</a>
             @endguest

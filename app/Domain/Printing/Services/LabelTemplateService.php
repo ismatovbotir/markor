@@ -18,10 +18,10 @@ class LabelTemplateService
         return LabelTemplate::create(['is_default' => false, 'printer_type' => 'pdf_browser'] + $this->withCompiledHtml($data));
     }
 
+    /** Any template, the default one included (it stays the default: is_default is never changed here). */
     public function update(LabelTemplate $template, array $data): LabelTemplate
     {
-        $this->guardDefault($template);
-        $template->update($this->withCompiledHtml($data));
+        $template->update($this->withCompiledHtml(collect($data)->except('is_default')->all()));
 
         return $template->fresh();
     }
@@ -42,7 +42,7 @@ class LabelTemplateService
     private function guardDefault(LabelTemplate $template): void
     {
         if ($template->is_default) {
-            throw new \DomainException('The default template cannot be changed or deleted.');
+            throw new \DomainException('The default template cannot be deleted.');
         }
     }
 }

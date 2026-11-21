@@ -24,6 +24,39 @@ class HomeController extends Controller
         ]);
     }
 
+    public function llms()
+    {
+        return $this->plain(\App\Support\LlmsText::build(false));
+    }
+
+    public function llmsFull()
+    {
+        return $this->plain(\App\Support\LlmsText::build(true));
+    }
+
+    private function plain(string $text)
+    {
+        abort_if(\App\Support\Seo::noindex() || \App\Support\Seo::aiAgents() === 'none', 404);
+
+        return response($text, 200, ['Content-Type' => 'text/markdown; charset=utf-8', 'X-Robots-Tag' => 'noindex']);
+    }
+
+    /** Public guide page: resources/help/{locale}/{page}.md. */
+    public function guide(?string $page = null)
+    {
+        $page ??= 'import';
+        abort_unless(in_array($page, \App\Http\Controllers\HelpController::PAGES, true), 404);
+        $html = \App\Http\Controllers\HelpController::render($page);
+        abort_if($html === null, 404);
+
+        return view('guide', [
+            'page'  => $page,
+            'html'  => $html,
+            'title' => \App\Http\Controllers\HelpController::title($page),
+            'pages' => collect(\App\Http\Controllers\HelpController::PAGES)->mapWithKeys(fn ($p) => [$p => \App\Http\Controllers\HelpController::title($p)])->filter(),
+        ]);
+    }
+
     public function robots()
     {
         // the whole site hidden (Admin → SEO → noindex), e.g. while testing on a staging domain
@@ -42,9 +75,21 @@ class HomeController extends Controller
             'Disallow: /dev/',
             'Disallow: /label-design/parse',
             'Disallow: /label-design/generate',
+            'Disallow: /label-design/print',
             'Disallow: /label-design/barcode.png',
             'Disallow: /*?*utm_',
         ];
+        // AI crawlers, named explicitly (a named group replaces "*", so it repeats the closed paths)
+        $closed = array_values(array_filter($lines, fn ($l) => str_starts_with($l, 'Disallow: ')));
+        foreach (\App\Support\Seo::AI_BOTS as $bot => $kind) {
+            $blocked = match (\App\Support\Seo::aiAgents()) {
+                'none'   => true,
+                'search' => $kind === 'training',   // allow AI search and user-requested fetches, not model training
+                default  => false,
+            };
+            $lines = [...$lines, '', "User-agent: $bot", ...($blocked ? ['Disallow: /'] : ['Allow: /', ...$closed])];
+        }
+
         // extra rules from Admin → SEO
         if ($extra = trim((string) \App\Support\Seo::get('robots_extra'))) {
             $lines = [...$lines, '', ...preg_split('/\r?\n/', $extra)];
@@ -80,12 +125,25 @@ class HomeController extends Controller
             }
         }
 
+        foreach (\App\Http\Controllers\HelpController::PAGES as $page) {
+            if (!\App\Http\Controllers\HelpController::title($page)) {
+                continue;
+            }
+            foreach (array_keys(SetLocale::LOCALES) as $locale) {
+                $xml .= "  <url>\n    <loc>" . e(\App\Support\LlmsText::guideUrl($page, $locale)) . "</loc>\n";
+                foreach (SetLocale::HREFLANG as $alt => $hreflang) {
+                    $xml .= '    <xhtml:link rel="alternate" hreflang="' . $hreflang . '" href="' . e(\App\Support\LlmsText::guideUrl($page, $alt)) . '"/>' . "\n";
+                }
+                $xml .= "    <lastmod>$lastmod</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n";
+            }
+        }
+
         return response($xml . "</urlset>\n", 200, ['Content-Type' => 'application/xml; charset=utf-8']);
     }
 
     /** Uzbek is the default and lives at the plain URL; other languages add ?lang=. */
-    public static function localizedUrl(string $routeName, string $locale): string
+    public static function localizedUrl(string $routeName, string $locale, array $params = []): string
     {
-        return $locale === 'uz' ? route($routeName) : route($routeName, ['lang' => $locale]);
+        return route($routeName, $locale === 'uz' ? $params : $params + ['lang' => $locale]);
     }
 }

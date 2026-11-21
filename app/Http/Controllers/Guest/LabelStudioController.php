@@ -20,6 +20,9 @@ class LabelStudioController extends Controller
 {
     public const MAX_LABELS = 300;
 
+    /** Labels per print job (HTML print): light for the server, the browser and the printer queue. */
+    public const PRINT_BATCH = 300;
+
     public function index()
     {
         return view('studio.index', [
@@ -113,11 +116,66 @@ class LabelStudioController extends Controller
         return response($png, 200, ['Content-Type' => 'image/png', 'Cache-Control' => 'private, max-age=3600']);
     }
 
-    public function generate(Request $request, LabelPdfService $pdf, BarcodeImage $barcode)
+    public function generate(Request $request, LabelPdfService $pdf)
     {
         // errors always as JSON (422), never a redirect: the browser would save that HTML page as labels.pdf
         $request->headers->set('Accept', 'application/json');
+        [$data, $rows] = $this->design($request);
 
+        $renderer = app(LayoutRenderer::class);
+        $pages = [];
+        $now = now();
+        foreach (array_values($rows) as $index => $row) {
+            $pages[] = fn () => $renderer->render($data, $row, $index, $now);
+        }
+
+        set_time_limit(120);
+
+        return response($pdf->pdfFromPages($data['width_mm'], $data['height_mm'], '', $pages, (int) ($data['columns'] ?? 1), (float) ($data['gap_mm'] ?? 0)), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="labels.pdf"',
+        ]);
+    }
+
+    /**
+     * Print without a PDF: the labels as an HTML page sized for the label printer (@page = label row),
+     * opened by the browser in a new window that calls the system print dialog. At most PRINT_BATCH
+     * labels per print (light for the server and the browser); `offset` prints the next batch.
+     */
+    public function print(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        [$data, $rows] = $this->design($request);
+        $offset = max(0, (int) $request->integer('offset'));
+        $total = count($rows);
+        $batch = array_slice(array_values($rows), $offset, self::PRINT_BATCH);
+        abort_if(!$batch, 422, __('studio.print_nothing'));
+
+        $renderer = app(LayoutRenderer::class);
+        $now = now();
+        $labels = [];
+        foreach ($batch as $i => $row) {
+            $labels[] = $renderer->render($data, $row, $offset + $i, $now); // serial numbers continue across batches
+        }
+
+        $columns = max(1, (int) ($data['columns'] ?? 1));
+        $gap = (float) ($data['gap_mm'] ?? 0);
+
+        return response()->view('studio.print', [
+            'pages'  => array_chunk($labels, $columns),
+            'width'  => (float) $data['width_mm'],
+            'height' => (float) $data['height_mm'],
+            'gap'    => $gap,
+            'pageW'  => $columns * $data['width_mm'] + ($columns - 1) * $gap,
+            'from'   => $offset + 1,
+            'to'     => $offset + count($batch),
+            'total'  => $total,
+        ]);
+    }
+
+    /** Validated design + the label rows (shared by the PDF download and printing). */
+    private function design(Request $request): array
+    {
         $data = $request->validate([
             'width_mm'             => 'required|integer|min:10|max:300',
             'height_mm'            => 'required|integer|min:10|max:300',
@@ -153,6 +211,7 @@ class LabelStudioController extends Controller
             'rows.*.*'             => 'nullable|string|max:500',
         ]);
 
+
         $rows = $data['rows'] ?? [];
         if (!$rows) {
             $rows = array_fill(0, $data['copies'] ?? 1, []);
@@ -164,18 +223,7 @@ class LabelStudioController extends Controller
             $rows = array_slice(array_values($rows), 0, $trial::LIMIT); // only the first 10 codes
         }
 
-        $renderer = app(LayoutRenderer::class);
-        $pages = [];
-        $now = now();
-        foreach (array_values($rows) as $index => $row) {
-            $pages[] = fn () => $renderer->render($data, $row, $index, $now);
-        }
 
-        set_time_limit(120);
-
-        return response($pdf->pdfFromPages($data['width_mm'], $data['height_mm'], '', $pages, (int) ($data['columns'] ?? 1), (float) ($data['gap_mm'] ?? 0)), 200, [
-            'Content-Type'        => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="labels.pdf"',
-        ]);
+        return [$data, $rows];
     }
 }

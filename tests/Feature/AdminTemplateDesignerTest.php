@@ -69,4 +69,25 @@ class AdminTemplateDesignerTest extends TestCase
         $this->assertStringStartsWith('%PDF', $pdf);
         $this->assertSame(3, preg_match_all('/\/Type\s*\/Page[^s]/', $pdf));
     }
+
+    public function test_super_admin_edits_the_default_template_but_cannot_delete_it(): void
+    {
+        $admin = \App\Models\User::create(['name' => 'A', 'email' => 'def@t.uz', 'password' => 'secret123', 'role' => 'admin', 'locale' => 'uz', 'is_active' => true]);
+        $default = LabelTemplate::default();
+        $this->actingAs($admin);
+
+        \Livewire\Livewire::test(\App\Http\Livewire\Printing\LabelTemplateIndex::class)
+            ->call('openEdit', $default->id)
+            ->call('save', ['name' => 'Default 30×20', 'width_mm' => 30, 'height_mm' => 20, 'columns' => 1, 'gap_mm' => 0, 'labels_per_pdf' => 2000,
+                'elements' => [['type' => 'datamatrix', 'x' => 2, 'y' => 2, 'w' => 16, 'h' => 16], ['type' => 'text', 'text' => 'SN', 'source' => 'serial', 'x' => 19, 'y' => 2, 'w' => 10, 'h' => 4, 'font_size' => 6]]]);
+
+        $default->refresh();
+        $this->assertSame([30, 20, 'Default 30×20'], [$default->width_mm, $default->height_mm, $default->name]);
+        $this->assertTrue($default->is_default, 'still the default');
+        $this->assertCount(2, $default->layout);
+
+        $this->assertFalse($admin->can('delete', $default));
+        \Livewire\Livewire::test(\App\Http\Livewire\Printing\LabelTemplateIndex::class)->call('delete', $default->id)->assertForbidden();
+        $this->assertNotNull(LabelTemplate::find($default->id), 'still there');
+    }
 }

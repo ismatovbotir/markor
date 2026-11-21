@@ -53,6 +53,12 @@ class HelpController extends Controller
         return $markdown && preg_match('/^#\s+(.+)$/m', $markdown, $m) ? trim($m[1]) : null;
     }
 
+    /** The guide's Markdown in the current language (Uzbek if missing), for llms-full.txt. */
+    public static function markdown(string $page): ?string
+    {
+        return self::source($page);
+    }
+
     private static function source(string $page): ?string
     {
         foreach ([app()->getLocale(), 'uz'] as $locale) {

@@ -29,8 +29,8 @@
                         <td class="px-4 py-3 font-medium">
                             {{ $t->name }}
                             @if($t->is_default)
-                                <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-normal bg-amber-100 text-amber-700">
-                                    @svg('heroicon-o-lock-closed', 'w-3 h-3') {{ __('templates.default') }}
+                                <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-normal bg-amber-100 text-amber-700" title="{{ __('templates.default_hint') }}">
+                                    @svg('heroicon-o-star', 'w-3 h-3') {{ __('templates.default') }}
                                 </span>
                             @endif
                         </td>

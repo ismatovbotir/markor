@@ -18,6 +18,7 @@ class SeoPage extends Component
     public array $codes = ['google' => '', 'yandex' => '', 'bing' => '', 'ga4' => '', 'metrika' => ''];
     public bool $noindex = false;
     public string $robotsExtra = '';
+    public string $aiAgents = 'all';
 
     public function mount(): void
     {
@@ -33,6 +34,7 @@ class SeoPage extends Component
         }
         $this->noindex = Seo::noindex();
         $this->robotsExtra = Seo::get('robots_extra') ?? '';
+        $this->aiAgents = Seo::aiAgents();
     }
 
     public function save(): void
@@ -40,6 +42,7 @@ class SeoPage extends Component
         $this->validate([
             'texts.*.title.*'       => 'nullable|string|max:120',
             'texts.*.description.*' => 'nullable|string|max:320',
+            'aiAgents'      => 'required|in:all,search,none',
             'codes.google'  => ['nullable', 'regex:/^[A-Za-z0-9_\-]{10,100}$/'],
             'codes.yandex'  => ['nullable', 'regex:/^[A-Za-z0-9]{8,40}$/'],
             'codes.bing'    => ['nullable', 'regex:/^[A-Za-z0-9]{8,40}$/'],
@@ -48,7 +51,7 @@ class SeoPage extends Component
             'robotsExtra'   => ['nullable', 'string', 'max:2000', 'regex:/^((User-agent|Disallow|Allow|Crawl-delay|Sitemap|Host|Clean-param):[^\r\n]*|#[^\r\n]*|\s*)(\r?\n((User-agent|Disallow|Allow|Crawl-delay|Sitemap|Host|Clean-param):[^\r\n]*|#[^\r\n]*|\s*))*$/i'],
         ]);
 
-        $values = ['seo.noindex' => $this->noindex ? '1' : null, 'seo.robots_extra' => $this->robotsExtra, 'seo.updated_at' => now()->toDateString()];
+        $values = ['seo.ai_agents' => $this->aiAgents, 'seo.noindex' => $this->noindex ? '1' : null, 'seo.robots_extra' => $this->robotsExtra, 'seo.updated_at' => now()->toDateString()];
         foreach ($this->codes as $key => $value) {
             $values["seo.$key"] = $value;
         }

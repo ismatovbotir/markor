@@ -9,7 +9,7 @@
     $jsonLd = [
         [
             '@context' => 'https://schema.org', '@type' => 'Organization',
-            'name' => config('app.name'), 'url' => route('home'),
+            'name' => config('app.name'), 'url' => route('home'), 'logo' => url('/icon-512.png'),
         ] + ($phone ? ['telephone' => $phone] : []),
         [
             '@context' => 'https://schema.org', '@type' => 'WebApplication',
@@ -22,10 +22,13 @@
             'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'UZS'],
         ],
     ];
-    if ($faq->isNotEmpty()) {
+    // one FAQPage for the page: the home questions + questions of the Marketplace items shown on it
+    $itemFaq = $catalog->flatMap(fn ($c) => $c->isTemplates() ? [] : $c->offers)->flatMap(fn ($o) => $o->localizedFaq())->take(30);
+    $allFaq = $faq->concat($itemFaq);
+    if ($allFaq->isNotEmpty()) {
         $jsonLd[] = [
             '@context' => 'https://schema.org', '@type' => 'FAQPage',
-            'mainEntity' => $faq->map(fn ($item) => [
+            'mainEntity' => $allFaq->map(fn ($item) => [
                 '@type' => 'Question', 'name' => $item['q'],
                 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $item['a']],
             ])->all(),
@@ -265,7 +268,7 @@
 <footer class="border-t border-stone-200">
     <div class="max-w-6xl mx-auto px-4 py-10 flex flex-wrap items-start justify-between gap-8 text-sm">
         <div class="max-w-sm">
-            <p class="font-display font-bold text-stone-900">{{ config('app.name') }}</p>
+            <p><img src="/images/logo.png" alt="{{ config('app.name') }}" width="96" height="24" class="h-6 w-auto"></p>
             <p class="text-stone-500 mt-2 leading-relaxed">{{ __('home.footer.about') }}</p>
         </div>
         <nav class="flex flex-col gap-2 text-stone-600">

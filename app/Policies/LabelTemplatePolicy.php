@@ -14,6 +14,7 @@ class LabelTemplatePolicy
     public function viewAny(User $user): bool { return $user->isAdmin(); }
     public function view(User $user, LabelTemplate $model): bool { return true; } // clients preview templates
     public function create(User $user): bool { return $user->isAdmin(); }
-    public function update(User $user, LabelTemplate $model): bool { return $user->isAdmin() && !$model->is_default; }
+    // the default template's design can be changed by the super admin; it can never be deleted
+    public function update(User $user, LabelTemplate $model): bool { return $user->isAdmin(); }
     public function delete(User $user, LabelTemplate $model): bool { return $user->isAdmin() && !$model->is_default; }
 }

@@ -1,9 +1,11 @@
 {{-- <head> content shared by the public pages: SEO meta, language alternates, fonts.
-     Expects: $seoTitle, $seoDescription, $seoRoute (route name); optional $ogTitle, $ogDescription, $jsonLd (array of schema.org objects). --}}
+     Expects: $seoTitle, $seoDescription, $seoRoute (route name); optional $seoParams (route parameters), $ogTitle, $ogDescription, $jsonLd (array of schema.org objects). --}}
 @php
     use App\Http\Controllers\Guest\HomeController;
     use App\Http\Middleware\SetLocale;
-    $canonical = HomeController::localizedUrl($seoRoute, app()->getLocale());
+    $seoParams ??= [];
+    $localized = fn (string $locale) => HomeController::localizedUrl($seoRoute, $locale, $seoParams);
+    $canonical = $localized(app()->getLocale());
 @endphp
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,18 +22,20 @@
 @endforeach
 <link rel="canonical" href="{{ $canonical }}">
 @foreach(SetLocale::HREFLANG as $locale => $hreflang)
-<link rel="alternate" hreflang="{{ $hreflang }}" href="{{ HomeController::localizedUrl($seoRoute, $locale) }}">
+<link rel="alternate" hreflang="{{ $hreflang }}" href="{{ $localized($locale) }}">
 @endforeach
-<link rel="alternate" hreflang="x-default" href="{{ route($seoRoute) }}">
+<link rel="alternate" hreflang="x-default" href="{{ route($seoRoute, $seoParams) }}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{{ config('app.name') }}">
 <meta property="og:title" content="{{ $ogTitle ?? $seoTitle }}">
 <meta property="og:description" content="{{ $ogDescription ?? $seoDescription }}">
 <meta property="og:url" content="{{ $canonical }}">
 <meta property="og:locale" content="{{ str_replace('-', '_', SetLocale::HREFLANG[app()->getLocale()] ?? 'uz') }}">
-<meta name="twitter:card" content="summary">
-<meta name="theme-color" content="#b45309">
-<link rel="icon" href="/favicon.ico">
+<meta property="og:image" content="{{ url('/images/og.png') }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+@include('partials.icons')
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=unbounded:500,700|golos-text:400,500,600|jetbrains-mono:400,500&display=swap" rel="stylesheet">
 @foreach($jsonLd ?? [] as $schema)

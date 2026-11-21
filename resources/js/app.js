@@ -597,6 +597,53 @@ window.labelStudio = (config) => {
             this.selectedId = null;
         },
 
+        // design + rows sent to the server (PDF download and printing)
+        designPayload(extra = {}) {
+            return {
+                width_mm: Number(this.width),
+                height_mm: Number(this.height),
+                columns: Number(this.columns) || 1,
+                gap_mm: Number(this.gap) || 0,
+                copies: this.usesMarking ? Math.min(Number(this.copies) || 1, config.markingLimit) : Number(this.copies) || 1,
+                elements: this.elements.map(({ id, ...el }) => el),
+                rows: this.usesMarking ? this.rows.slice(0, config.markingLimit) : this.rows,
+                ...extra,
+            };
+        },
+
+        // Print without a PDF: the server returns the labels as an HTML page sized for the label
+        // printer; it opens in a new window, which calls the system print dialog (installed printers).
+        printing: false,
+        async printLabels(offset = 0) {
+            this.error = '';
+            this.clampAll();
+            // open the window right away (inside the click), otherwise popup blockers stop it
+            const win = window.open('', '_blank');
+            if (!win) { this.error = config.popupBlocked; return; }
+            win.document.write(`<p style="font:14px system-ui;padding:24px;color:#57534e">${config.printLoading}</p>`);
+            this.printing = true;
+            try {
+                const response = await fetch(config.printUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': this.csrf(), 'Content-Type': 'application/json', Accept: 'text/html, application/json' },
+                    body: JSON.stringify(this.designPayload({ offset })),
+                });
+                if (!response.ok || !(response.headers.get('content-type') || '').includes('text/html')) {
+                    const data = await response.json().catch(() => ({}));
+                    throw new Error(response.status === 429 ? config.tooManyError : Object.values(data.errors || {})[0]?.[0] || data.message || config.genericError);
+                }
+                const html = await response.text();
+                win.document.open();
+                win.document.write(html);
+                win.document.close();
+            } catch (e) {
+                win.close();
+                this.error = e.message || config.genericError;
+            } finally {
+                this.printing = false;
+            }
+        },
+
         async generate() {
             this.error = '';
             this.clampAll();
@@ -612,15 +659,7 @@ window.labelStudio = (config) => {
                 const response = await fetch(config.generateUrl, {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': this.csrf(), 'Content-Type': 'application/json', Accept: 'application/json, application/pdf' },
-                    body: JSON.stringify({
-                        width_mm: Number(this.width),
-                        height_mm: Number(this.height),
-                        columns: Number(this.columns) || 1,
-                        gap_mm: Number(this.gap) || 0,
-                        copies: this.usesMarking ? Math.min(Number(this.copies) || 1, config.markingLimit) : Number(this.copies) || 1,
-                        elements: this.elements.map(({ id, ...el }) => el),
-                        rows: this.usesMarking ? this.rows.slice(0, config.markingLimit) : this.rows,
-                    }),
+                    body: JSON.stringify(this.designPayload()),
                 });
                 if (!response.ok) {
                     const data = await response.json().catch(() => ({}));

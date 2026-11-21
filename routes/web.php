@@ -29,6 +29,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/robots.txt', [HomeController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
+// for AI agents (Claude, ChatGPT, Perplexity …): plain Markdown summary of the site, ?lang=ru|zh
+Route::get('/llms.txt', [HomeController::class, 'llms'])->name('llms');
+Route::get('/llms-full.txt', [HomeController::class, 'llmsFull'])->name('llms.full');
+// public guides (the same Markdown guides as inside the client area)
+Route::get('/guide/{page?}', [HomeController::class, 'guide'])->name('guide');
 Route::get('/label-image/{w}x{h}.svg', [\App\Http\Controllers\Guest\LabelImageController::class, 'show'])->whereNumber(['w', 'h'])->name('label-image');
 Route::post('/telegram/webhook/{secret}', function (string $secret, \Illuminate\Http\Request $request, \App\Domain\Telegram\BotHandler $bot) {
     abort_unless(filled(config('telegram.webhook_secret')) && hash_equals(config('telegram.webhook_secret'), $secret), 404);
@@ -42,6 +47,7 @@ Route::prefix('label-design')->group(function () {
     Route::post('/parse', [LabelStudioController::class, 'parse'])->middleware('throttle:20,1')->name('studio.parse');
     Route::get('/barcode.png', [LabelStudioController::class, 'barcode'])->middleware('throttle:300,1')->name('studio.barcode');
     Route::post('/generate', [LabelStudioController::class, 'generate'])->middleware('throttle:10,1')->name('studio.generate');
+    Route::post('/print', [LabelStudioController::class, 'print'])->middleware('throttle:20,1')->name('studio.print');
 });
 
 // Interface language (uz / ru / zh)

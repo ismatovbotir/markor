@@ -5,6 +5,9 @@
     'seoTitle' => \App\Support\Seo::text('studio', 'title'),
     'seoDescription' => \App\Support\Seo::text('studio', 'description'),
     'seoRoute' => 'studio',
+    'jsonLd' => ($studioFaq = $catalog->flatMap(fn ($c) => $c->isTemplates() ? [] : $c->offers)->flatMap(fn ($o) => $o->localizedFaq())->take(30))->isNotEmpty()
+        ? [['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => $studioFaq->map(fn ($f) => ['@type' => 'Question', 'name' => $f['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f['a']]])->values()->all()]]
+        : [],
 ])
 @livewireStyles
 </head>
@@ -22,6 +25,10 @@
       x-data="labelStudio(@js([
           'parseUrl' => route('studio.parse'),
           'generateUrl' => route('studio.generate'),
+          'printUrl' => route('studio.print'),
+          'printBatch' => \App\Http\Controllers\Guest\LabelStudioController::PRINT_BATCH,
+          'printLoading' => __('studio.print_loading'),
+          'popupBlocked' => __('studio.popup_blocked'),
           'maxLabels' => $maxLabels,
           'offersCount' => $offers->count(),
           'sampleTitle' => __('studio.sample_title'),
@@ -149,7 +156,14 @@
                     class="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-700 text-white rounded-lg text-sm font-medium hover:bg-amber-800 transition disabled:opacity-50">
                 @svg('heroicon-o-arrow-down-tray', 'w-4 h-4') {{ __('studio.download') }} (<span x-text="pdfCount"></span>)
             </button>
+            <button type="button" x-on:click="printLabels()" :disabled="printing || !elements.length"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 border border-amber-700 text-amber-800 bg-white rounded-lg text-sm font-medium hover:bg-amber-50 transition disabled:opacity-50">
+                <span x-show="!printing">@svg('heroicon-o-printer', 'w-4 h-4')</span>
+                <span x-show="printing" x-cloak>@svg('heroicon-o-arrow-path', 'w-4 h-4 animate-spin')</span>
+                {{ __('studio.print') }} (<span x-text="Math.min(pdfCount, {{ \App\Http\Controllers\Guest\LabelStudioController::PRINT_BATCH }})"></span>)
+            </button>
         </div>
+        <p class="text-xs text-stone-500 mt-3">{{ __('studio.print_help') }}</p>
         <p x-show="overMarkingLimit" x-cloak class="text-sm text-amber-800 mt-3">{{ __('studio.marking_first', ['limit' => \App\Domain\Studio\MarkingTrial::LIMIT]) }}
             <a href="{{ auth()->check() ? route('import-batches.index') : route('register') }}" class="font-semibold underline">{{ __('studio.marking_cta') }}</a></p>
         <p x-show="error" x-cloak x-text="error" class="text-sm text-rose-600 mt-3"></p>

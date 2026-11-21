@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
     <title>{{ config('app.name') }}</title>
+    @include('partials.icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
@@ -15,7 +16,7 @@
     {{-- Sidebar --}}
     <aside class="w-64 bg-stone-100 border-r border-stone-200 flex flex-col">
         <div class="px-6 py-6 border-b border-stone-200">
-            <h1 class="text-xl font-bold text-amber-700">{{ config('app.name') }}</h1>
+            <h1><img src="/images/logo.png" alt="{{ config('app.name') }}" width="128" height="32" class="h-8 w-auto"></h1>
             <p class="text-xs text-stone-500 mt-1">{{ __('app.tagline') }}</p>
         </div>
 

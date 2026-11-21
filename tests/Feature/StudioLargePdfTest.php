@@ -141,4 +141,35 @@ class StudioLargePdfTest extends TestCase
         $xlsx = \Illuminate\Http\UploadedFile::fake()->createWithContent('jadval.xlsx', 'not a zip');
         $this->post(route('studio.parse'), ['file' => $xlsx], ['Accept' => 'application/json'])->assertStatus(422)->assertJsonPath('errors.file.0', __('upload.not_spreadsheet'));
     }
+
+    public function test_print_returns_an_html_page_sized_for_the_label_printer(): void
+    {
+        $rows = array_map(fn ($i) => ['Nomi' => "Mahsulot $i", 'EAN' => '4780000000007'], range(1, 5));
+        $response = $this->post(route('studio.print'), [
+            'width_mm' => 40, 'height_mm' => 30, 'columns' => 2, 'gap_mm' => 2, 'rows' => $rows,
+            'elements' => [
+                ['type' => 'text', 'x' => 1, 'y' => 1, 'w' => 38, 'h' => 6, 'text' => '', 'source' => 'Nomi'],
+                ['type' => 'barcode', 'x' => 1, 'y' => 8, 'w' => 38, 'h' => 15, 'text' => '', 'symbology' => 'ean13', 'source' => 'EAN', 'hrt' => true],
+                ['type' => 'text', 'x' => 1, 'y' => 24, 'w' => 38, 'h' => 5, 'text' => '', 'source' => '@serial', 'prefix' => 'N', 'start' => 1, 'step' => 1],
+            ],
+        ]);
+
+        $response->assertOk()->assertHeader('Content-Type', 'text/html; charset=UTF-8');
+        $html = $response->getContent();
+        $this->assertStringContainsString('@page { size: 82mm 30mm; margin: 0; }', $html, 'page = one row of 2 labels + gap');
+        $this->assertSame(3, substr_count($html, '<div class="page">'), '5 labels in rows of 2');
+        $this->assertSame(5, substr_count($html, 'data:image/png;base64,'), 'barcodes inline, no extra requests');
+        $this->assertStringContainsString('Mahsulot 5', $html);
+        $this->assertStringContainsString('window.print()', $html);
+        $this->assertStringNotContainsString('%PDF', $html);
+    }
+
+    public function test_print_batches_continue_serial_numbers(): void
+    {
+        config(['app.debug' => false]);
+        $element = ['type' => 'text', 'x' => 1, 'y' => 1, 'w' => 30, 'h' => 6, 'text' => '', 'source' => '@serial', 'prefix' => 'S', 'start' => 1, 'step' => 1];
+        $html = $this->post(route('studio.print'), ['width_mm' => 30, 'height_mm' => 20, 'copies' => 3, 'offset' => 2, 'elements' => [$element]])->getContent();
+        $this->assertStringContainsString('S3', $html, 'third label keeps its number');
+        $this->assertSame(1, substr_count($html, '<div class="page">'));
+    }
 }

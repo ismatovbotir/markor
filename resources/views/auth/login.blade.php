@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title>{{ __('auth.login') }} — {{ config('app.name') }}</title>
+    @include('partials.icons')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-stone-50 min-h-screen flex items-center justify-center">
     <div class="w-full max-w-sm">
         <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold text-amber-700">{{ config('app.name') }}</h1>
+            <h1 class="flex justify-center"><a href="{{ route('home') }}"><img src="/images/logo.png" alt="{{ config('app.name') }}" width="160" height="40" class="h-10 w-auto"></a></h1>
             <p class="text-stone-500 text-sm mt-1">{{ __('app.tagline') }}</p>
             <div class="mt-3">@include('partials.locale-switcher')</div>
         </div>
