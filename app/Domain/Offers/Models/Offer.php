@@ -26,6 +26,12 @@ class Offer extends Model
                 ->orWhereHas('offerCategory', fn ($c) => $c->where('is_active', true)));
     }
 
+    /** Printer drivers that fit this product (/drivers pages). */
+    public function drivers()
+    {
+        return $this->belongsToMany(\App\Domain\Content\PrinterDriver::class, 'offer_printer_driver');
+    }
+
     public function offerCategory()
     {
         return $this->belongsTo(OfferCategory::class);

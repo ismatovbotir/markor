@@ -55,7 +55,7 @@
     </ul>
 
     <div class="grid sm:grid-cols-3 gap-4 mt-10 text-sm">
-        <a href="{{ route('home') }}#offers" class="p-4 rounded-xl border border-stone-200 bg-white hover:border-amber-400">@svg('heroicon-o-shopping-bag', 'w-5 h-5 text-amber-700') <span class="block font-semibold mt-2">{{ __('nav.offers') }}</span><span class="text-stone-500">{{ __('contact.offers_hint') }}</span></a>
+        <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace', app()->getLocale()) }}" class="p-4 rounded-xl border border-stone-200 bg-white hover:border-amber-400">@svg('heroicon-o-shopping-bag', 'w-5 h-5 text-amber-700') <span class="block font-semibold mt-2">{{ __('nav.offers') }}</span><span class="text-stone-500">{{ __('contact.offers_hint') }}</span></a>
         <a href="{{ route('register') }}" class="p-4 rounded-xl border border-stone-200 bg-white hover:border-amber-400">@svg('heroicon-o-user-plus', 'w-5 h-5 text-amber-700') <span class="block font-semibold mt-2">Asl Belgisi</span><span class="text-stone-500">{{ __('contact.register_hint') }}</span></a>
         <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('studio', app()->getLocale()) }}" class="p-4 rounded-xl border border-stone-200 bg-white hover:border-amber-400">@svg('heroicon-o-pencil-square', 'w-5 h-5 text-amber-700') <span class="block font-semibold mt-2">{{ __('nav.studio') }}</span><span class="text-stone-500">{{ __('contact.studio_hint') }}</span></a>
     </div>

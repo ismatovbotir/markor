@@ -9,7 +9,7 @@ use App\Http\Middleware\SetLocale;
 class HomeController extends Controller
 {
     /** Public pages that search engines should index. */
-    private const PUBLIC_ROUTES = ['home', 'studio', 'china', 'contact', 'drivers'];
+    private const PUBLIC_ROUTES = ['home', 'studio', 'aslbelgi', 'marketplace', 'faq', 'china', 'contact', 'drivers'];
 
     public function index()
     {
@@ -29,11 +29,57 @@ class HomeController extends Controller
             'offers'  => Offer::active()->orderBy('sort_order')->get(),
             'catalog' => \App\Domain\Offers\Models\OfferCategory::catalog(),
             'templatePreviews' => \App\Domain\Offers\Models\OfferCategory::templatePreviews(),
-            'faq'    => collect(range(1, 9))
-                ->map(fn ($i) => ['q' => __("home.faq.$i.q"), 'a' => __("home.faq.$i.a")])
-                ->reject(fn ($item) => str_starts_with($item['q'], 'home.faq.'))
-                ->values(),
+            'faq'    => self::faq(),
         ]);
+    }
+
+    /** Home FAQ (home.faq.1..9) in the current language. */
+    public static function faq()
+    {
+        return collect(range(1, 9))
+            ->map(fn ($i) => ['q' => __("home.faq.$i.q"), 'a' => __("home.faq.$i.a")])
+            ->reject(fn ($item) => str_starts_with($item['q'], 'home.faq.'))
+            ->values();
+    }
+
+    private static function faqPage($items): array
+    {
+        return ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => collect($items)->map(fn ($f) => [
+            '@type' => 'Question', 'name' => $f['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f['a']],
+        ])->values()->all()];
+    }
+
+    /** /asl-belgisi — the Asl Belgisi service on its own page (menu item). */
+    public function aslbelgi()
+    {
+        $faq = self::faq();
+
+        return view('pages.section', ['page' => 'aslbelgi', 'label' => 'Asl Belgisi', 'faq' => $faq, 'jsonLd' => $faq->isNotEmpty() ? [self::faqPage($faq)] : []]);
+    }
+
+    /** /marketplace — the whole catalog: equipment, labels, ribbons, service. */
+    public function marketplace()
+    {
+        $catalog = \App\Domain\Offers\Models\OfferCategory::catalog();
+        $items = $catalog->flatMap(fn ($c) => $c->isTemplates() ? [] : $c->offers)->values();
+        $itemFaq = $items->flatMap(fn ($o) => $o->localizedFaq())->take(30);
+        $jsonLd = [['@context' => 'https://schema.org', '@type' => 'ItemList', 'name' => __('home.offers.title'),
+            'itemListElement' => $items->map(fn ($o, $i) => ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $o->title,
+                'url' => self::localizedUrl('marketplace.item', app()->getLocale(), ['offer' => $o->slug])])->all()]];
+        if ($itemFaq->isNotEmpty()) {
+            $jsonLd[] = self::faqPage($itemFaq);
+        }
+
+        return view('pages.section', ['page' => 'marketplace', 'label' => __('nav.offers'), 'catalog' => $catalog,
+            'templatePreviews' => \App\Domain\Offers\Models\OfferCategory::templatePreviews(), 'jsonLd' => $jsonLd]);
+    }
+
+    /** /faq — frequently asked questions. */
+    public function faqIndex()
+    {
+        $faq = self::faq();
+
+        return view('pages.section', ['page' => 'faq', 'label' => __('home.nav.faq'), 'faq' => $faq, 'jsonLd' => $faq->isNotEmpty() ? [self::faqPage($faq)] : []]);
     }
 
     public function llms()

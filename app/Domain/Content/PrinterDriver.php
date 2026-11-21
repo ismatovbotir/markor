@@ -28,9 +28,33 @@ class PrinterDriver extends Model
         return $query->where('is_active', true);
     }
 
+    /** Marketplace products this driver fits (one driver → several models of the brand). */
+    public function offers()
+    {
+        return $this->belongsToMany(\App\Domain\Offers\Models\Offer::class, 'offer_printer_driver');
+    }
+
+    /** "Zebra ZD421", "Godex" (no driver name), "Zebra ZDesigner" — the brand is not repeated. */
     public function name(): string
     {
-        return "{$this->brand} {$this->model}";
+        $model = trim((string) $this->model);
+        if ($model === '' || str_starts_with(mb_strtolower($model), mb_strtolower($this->brand))) {
+            return $model ?: (string) $this->brand;
+        }
+
+        return "{$this->brand} {$model}";
+    }
+
+    /** A free address for a driver: brand + name, or brand + "driver"; a number is added when taken. */
+    public static function freeSlug(string $brand, ?string $model, ?int $ignoreId = null): string
+    {
+        $base = \Illuminate\Support\Str::slug($brand . ' ' . str_replace('/', ' ', trim((string) $model) ?: 'driver'));
+        $slug = $base;
+        for ($i = 2; static::where('slug', $slug)->when($ignoreId, fn ($q) => $q->whereKeyNot($ignoreId))->exists(); $i++) {
+            $slug = "$base-$i";
+        }
+
+        return $slug;
     }
 
     public function localized(string $field): ?string

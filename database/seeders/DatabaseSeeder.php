@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call(SuperAdminSeeder::class);
         $this->call(ProductGroupSeeder::class);
         $this->call(OfferSeeder::class);
+        $this->call(MarketplaceProductsSeeder::class);
         $this->call(SettingsSeeder::class);
         $this->call(BannerSeeder::class);
         $this->call(PrinterDriverSeeder::class);

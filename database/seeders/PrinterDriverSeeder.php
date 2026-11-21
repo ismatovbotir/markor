@@ -11,6 +11,14 @@ use Illuminate\Database\Seeder;
  */
 class PrinterDriverSeeder extends Seeder
 {
+    /** Driver → marketplace products it fits (linked only when the product exists; links added in admin stay). */
+    public const PRODUCTS = [
+        'zebra-zd421' => ['zebra-zd421t'],
+        'zebra-zt411' => ['zebra-zt411'],
+        'godex-g500'  => ['godex-g500u'],
+        'godex-g530'  => ['godex-g530u'],
+    ];
+
     public function run(): void
     {
         $zebra = 'https://www.zebra.com/us/en/support-downloads/printers/';
@@ -43,6 +51,11 @@ class PrinterDriverSeeder extends Seeder
                 'brand' => $brand, 'model' => $model, 'kind' => $kind, 'language' => $lang, 'os' => $os, 'driver_url' => $url,
                 'summary_uz' => $uz, 'summary_ru' => $ru, 'summary_zh' => $zh, 'sort_order' => $i + 1, 'is_active' => true,
             ]);
+        }
+
+        foreach (self::PRODUCTS as $slug => $offers) {
+            $ids = \App\Domain\Offers\Models\Offer::whereIn('slug', $offers)->pluck('id');
+            PrinterDriver::where('slug', $slug)->first()?->offers()->syncWithoutDetaching($ids);
         }
     }
 }

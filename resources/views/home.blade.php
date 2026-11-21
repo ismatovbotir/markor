@@ -134,34 +134,8 @@
         </section>
         </div>
         @foreach($extra as $k => $b)
-            @php
-                $theme = ['light' => ['bg-stone-100', 'text-stone-900', 'text-stone-600', 'bg-amber-700 text-white hover:bg-amber-800'],
-                          'dark'  => ['bg-stone-900', 'text-white', 'text-stone-300', 'bg-amber-500 text-stone-900 hover:bg-amber-400'],
-                          'amber' => ['bg-amber-700', 'text-white', 'text-amber-50', 'bg-white text-amber-800 hover:bg-amber-50']][$b->style] ?? ['bg-stone-100', 'text-stone-900', 'text-stone-600', 'bg-amber-700 text-white'];
-                $link = $b->link();
-                $external = $link && preg_match('#^https?://#i', $link);
-                $rel = trim(($external ? 'noopener ' : '') . ($b->is_sponsored ? 'sponsored' : ($external ? 'nofollow' : '')));
-            @endphp
-            <section style="grid-area: 1 / 1" class="{{ $theme[0] }} flex items-center transition-opacity duration-500 opacity-0 invisible pointer-events-none" :class="i === {{ $k + 1 }} ? '!opacity-100 !visible !pointer-events-auto' : ''" aria-hidden="true" :aria-hidden="i !== {{ $k + 1 }}">
-                <div class="w-full max-w-6xl mx-auto px-4 py-14 lg:py-20 grid lg:grid-cols-2 gap-10 items-center">
-                    <div>
-                        @if($b->is_sponsored)<span class="inline-block text-[11px] uppercase tracking-wider px-2 py-0.5 rounded border {{ $b->style === 'light' ? 'border-stone-300 text-stone-500' : 'border-white/40 text-white/80' }}">{{ __('banners.ad') }}</span>@endif
-                        <h2 class="font-display font-bold text-3xl sm:text-4xl tracking-tight mt-3 {{ $theme[1] }}">{{ $b->localized('title') }}</h2>
-                        @if($b->localized('text'))<p class="text-lg mt-4 leading-relaxed max-w-xl {{ $theme[2] }}">{{ $b->localized('text') }}</p>@endif
-                        @if($link)
-                            <a href="{{ $link }}" @if($external) target="_blank" @endif @if($rel) rel="{{ $rel }}" @endif class="inline-flex items-center gap-2 mt-8 px-6 py-3.5 rounded-xl font-semibold transition {{ $theme[3] }}">
-                                {{ $b->localized('button') ?: __('banners.more') }} @svg($external ? 'heroicon-o-arrow-top-right-on-square' : 'heroicon-o-arrow-right', 'w-4 h-4')
-                            </a>
-                        @endif
-                    </div>
-                    @if($b->imageUrl())
-                        <div class="flex items-center justify-center">
-                            <div class="bg-white rounded-3xl shadow-2xl ring-1 ring-black/5 p-6 w-full max-w-md">
-                                <img src="{{ $b->imageUrl() }}" alt="{{ $b->localized('title') }}" loading="lazy" class="w-full h-72 object-contain">
-                            </div>
-                        </div>
-                    @endif
-                </div>
+            <section style="grid-area: 1 / 1" class="{{ $b->theme()[0] }} flex items-center transition-opacity duration-500 opacity-0 invisible pointer-events-none" :class="i === {{ $k + 1 }} ? '!opacity-100 !visible !pointer-events-auto' : ''" aria-hidden="true" :aria-hidden="i !== {{ $k + 1 }}">
+                @include('partials.banner-slide', ['b' => $b])
             </section>
         @endforeach
         @if($extra->isNotEmpty())
@@ -237,73 +211,13 @@
     </section>
 
     {{-- Asl Belgisi --}}
-    <section id="aslbelgi" class="bg-stone-900 text-stone-100 scroll-mt-16">
-        <div class="max-w-6xl mx-auto px-4 py-20 grid lg:grid-cols-2 gap-12">
-            <div>
-                <p class="font-mono text-xs uppercase tracking-widest text-amber-400">Asl Belgisi · GS1 DataMatrix</p>
-                <h2 class="font-display font-bold text-2xl sm:text-3xl text-white tracking-tight mt-3">{{ __('home.aslbelgi.title') }}</h2>
-                <p class="text-stone-300 mt-4 leading-relaxed">{{ __('home.aslbelgi.text') }}</p>
-                <div class="flex flex-wrap items-center gap-4 mt-8">
-                    <a href="{{ auth()->check() ? $loginUrl : route('register') }}" class="inline-flex items-center gap-2 px-5 py-3 bg-amber-600 text-white rounded-xl font-semibold hover:bg-amber-500 transition">
-                        {{ auth()->check() ? __('home.aslbelgi.cta') : __('home.aslbelgi.register') }} @svg('heroicon-o-arrow-right', 'w-4 h-4')
-                    </a>
-                    @guest
-                        <a href="{{ route('login') }}" class="text-sm font-medium text-stone-300 hover:text-white">{{ __('auth.have_account') }} {{ __('auth.login') }}</a>
-                    @endguest
-                </div>
-                <p class="text-sm text-stone-400 mt-4">{{ __('home.aslbelgi.private') }}</p>
-                <p class="text-sm text-amber-300 mt-1">{{ __('home.aslbelgi.price') }}</p>
-                <p class="text-sm text-stone-400 mt-1">{{ __('home.aslbelgi.topup') }}</p>
-                <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('china', app()->getLocale()) }}" class="inline-block text-sm text-amber-300 hover:text-amber-200 mt-4">{{ __('china.home_link') }}</a>
-                <p class="flex items-start gap-2 text-sm text-stone-300 mt-6">@svg('heroicon-o-paper-airplane', 'w-4 h-4 mt-0.5 shrink-0') {{ __('home.aslbelgi.telegram') }}</p>
-            </div>
-            <ol class="grid sm:grid-cols-2 auto-rows-fr gap-px bg-stone-700 rounded-2xl overflow-hidden self-stretch">
-                @foreach([1, 2, 3, 4] as $i)
-                    <li class="bg-stone-900 p-6">
-                        <span class="font-mono text-xs text-amber-400">0{{ $i }}</span>
-                        <h3 class="font-semibold text-white mt-2">{{ __("home.aslbelgi.point$i.title") }}</h3>
-                        <p class="text-sm text-stone-400 mt-2 leading-relaxed">{{ __("home.aslbelgi.point$i.text") }}</p>
-                    </li>
-                @endforeach
-            </ol>
-        </div>
-    </section>
+    @include('partials.section-aslbelgi')
 
     {{-- Equipment and consumables --}}
-    @if($catalog->isNotEmpty())
-        <section id="offers" class="max-w-6xl mx-auto px-4 py-20 scroll-mt-16">
-            <div class="flex items-end justify-between gap-6 flex-wrap">
-                <div>
-                    <h2 class="font-display font-bold text-2xl sm:text-3xl text-stone-900 tracking-tight">{{ __('home.offers.title') }}</h2>
-                    <p class="text-stone-600 mt-3 max-w-2xl">{{ __('home.offers.subtitle') }}</p>
-                </div>
-                @if($tel)
-                    <a href="{{ $tel }}" class="inline-flex items-center gap-2 px-5 py-3 border border-stone-900 rounded-xl font-semibold hover:bg-stone-900 hover:text-white transition">@svg('heroicon-o-phone', 'w-4 h-4') {{ $phone }}</a>
-                @endif
-            </div>
-            <div class="mt-10">@include('partials.offer-catalog', ['catalog' => $catalog, 'templatePreviews' => $templatePreviews])</div>
-        </section>
-    @endif
+    @include('partials.section-offers')
 
     {{-- FAQ --}}
-    @if($faq->isNotEmpty())
-        <section id="faq" class="bg-white border-y border-stone-200 scroll-mt-16">
-            <div class="max-w-3xl mx-auto px-4 py-20">
-                <h2 class="font-display font-bold text-2xl sm:text-3xl text-stone-900 tracking-tight">{{ __('home.faq.title') }}</h2>
-                <div class="mt-8 divide-y divide-stone-200 border-y border-stone-200">
-                    @foreach($faq as $item)
-                        <details class="group py-5">
-                            <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-semibold text-stone-900">
-                                <h3>{{ $item['q'] }}</h3>
-                                <span class="shrink-0 w-7 h-7 rounded-full border border-stone-300 flex items-center justify-center text-stone-500 transition group-open:rotate-45 group-open:bg-amber-700 group-open:border-amber-700 group-open:text-white">+</span>
-                            </summary>
-                            <p class="text-stone-600 mt-3 leading-relaxed">{{ $item['a'] }}</p>
-                        </details>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-    @endif
+    @include('partials.section-faq')
 
     {{-- Final call --}}
     <section class="max-w-6xl mx-auto px-4 py-20">

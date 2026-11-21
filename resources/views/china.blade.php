@@ -91,7 +91,7 @@
         <div class="bg-white border border-stone-200 rounded-xl p-6">
             <h2 class="font-semibold text-lg text-stone-900">{{ __('china.equipment.title') }}</h2>
             <p class="text-stone-600 mt-3 leading-relaxed">{{ __('china.equipment.text') }}</p>
-            <a href="{{ route('home') }}#offers" class="inline-block text-sm text-amber-700 font-medium mt-4 hover:underline">{{ __('nav.offers') }} →</a>
+            <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace', app()->getLocale()) }}" class="inline-block text-sm text-amber-700 font-medium mt-4 hover:underline">{{ __('nav.offers') }} →</a>
         </div>
         <div class="bg-white border border-stone-200 rounded-xl p-6">
             <h2 class="font-semibold text-lg text-stone-900">{{ __('china.price.title') }}</h2>

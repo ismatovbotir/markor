@@ -12,7 +12,7 @@ class DriverController extends Controller
     public function index()
     {
         return view('drivers.index', [
-            'brands' => PrinterDriver::active()->orderBy('brand')->orderBy('sort_order')->get()->groupBy('brand'),
+            'brands' => PrinterDriver::active()->with(['offers' => fn ($q) => $q->active()])->orderBy('brand')->orderBy('sort_order')->get()->groupBy('brand'),
         ]);
     }
 
@@ -22,6 +22,7 @@ class DriverController extends Controller
 
         return view('drivers.show', [
             'driver'  => $driver,
+            'products'=> $driver->offers()->active()->orderBy('sort_order')->get(),
             'siblings'=> PrinterDriver::active()->where('brand', $driver->brand)->whereKeyNot($driver->id)->orderBy('sort_order')->limit(6)->get(),
             // consumables that fit any label printer: ribbons and labels from our catalog
             'supplies'=> Offer::where('is_active', true)->whereHas('offerCategory', fn ($q) => $q->where('is_active', true)->whereIn('slug', ['ribbons', 'labels']))

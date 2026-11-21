@@ -171,13 +171,13 @@ class ClaudeAiTest extends TestCase
         ];
 
         $this->actingAs($admin);
-        Livewire::test(OfferCategoryManager::class, ['category' => $category])
-            ->call('openCreate')->set('item.title_uz', 'Xprinter XP-365B')->set('aiNotes', '58 mm, USB')
+        Livewire::test(\App\Http\Livewire\Admin\OfferForm::class, ['category' => $category])
+            ->set('item.title_uz', 'Xprinter XP-365B')->set('aiNotes', '58 mm, USB')
             ->call('generateContent')
             ->assertSet('item.title_uz', 'Xprinter XP-365B')            // typed name kept
             ->assertSet('item.title_ru', 'Принтер Xprinter XP-365B')
             ->assertSet('item.description_zh', '热敏标签打印机。')
-            ->call('saveItem')->assertHasNoErrors();
+            ->call('save')->assertHasNoErrors();
 
         $offer = Offer::where('title_uz', 'Xprinter XP-365B')->firstOrFail();
         $this->assertSame('Qaysi etiketkalar mos?', $offer->faq[0]['q_uz']);
@@ -193,8 +193,8 @@ class ClaudeAiTest extends TestCase
         $category = OfferCategory::create(['slug' => 'ribbons-ai', 'name_uz' => 'Ribbonlar', 'icon' => 'heroicon-o-film', 'is_active' => true, 'sort_order' => 98]);
 
         $this->actingAs($admin);
-        Livewire::test(OfferCategoryManager::class, ['category' => $category])
-            ->call('openCreate')->set('item.title_uz', 'Wax ribbon')
+        Livewire::test(\App\Http\Livewire\Admin\OfferForm::class, ['category' => $category])
+            ->set('item.title_uz', 'Wax ribbon')
             ->call('generateContent')
             ->assertSet('aiMessage', __('ai.unavailable.no_key'))
             ->assertSet('item.title_uz', 'Wax ribbon');

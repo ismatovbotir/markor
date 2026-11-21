@@ -42,15 +42,22 @@ class OfferCatalogTest extends TestCase
 
         Livewire::test(OfferCategoryManager::class, ['category' => $printers])
             ->set('settings.market_url', 'https://uzum.uz/uz/shop/markor')
-            ->call('saveSettings')->assertHasNoErrors()
-            ->call('openCreate')
+            ->call('saveSettings')->assertHasNoErrors();
+        Livewire::test(\App\Http\Livewire\Admin\OfferForm::class, ['category' => $printers])
             ->set('item.title_uz', 'Termo printer X1')
-            ->set('item.price', "2 400 000 so'm")
+            ->assertSet('item.slug', 'termo-printer-x1')
             ->set('photo', UploadedFile::fake()->image('p.jpg', 400, 300))
-            ->call('saveItem')->assertHasNoErrors();
+            ->call('save')->assertHasNoErrors()->assertRedirect(route('admin.offers', $printers));
 
         $item = $printers->offers()->where('title_uz', 'Termo printer X1')->firstOrFail();
+        $this->assertSame('termo-printer-x1', $item->slug);
         Storage::disk('public')->assertExists($item->image_path);
+
+        // edit page: same item, own address; a taken address is refused
+        $this->get(route('admin.offers.edit', [$printers, $item]))->assertOk()->assertSee(__('offers.sec_texts'));
+        $other = $printers->offers()->where('id', '!=', $item->id)->firstOrFail();
+        Livewire::test(\App\Http\Livewire\Admin\OfferForm::class, ['category' => $printers, 'offer' => $item])
+            ->set('item.slug', $other->slug)->call('save')->assertHasErrors('item.slug');
 
         auth()->logout();
         $this->get('/')->assertOk()->assertSee('https://uzum.uz/uz/shop/markor')->assertSee("Ko'proq mahsulotlar");

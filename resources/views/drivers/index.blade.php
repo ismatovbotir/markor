@@ -26,7 +26,7 @@
 @php
     // search text per model: name + command language, without spaces/hyphens ("xp365" finds "XP-365B")
     $norm = fn ($s) => preg_replace('/[\s\-_\/]+/u', '', mb_strtolower($s));
-    $hay = $all->mapWithKeys(fn ($d) => [$d->id => $norm($d->name() . ' ' . $d->language . ' ' . $d->brand)]);
+    $hay = $all->mapWithKeys(fn ($d) => [$d->id => $norm($d->name() . ' ' . $d->language . ' ' . $d->brand . ' ' . $d->offers->pluck('title_uz')->implode(' '))]);
 @endphp
 <main class="max-w-6xl mx-auto px-4 py-12" x-data="{ q: '', hay: @js($hay->values()), norm(s) { return (s || '').toLowerCase().replace(/[\s\-_\/]+/g, '') }, has(h) { return !this.norm(this.q) || h.includes(this.norm(this.q)) }, get none() { return !this.hay.some(h => this.has(h)) } }">
     <nav class="text-xs text-stone-500 mb-4"><a href="{{ route('home') }}" class="hover:text-amber-700">{{ config('app.name') }}</a> › {{ __('drivers.title') }}</nav>

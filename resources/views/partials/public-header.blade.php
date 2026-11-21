@@ -13,9 +13,9 @@
             // one list for the desktop menu and the phone menu: [url, label, active, desktop visibility]
             $menu = array_values(array_filter([
                 [$u('studio'), __('nav.studio'), request()->routeIs('studio'), 'lg:inline'],
-                [route('home') . '#aslbelgi', 'Asl Belgisi', false, 'lg:inline'],
-                [route('home') . '#offers', __('nav.offers'), false, 'lg:inline'],
-                [route('home') . '#faq', __('home.nav.faq'), false, 'xl:inline'],
+                [$u('aslbelgi'), 'Asl Belgisi', request()->routeIs('aslbelgi'), 'lg:inline'],
+                [$u('marketplace'), __('nav.offers'), request()->routeIs('marketplace', 'marketplace.item'), 'lg:inline'],
+                [$u('faq'), __('home.nav.faq'), request()->routeIs('faq'), 'xl:inline'],
                 $loc === 'zh' ? [$u('china'), __('china.nav'), request()->routeIs('china'), 'lg:inline'] : null,
                 [route('guide'), __('guide.title'), request()->routeIs('guide'), 'xl:inline'],
                 [$u('drivers'), __('nav.drivers'), request()->routeIs('drivers*'), 'lg:inline'],

@@ -18,7 +18,7 @@ class BannerSeeder extends Seeder
 
         foreach ($this->brands() as $i => $banner) {
             $row = Banner::firstOrCreate(['is_default' => false, 'title_uz' => $banner['title_uz']], $banner + [
-                'url' => '/#offers', 'is_sponsored' => false, 'is_active' => true, 'sort_order' => $i + 1, // $banner's own is_active wins
+                'url' => '/marketplace', 'is_sponsored' => false, 'is_active' => true, 'sort_order' => $i + 1, // $banner's own is_active wins
             ]);
             if (!$row->image_path && !empty($banner['image_path'])) {
                 $row->update(['image_path' => $banner['image_path']]); // a banner seeded before the pictures existed

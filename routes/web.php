@@ -37,6 +37,9 @@ Route::get('/guide/{page?}', [HomeController::class, 'guide'])->name('guide');
 // landing page for Chinese manufacturers / exporters marking goods for Uzbekistan
 Route::view('/uzbekistan-marking', 'china')->name('china');
 Route::view('/contact', 'contact')->name('contact');
+Route::get('/asl-belgisi', [HomeController::class, 'aslbelgi'])->name('aslbelgi');
+Route::get('/marketplace', [HomeController::class, 'marketplace'])->name('marketplace');
+Route::get('/faq', [HomeController::class, 'faqIndex'])->name('faq');
 Route::get('/drivers', [\App\Http\Controllers\Guest\DriverController::class, 'index'])->name('drivers');
 Route::get('/drivers/{driver:slug}', [\App\Http\Controllers\Guest\DriverController::class, 'show'])->name('drivers.show');
 // public page of a Marketplace item
@@ -118,12 +121,18 @@ Route::middleware(['auth', 'can:admin'])->prefix('admin')->group(function () {
     Route::get('/companies', \App\Http\Livewire\Admin\CompanyIndex::class)->name('admin.clients');
     Route::get('/companies/{company}', \App\Http\Livewire\Admin\CompanyShow::class)->name('admin.companies.show');
     Route::get('/offers/{category:slug}', \App\Http\Livewire\Admin\OfferCategoryManager::class)->name('admin.offers');
+    Route::get('/offers/{category:slug}/items/create', \App\Http\Livewire\Admin\OfferForm::class)->name('admin.offers.create');
+    Route::get('/offers/{category:slug}/items/{offer}/edit', \App\Http\Livewire\Admin\OfferForm::class)->name('admin.offers.edit');
     Route::get('/offer-requests', \App\Http\Livewire\Admin\OfferRequestIndex::class)->name('admin.offer-requests');
     Route::get('/template-requests', \App\Http\Livewire\Admin\TemplateRequestIndex::class)->name('admin.template-requests');
     Route::get('/settings', \App\Http\Livewire\Admin\SettingsPage::class)->name('admin.settings');
     Route::get('/seo', \App\Http\Livewire\Admin\SeoPage::class)->name('admin.seo');
     Route::get('/banners', \App\Http\Livewire\Admin\BannerIndex::class)->name('admin.banners');
+    Route::get('/banners/create', \App\Http\Livewire\Admin\BannerForm::class)->name('admin.banners.create');
+    Route::get('/banners/{banner}/edit', \App\Http\Livewire\Admin\BannerForm::class)->name('admin.banners.edit');
     Route::get('/drivers', \App\Http\Livewire\Admin\DriverIndex::class)->name('admin.drivers');
+    Route::get('/drivers/create', \App\Http\Livewire\Admin\DriverForm::class)->name('admin.drivers.create');
+    Route::get('/drivers/{driver}/edit', \App\Http\Livewire\Admin\DriverForm::class)->name('admin.drivers.edit');
     Route::get('/stats', \App\Http\Livewire\Admin\StatsPage::class)->name('admin.stats');
     Route::get('/telegram', \App\Http\Livewire\Admin\TelegramPage::class)->name('admin.telegram');
     Route::get('/payments', \App\Http\Livewire\Admin\PaymentIndex::class)->name('admin.payments');

@@ -8,7 +8,7 @@
         @if($category->isTemplates())
             <a href="{{ route('label-templates.index') }}" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition">{{ __('nav.template_designer') }} →</a>
         @else
-            <button wire:click="openCreate" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition">+ {{ __('offers.add_item') }}</button>
+            <a href="{{ route('admin.offers.create', $category) }}" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition">+ {{ __('offers.add_item') }}</a>
         @endif
     </div>
 
@@ -69,15 +69,14 @@
                         <span class="w-12 h-12 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">@svg($offer->icon ?: 'heroicon-o-cube', 'w-5 h-5')</span>
                     @endif
                     <div class="flex-1 min-w-0">
-                        <p class="font-medium truncate">{{ $offer->title_uz }}</p>
+                        <p class="font-medium truncate"><a href="{{ route('admin.offers.edit', [$category, $offer]) }}" class="hover:text-amber-700">{{ $offer->title_uz }}</a></p>
                         <p class="text-xs text-stone-500 truncate">{{ $offer->description_uz }}</p>
                     </div>
-                    <span class="text-sm text-stone-600 whitespace-nowrap">{{ $offer->price ?: '—' }}</span>
                     <span class="flex items-center gap-2 text-stone-400 whitespace-nowrap">
                         <button wire:click="move({{ $offer->id }}, -1)" class="hover:text-stone-700">@svg('heroicon-o-chevron-up', 'w-4 h-4')</button>
                         <button wire:click="move({{ $offer->id }}, 1)" class="hover:text-stone-700">@svg('heroicon-o-chevron-down', 'w-4 h-4')</button>
                         <button wire:click="toggle({{ $offer->id }})" class="text-xs hover:text-amber-700">{{ $offer->is_active ? __('offers.hide') : __('offers.show') }}</button>
-                        <button wire:click="openEdit({{ $offer->id }})" class="text-xs hover:text-amber-700">{{ __('common.edit') }}</button>
+                        <a href="{{ route('admin.offers.edit', [$category, $offer]) }}" class="text-xs hover:text-amber-700">{{ __('common.edit') }}</a>
                         <button wire:click="delete({{ $offer->id }})" wire:confirm="{{ __('common.confirm_delete') }}" class="text-xs hover:text-rose-600">{{ __('common.delete') }}</button>
                     </span>
                 </div>
@@ -88,92 +87,4 @@
         <p class="text-xs text-stone-500 mt-2">{{ __('offers.order_hint', ['n' => $shown]) }}</p>
     @endif
 
-    @if($showForm)
-        <div class="fixed inset-0 bg-black/40 z-40 flex items-start justify-center overflow-y-auto py-8 px-4">
-            <form wire:submit="saveItem" class="bg-white rounded-xl shadow-xl w-full max-w-3xl p-6 space-y-4">
-                <h2 class="text-lg font-semibold">{{ $editingId ? __('common.edit') : __('offers.add_item') }} — {{ $category->name_uz }}</h2>
-                {{-- Claude: fills names, descriptions and FAQ in 3 languages; the admin reviews and saves --}}
-                @php $ai = app(\App\Domain\Ai\Claude::class); @endphp
-                <div class="rounded-lg border border-violet-200 bg-violet-50/60 p-3 space-y-2">
-                    <div class="flex items-center justify-between gap-3 flex-wrap">
-                        <p class="text-sm font-medium text-violet-900 flex items-center gap-1.5">@svg('heroicon-o-sparkles', 'w-4 h-4') {{ __('ai.offer_title') }}</p>
-                        <button type="button" wire:click="generateContent" wire:loading.attr="disabled" wire:target="generateContent" @disabled(!$ai->available())
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 disabled:opacity-50">
-                            <span wire:loading.remove wire:target="generateContent">@svg('heroicon-o-sparkles', 'w-4 h-4')</span>
-                            <span wire:loading wire:target="generateContent">@svg('heroicon-o-arrow-path', 'w-4 h-4 animate-spin')</span>
-                            {{ __('ai.generate') }}
-                        </button>
-                    </div>
-                    <textarea wire:model="aiNotes" rows="2" maxlength="1500" placeholder="{{ __('ai.notes_placeholder') }}" class="{{ $field }} text-xs"></textarea>
-                    <p class="text-[11px] text-violet-800/80">{{ $ai->available() ? __('ai.offer_hint') : __('ai.unavailable.' . $ai->unavailableReason()) }}</p>
-                    @if($aiMessage)<p class="text-xs {{ str_starts_with($aiMessage, '✓') ? 'text-emerald-700' : 'text-rose-600' }}">{{ $aiMessage }}</p>@endif
-                </div>
-                <div class="grid sm:grid-cols-3 gap-3">
-                    @foreach(['uz' => 'UZ', 'ru' => 'RU', 'zh' => '中文'] as $l => $lang)
-                        <div class="space-y-2">
-                            <label class="block text-xs font-medium text-stone-600">{{ __('common.name') }} ({{ $lang }})
-                                <input wire:model="item.title_{{ $l }}" type="text" class="{{ $field }} mt-1">
-                            </label>
-                            @error("item.title_$l") <p class="text-rose-500 text-xs">{{ $message }}</p> @enderror
-                            <label class="block text-xs font-medium text-stone-600">{{ __('offers.description') }} ({{ $lang }})
-                                <textarea wire:model="item.description_{{ $l }}" rows="3" class="{{ $field }} mt-1"></textarea>
-                            </label>
-                        </div>
-                    @endforeach
-                </div>
-                {{-- FAQ (questions buyers ask about this item) --}}
-                <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <p class="text-xs font-medium text-stone-600">{{ __('ai.faq') }}</p>
-                        <button type="button" wire:click="addFaq" class="text-xs text-amber-700 hover:underline">+ {{ __('ai.faq_add') }}</button>
-                    </div>
-                    @foreach($item['faq'] ?? [] as $i => $f)
-                        <div class="border border-stone-200 rounded-lg p-2 grid sm:grid-cols-3 gap-2 relative" wire:key="faq-{{ $i }}">
-                            @foreach(['uz' => 'UZ', 'ru' => 'RU', 'zh' => '中文'] as $l => $lang)
-                                <div class="space-y-1">
-                                    <input wire:model="item.faq.{{ $i }}.q_{{ $l }}" type="text" placeholder="{{ __('ai.question') }} ({{ $lang }})" class="{{ $field }} text-xs font-medium">
-                                    <textarea wire:model="item.faq.{{ $i }}.a_{{ $l }}" rows="2" placeholder="{{ __('ai.answer') }} ({{ $lang }})" class="{{ $field }} text-xs"></textarea>
-                                </div>
-                            @endforeach
-                            <button type="button" wire:click="removeFaq({{ $i }})" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-white border border-stone-300 text-stone-500 hover:text-rose-600 text-xs leading-none">×</button>
-                        </div>
-                    @endforeach
-                </div>
-                <div class="grid sm:grid-cols-3 gap-3">
-                    <label class="block text-xs font-medium text-stone-600">{{ __('offers.price') }}
-                        <input wire:model="item.price" type="text" placeholder="1 250 000 so'm" class="{{ $field }} mt-1">
-                    </label>
-                    <label class="block text-xs font-medium text-stone-600 sm:col-span-2">{{ __('offers.item_url') }}
-                        <input wire:model="item.url" type="url" placeholder="https://…" class="{{ $field }} mt-1">
-                        @error('item.url') <span class="text-rose-500 text-xs">{{ $message }}</span> @enderror
-                    </label>
-                </div>
-                {{-- preview is made in the browser from the chosen file, so it never depends on the server address --}}
-                <div class="flex items-center gap-4 flex-wrap" x-data="{ preview: null }" x-on:offer-photo-cleared.window="preview = null">
-                    <img x-show="preview" x-cloak :src="preview" alt="" class="w-20 h-20 object-cover rounded-lg border border-amber-300">
-                    @if(!$photo && !empty($item['image_path']))
-                        <img x-show="!preview" src="{{ \App\Domain\Offers\Models\Offer::publicUrl($item['image_path']) }}" alt="" class="w-20 h-20 object-cover rounded-lg border border-stone-200">
-                        <button type="button" wire:click="removePhoto" class="text-xs text-rose-600 hover:underline">{{ __('offers.remove_photo') }}</button>
-                    @endif
-                    <label class="text-xs font-medium text-stone-600">{{ __('offers.photo') }}
-                        <input wire:model="photo" type="file" accept=".jpg,.jpeg,.png,.webp" x-on:change="const err = window.checkUpload($event.target.files[0], @js(\App\Support\Uploads::forJs('image'))); if (err) { $event.target.value = ''; preview = null; $event.stopImmediatePropagation(); $dispatch('notify', { type: 'error', message: err }); return; } preview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null" class="block mt-1 text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-100 file:text-amber-700">
-                    </label>
-                    @error('photo') <p class="text-rose-500 text-xs">{{ $message }}</p> @enderror
-                </div>
-                <div class="flex items-center gap-6 text-sm">
-                    <label class="flex items-center gap-2">{{ __('offers.button') }}
-                        <select wire:model="item.action" class="{{ $field }} w-auto">
-                            <option value="order">{{ __('offers.action.order') }}</option>
-                            <option value="call">{{ __('offers.action.call') }}</option>
-                        </select>
-                    </label>
-                    <label class="flex items-center gap-2"><input wire:model="item.is_active" type="checkbox" class="rounded border-stone-300 text-amber-600"> {{ __('offers.visible') }}</label>
-                </div>
-                <div class="flex justify-end gap-3 pt-2">
-                    <button type="button" wire:click="$set('showForm', false)" class="px-4 py-2 text-sm text-stone-600 hover:text-stone-800">{{ __('common.cancel') }}</button>
-                    <button type="submit" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition" wire:loading.attr="disabled" wire:target="saveItem, photo">{{ __('common.save') }}</button>
-                </div>
-            </form>
-        </div>
-    @endif
 </div>

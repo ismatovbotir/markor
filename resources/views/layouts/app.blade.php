@@ -161,7 +161,7 @@
     </aside>
 
     {{-- Main --}}
-    <main class="flex-1 flex flex-col">
+    <main class="flex-1 min-w-0 flex flex-col">
         <div class="px-8 py-6 flex-1">
             @php $helpPage = \App\Http\Controllers\HelpController::FOR_ROUTE[request()->route()?->getName()] ?? null; @endphp
             @if($helpPage && !auth()->user()?->isAdmin())
@@ -177,6 +177,7 @@
 {{-- Toast notifications --}}
 <div
     x-data="{ show: false, type: 'success', message: '' }"
+    @if(session('notify')) x-init="message = @js(session('notify')); show = true; window.__toastTimer = setTimeout(() => show = false, 3000)" @endif
     x-on:notify.window="const d = Array.isArray($event.detail) ? $event.detail[0] : $event.detail; show = true; type = d.type; message = d.message; clearTimeout(window.__toastTimer); window.__toastTimer = setTimeout(() => show = false, 3000)"
     x-show="show"
     x-transition

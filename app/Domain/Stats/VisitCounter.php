@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class VisitCounter
 {
     /** Public pages that are counted (route names). */
-    public const ROUTES = ['home', 'studio', 'china', 'contact', 'drivers', 'drivers.show', 'marketplace.item', 'guide'];
+    public const ROUTES = ['home', 'studio', 'aslbelgi', 'marketplace', 'faq', 'china', 'contact', 'drivers', 'drivers.show', 'marketplace.item', 'guide'];
 
     public const RETENTION_DAYS = 180;
 

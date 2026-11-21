@@ -16,7 +16,7 @@
         '@context' => 'https://schema.org', '@type' => 'BreadcrumbList',
         'itemListElement' => [
             ['@type' => 'ListItem', 'position' => 1, 'name' => config('app.name'), 'item' => route('home')],
-            ['@type' => 'ListItem', 'position' => 2, 'name' => __('nav.offers'), 'item' => route('home') . '#offers'],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => __('nav.offers'), 'item' => route('marketplace')],
             ['@type' => 'ListItem', 'position' => 3, 'name' => $offer->title, 'item' => $url],
         ],
     ]];
@@ -43,7 +43,7 @@
 <main class="max-w-6xl mx-auto px-4 py-8">
     <nav class="text-xs text-stone-500 mb-5 flex flex-wrap items-center gap-1" aria-label="breadcrumb">
         <a href="{{ route('home') }}" class="hover:text-amber-700">{{ config('app.name') }}</a> ›
-        <a href="{{ route('home') }}#offers" class="hover:text-amber-700">{{ __('nav.offers') }}</a> ›
+        <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace', app()->getLocale()) }}" class="hover:text-amber-700">{{ __('nav.offers') }}</a> ›
         <span>{{ $category->name }}</span>
     </nav>
 
@@ -85,6 +85,16 @@
                     </li>
                 @endforeach
             </ul>
+            @php $drivers = $offer->drivers()->active()->orderBy('sort_order')->get(); @endphp
+            @if($drivers->isNotEmpty())
+                {{-- printer drivers that fit this model: official download pages (/drivers) --}}
+                <div class="mt-4 flex items-center gap-2 flex-wrap text-sm">
+                    <span class="inline-flex items-center gap-1.5 text-stone-600">@svg('heroicon-o-arrow-down-tray', 'w-4 h-4 text-amber-700') {{ __('marketplace.driver') }}:</span>
+                    @foreach($drivers as $d)
+                        <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('drivers.show', app()->getLocale(), ['driver' => $d->slug]) }}" class="px-2.5 py-1 rounded-lg border border-stone-200 bg-white hover:border-amber-400 hover:text-amber-700">{{ $d->name() }}</a>
+                    @endforeach
+                </div>
+            @endif
             @if($category->market_url)
                 <p class="text-sm mt-4"><a href="{{ $category->market_url }}" target="_blank" rel="noopener nofollow" class="text-amber-700 hover:underline">{{ __('offers.more_items') }} →</a></p>
             @endif
@@ -137,7 +147,7 @@
                                 </a>
                             @endforeach
                             @if($sm || $xs)
-                                <a href="{{ route('home') }}#offers" @class(['border-2 border-dashed border-stone-300 rounded-lg p-2 flex items-center justify-center text-center text-xs font-medium text-amber-700 hover:bg-amber-50',
+                                <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace', app()->getLocale()) }}" @class(['border-2 border-dashed border-stone-300 rounded-lg p-2 flex items-center justify-center text-center text-xs font-medium text-amber-700 hover:bg-amber-50',
                                     'hidden' => !$xs, 'col-span-1' => $xs, 'sm:flex' => $sm, 'sm:hidden' => !$sm, 'sm:col-span-1' => $sm === 1, 'sm:col-span-2' => $sm === 2, 'sm:col-span-3' => $sm === 3, 'flex' => $xs])>
                                     {{ __('marketplace.all_items') }} →
                                 </a>

@@ -8,7 +8,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * Starter content for "Biz taklif qilamiz". Categories and items are matched by slug, so re-running
- * updates them; after that, edit everything in the admin panel (Biz taklif qilamiz menu group).
+ * updates them and nothing is deleted; after that, edit everything in the admin panel (Biz taklif qilamiz menu group).
  * Items are generic product types — replace them with the exact models you sell.
  */
 class OfferSeeder extends Seeder
@@ -79,8 +79,6 @@ class OfferSeeder extends Seeder
              ]],
         ];
 
-        $keepCategories = [];
-        $keepItems = [];
         foreach ($catalog as $order => $c) {
             $category = OfferCategory::updateOrCreate(['slug' => $c['slug']], [
                 'kind' => $c['kind'] ?? 'items', 'icon' => $c['icon'],
@@ -88,7 +86,6 @@ class OfferSeeder extends Seeder
                 'description_uz' => $c['description'][0], 'description_ru' => $c['description'][1], 'description_zh' => $c['description'][2],
                 'sort_order' => $order,
             ]);
-            $keepCategories[] = $category->id;
 
             foreach ($c['items'] as $i => [$slug, $title, $text]) {
                 Offer::updateOrCreate(['slug' => $slug], [
@@ -97,11 +94,9 @@ class OfferSeeder extends Seeder
                     'description_uz' => $text[0], 'description_ru' => $text[1], 'description_zh' => $text[2],
                     'action' => $c['slug'] === 'service' ? 'call' : 'order', 'sort_order' => $i, 'is_active' => true,
                 ]);
-                $keepItems[] = $slug;
             }
         }
 
-        Offer::whereNotIn('slug', $keepItems)->delete();
-        OfferCategory::whereNotIn('id', $keepCategories)->delete();
+        // nothing is deleted: real products (MarketplaceProductsSeeder) and items added in admin stay
     }
 }
