@@ -24,3 +24,7 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Claude Code: project notes and local settings / sample files
+/CLAUDE.md
+/.claude/

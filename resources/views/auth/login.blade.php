@@ -98,9 +98,10 @@
             </div>
         </div>
 
-        <p class="text-xs text-stone-400 text-center mt-6">
-            Demo: <code class="bg-stone-100 px-2 py-1 rounded">admin@aslbelgi.local / admin123</code>
-        </p>
+        @if(app()->isLocal())
+            {{-- development only: never shown in production --}}
+            <p class="text-xs text-stone-400 text-center mt-6">Dev: <code class="bg-stone-100 px-2 py-1 rounded">{{ config('admin.email') }}</code></p>
+        @endif
         <p class="text-center text-sm text-stone-500 mt-5">
             {{ __('auth.no_account') }} <a href="{{ route('register') }}" class="text-amber-700 font-medium hover:underline">{{ __('auth.register') }}</a>
         </p>

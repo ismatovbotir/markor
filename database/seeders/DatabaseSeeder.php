@@ -17,16 +17,14 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Super admin
-        User::create([
-            'name'      => 'Administrator',
-            'email'     => 'admin@aslbelgi.local',
-            'password'  => 'admin123', // hashed by the model cast
-            'role'      => 'admin',
-            'locale'    => 'uz',
-            'qr_token'  => Str::random(32),
-            'is_active' => true,
-        ]);
+        // Reference data and the owner's account: dev and production
+        $this->call(SuperAdminSeeder::class);
+        $this->call(ProductGroupSeeder::class);
+        $this->call(OfferSeeder::class);
+
+        if (app()->isProduction()) {
+            return; // demo client, company and printers are for development only
+        }
 
         // Demo client with a registered company (owner)
         $company = Company::create([
@@ -68,8 +66,5 @@ class DatabaseSeeder extends Seeder
             'port'            => 9100,
             'is_active'       => false,
         ]);
-
-        $this->call(ProductGroupSeeder::class);
-        $this->call(OfferSeeder::class);
     }
 }

@@ -2,8 +2,8 @@
 <html lang="{{ \App\Http\Middleware\SetLocale::HREFLANG[app()->getLocale()] ?? 'uz' }}">
 <head>
 @include('partials.public-head', [
-    'seoTitle' => __('seo.studio.title'),
-    'seoDescription' => __('seo.studio.description'),
+    'seoTitle' => \App\Support\Seo::text('studio', 'title'),
+    'seoDescription' => \App\Support\Seo::text('studio', 'description'),
     'seoRoute' => 'studio',
 ])
 @livewireStyles

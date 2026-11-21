@@ -106,6 +106,11 @@
                     @svg('heroicon-o-cog-6-tooth', 'w-5 h-5 mr-3')
                     <span>{{ __('nav.settings') }}</span>
                 </a>
+                <a href="{{ route('admin.seo') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.seo') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
+                    @svg('heroicon-o-magnifying-glass', 'w-5 h-5 mr-3')
+                    <span class="flex-1">SEO</span>
+                    @if(\App\Support\Seo::noindex())<span class="ml-2 px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-semibold">noindex</span>@endif
+                </a>
 
                 <p class="px-4 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-teal-700 flex items-center gap-1.5"><span class="offer-nav-icon inline-flex">@svg('heroicon-o-shopping-bag', 'w-3.5 h-3.5')</span>{{ __('nav.offers') }}</p>
                 @php $newRequests = \App\Domain\Offers\Models\OfferRequest::where('status', 'new')->count(); @endphp

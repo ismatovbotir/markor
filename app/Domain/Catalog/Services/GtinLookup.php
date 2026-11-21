@@ -13,7 +13,11 @@ use Illuminate\Support\Facades\Log;
  */
 class GtinLookup
 {
-    public const URL = 'https://tasnif.soliq.uz/api/cl-api/integration-mxik/get/information/';
+    /** Lookup address with a {gtin} placeholder (GTIN_LOOKUP_URL in .env, see config/catalog.php). */
+    public static function url(string $gtin): string
+    {
+        return str_replace('{gtin}', rawurlencode($gtin), (string) config('catalog.gtin_lookup_url'));
+    }
 
     /**
      * @return array|null|false  the item, null when the classifier has no such barcode, false when the service failed
@@ -22,7 +26,7 @@ class GtinLookup
     {
         try {
             $response = Http::timeout(15)->acceptJson()->withUserAgent('Markor/1.0')
-                ->get(self::URL, ['shtrixCode' => $gtin]);
+                ->get(self::url($gtin));
         } catch (\Throwable $e) {
             Log::warning('GTIN lookup failed', ['gtin' => $gtin, 'error' => $e->getMessage()]);
             return false;

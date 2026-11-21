@@ -10,6 +10,14 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{{ $seoTitle }}</title>
 <meta name="description" content="{{ $seoDescription }}">
+@if(\App\Support\Seo::noindex())
+<meta name="robots" content="noindex, nofollow">
+@endif
+@foreach(['google' => 'google-site-verification', 'yandex' => 'yandex-verification', 'bing' => 'msvalidate.01'] as $key => $meta)
+@if($code = \App\Support\Seo::get($key))
+<meta name="{{ $meta }}" content="{{ $code }}">
+@endif
+@endforeach
 <link rel="canonical" href="{{ $canonical }}">
 @foreach(SetLocale::HREFLANG as $locale => $hreflang)
 <link rel="alternate" hreflang="{{ $hreflang }}" href="{{ HomeController::localizedUrl($seoRoute, $locale) }}">
@@ -30,3 +38,11 @@
 <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 @endforeach
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+@if(app()->isProduction() && ($ga4 = \App\Support\Seo::get('ga4')))
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ $ga4 }}"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config',@js($ga4));</script>
+@endif
+@if(app()->isProduction() && ($metrika = \App\Support\Seo::get('metrika')))
+<script>(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,'script','https://mc.yandex.ru/metrika/tag.js','ym');ym({{ (int) $metrika }},'init',{clickmap:true,trackLinks:true,accurateTrackBounce:true});</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/{{ (int) $metrika }}" style="position:absolute;left:-9999px" alt=""></div></noscript>
+@endif

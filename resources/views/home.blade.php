@@ -17,7 +17,7 @@
             'url' => route('studio'),
             'applicationCategory' => 'BusinessApplication',
             'operatingSystem' => 'Web',
-            'description' => __('seo.studio.description'),
+            'description' => \App\Support\Seo::text('studio', 'description'),
             'inLanguage' => ['uz', 'ru', 'zh-Hans'],
             'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'UZS'],
         ],
@@ -41,10 +41,11 @@
     ];
 @endphp
 @include('partials.public-head', [
-    'seoTitle' => __('seo.home.title'),
-    'seoDescription' => __('seo.home.description'),
-    'ogTitle' => __('seo.home.og_title'),
-    'ogDescription' => __('seo.home.og_description'),
+    'seoTitle' => \App\Support\Seo::text('home', 'title'),
+    'seoDescription' => \App\Support\Seo::text('home', 'description'),
+    // social previews: the admin's override if there is one, otherwise the longer og_* texts
+    'ogTitle' => \App\Support\Seo::get('home.title.' . app()->getLocale()) ?? __('seo.home.og_title'),
+    'ogDescription' => \App\Support\Seo::get('home.description.' . app()->getLocale()) ?? __('seo.home.og_description'),
     'seoRoute' => 'home',
     'jsonLd' => $jsonLd,
 ])

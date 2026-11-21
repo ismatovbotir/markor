@@ -107,6 +107,7 @@ Route::middleware(['auth', 'can:admin'])->prefix('admin')->group(function () {
     Route::get('/offers/{category:slug}', \App\Http\Livewire\Admin\OfferCategoryManager::class)->name('admin.offers');
     Route::get('/offer-requests', \App\Http\Livewire\Admin\OfferRequestIndex::class)->name('admin.offer-requests');
     Route::get('/settings', \App\Http\Livewire\Admin\SettingsPage::class)->name('admin.settings');
+    Route::get('/seo', \App\Http\Livewire\Admin\SeoPage::class)->name('admin.seo');
     Route::get('/telegram', \App\Http\Livewire\Admin\TelegramPage::class)->name('admin.telegram');
     Route::get('/payments', \App\Http\Livewire\Admin\PaymentIndex::class)->name('admin.payments');
     Route::get('/templates', LabelTemplateIndex::class)->name('label-templates.index');
