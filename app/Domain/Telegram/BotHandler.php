@@ -201,6 +201,10 @@ class BotHandler
         if (!$user || !preg_match('/^pdf:(\d+):(\d+)$/', $query['data'] ?? '', $m)) {
             return;
         }
+        if (!$user->company?->is_active) {
+            $this->say($chatId, $user, 'bot.company_blocked'); // a blocked company gets no PDFs
+            return;
+        }
 
         $batch = ImportBatch::withoutGlobalScope('owner')->where('company_id', $user->company_id)->find($m[1]);
         $template = LabelTemplate::find($m[2]);
@@ -258,7 +262,7 @@ class BotHandler
         // products of this batch the classifier did not know: ask the client to name them
         $unnamed = \App\Domain\Catalog\Models\Product::withoutGlobalScope('owner')
             ->whereIn('id', \App\Domain\Marking\Models\MarkingCode::withoutGlobalScope('owner')->where('import_batch_id', $batch->id)->distinct()->pluck('product_id'))
-            ->get()->filter(fn ($p) => $p->needsName());
+            ->get()->map(fn ($p) => $p->forCompany($batch->company_id))->filter(fn ($p) => $p->needsName());
         if ($unnamed->isNotEmpty()) {
             $this->api->sendMessage($user->telegram_chat_id, $this->t($user, 'bot.items_need_name', [
                 'file'  => e($batch->original_filename),

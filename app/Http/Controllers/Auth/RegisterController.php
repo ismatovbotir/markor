@@ -40,6 +40,7 @@ class RegisterController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+        app(\App\Domain\Telegram\Notifier::class)->userRegistered($user); // Telegram alert to the super admin
 
         return redirect()->route('import-batches.index');
     }

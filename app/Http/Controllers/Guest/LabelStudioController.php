@@ -20,6 +20,9 @@ class LabelStudioController extends Controller
 {
     public const MAX_LABELS = 300;
 
+    /** Barcodes per request (labels × barcode elements) — keeps a public request light. */
+    public const MAX_BARCODES = 1500;
+
     /** Labels per print job (HTML print): light for the server, the browser and the printer queue. */
     public const PRINT_BATCH = 300;
 
@@ -106,8 +109,10 @@ class LabelStudioController extends Controller
         ]);
 
         try {
+            // the editor preview of an Asl Belgisi element is only a look-alike: a real GS1 mark is made
+            // only by generate/print, within the daily trial (otherwise this would be a free mark printer)
             $png = $data['type'] === \App\Domain\Studio\MarkingTrial::SYMBOLOGY
-                ? base64_decode(substr(app(\App\Domain\Studio\MarkingTrial::class)->png($data['data']), strlen('data:image/png;base64,')))
+                ? $barcode->png('datamatrix', 'MARKOR PREVIEW ' . substr(md5($data['data']), 0, 8))
                 : $barcode->png($data['type'], $data['data'], 6, (bool) ($data['hrt'] ?? false));
         } catch (\Throwable) {
             abort(422);
@@ -219,9 +224,18 @@ class LabelStudioController extends Controller
 
         // real Asl Belgisi marks: free trial only, the full workflow is in /aslbelgi
         $trial = \App\Domain\Studio\MarkingTrial::class;
-        if (collect($data['elements'])->contains(fn ($e) => ($e['symbology'] ?? null) === $trial::SYMBOLOGY)) {
+        $markingElements = collect($data['elements'])->filter(fn ($e) => ($e['symbology'] ?? null) === $trial::SYMBOLOGY);
+        if ($markingElements->isNotEmpty()) {
             $rows = array_slice(array_values($rows), 0, $trial::LIMIT); // only the first 10 codes
+            $codes = collect($rows)->flatMap(fn ($row) => $markingElements->map(fn ($e) => (string) ($row[$e['source'] ?? ''] ?? '')))->filter()->unique()->values()->all();
+            abort_unless(app($trial)->allowToday($request->ip(), $codes), 422, __('studio.marking_daily', ['limit' => $trial::LIMIT]));
         }
+
+        // heavy requests are refused before any work (public page: protect the server)
+        $barcodes = collect($data['elements'])->where('type', 'barcode')->count();
+        $columns = max(1, (int) ($data['columns'] ?? 1));
+        $pageWidth = $columns * $data['width_mm'] + ($columns - 1) * (float) ($data['gap_mm'] ?? 0);
+        abort_if(count($rows) * $barcodes > self::MAX_BARCODES || $pageWidth > 320, 422, __('studio.too_heavy'));
 
 
         return [$data, $rows];

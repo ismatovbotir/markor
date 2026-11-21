@@ -40,14 +40,14 @@ Route::post('/telegram/webhook/{secret}', function (string $secret, \Illuminate\
     $bot->handle($request->all());
 
     return response()->json(['ok' => true]);
-})->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])->name('telegram.webhook');
+})->name('telegram.webhook'); // CSRF exemption: bootstrap/app.php (preventRequestForgery except)
 Route::post('/offer-request', [\App\Http\Controllers\Guest\OfferRequestController::class, 'store'])->middleware('throttle:6,1')->name('offer-request');
 Route::prefix('label-design')->group(function () {
     Route::get('/', [LabelStudioController::class, 'index'])->name('studio');
     Route::post('/parse', [LabelStudioController::class, 'parse'])->middleware('throttle:20,1')->name('studio.parse');
     Route::get('/barcode.png', [LabelStudioController::class, 'barcode'])->middleware('throttle:300,1')->name('studio.barcode');
-    Route::post('/generate', [LabelStudioController::class, 'generate'])->middleware('throttle:10,1')->name('studio.generate');
-    Route::post('/print', [LabelStudioController::class, 'print'])->middleware('throttle:20,1')->name('studio.print');
+    Route::post('/generate', [LabelStudioController::class, 'generate'])->middleware('throttle:6,1')->name('studio.generate');
+    Route::post('/print', [LabelStudioController::class, 'print'])->middleware('throttle:10,1')->name('studio.print');
 });
 
 // Interface language (uz / ru / zh)
@@ -78,8 +78,8 @@ Route::get('/dev/as/{role}', function (string $role) {
 
 // Auth
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-Route::post('/login/qr', [LoginController::class, 'loginByQr'])->name('login.qr');
+Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:20,1')->name('login.post');
+Route::post('/login/qr', [LoginController::class, 'loginByQr'])->middleware('throttle:10,1')->name('login.qr');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/register', [RegisterController::class, 'show'])->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:5,1')->name('register.post');
@@ -112,6 +112,7 @@ Route::middleware(['auth', 'can:admin'])->prefix('admin')->group(function () {
     Route::get('/companies/{company}', \App\Http\Livewire\Admin\CompanyShow::class)->name('admin.companies.show');
     Route::get('/offers/{category:slug}', \App\Http\Livewire\Admin\OfferCategoryManager::class)->name('admin.offers');
     Route::get('/offer-requests', \App\Http\Livewire\Admin\OfferRequestIndex::class)->name('admin.offer-requests');
+    Route::get('/template-requests', \App\Http\Livewire\Admin\TemplateRequestIndex::class)->name('admin.template-requests');
     Route::get('/settings', \App\Http\Livewire\Admin\SettingsPage::class)->name('admin.settings');
     Route::get('/seo', \App\Http\Livewire\Admin\SeoPage::class)->name('admin.seo');
     Route::get('/telegram', \App\Http\Livewire\Admin\TelegramPage::class)->name('admin.telegram');

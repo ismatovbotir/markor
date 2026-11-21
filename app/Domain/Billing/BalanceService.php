@@ -79,11 +79,19 @@ class BalanceService
 
     public function rejectPayment(Payment $payment, User $admin, ?string $note = null): void
     {
-        if ($payment->status !== 'pending') {
-            return;
+        // locked like confirmPayment, so a reject and a confirm at the same moment can't both apply
+        $rejected = DB::transaction(function () use ($payment, $admin, $note) {
+            $locked = Payment::whereKey($payment->id)->lockForUpdate()->first();
+            if (!$locked || $locked->status !== 'pending') {
+                return false;
+            }
+            $locked->update(['status' => 'rejected', 'admin_note' => $note, 'decided_by' => $admin->id, 'decided_at' => now()]);
+
+            return true;
+        });
+        if ($rejected) {
+            $this->notifier->paymentRejected($payment->fresh());
         }
-        $payment->update(['status' => 'rejected', 'admin_note' => $note, 'decided_by' => $admin->id, 'decided_at' => now()]);
-        $this->notifier->paymentRejected($payment);
     }
 
     /** A payment the super admin records directly (cash, bank transfer seen on the account…). */

@@ -16,9 +16,9 @@ class CompanySetup extends Component
 {
     public string $tin = '';
     public array $company = [];
-    public ?string $lookupMessage = null;
+    #[\Livewire\Attributes\Locked] public ?string $lookupMessage = null; // set only by lookup(), never from the browser
     public bool $lookedUp = false;
-    public ?array $lookupData = null;
+    #[\Livewire\Attributes\Locked] public ?array $lookupData = null;
 
     public const FIELDS = ['name', 'legal_address', 'director', 'phone', 'email', 'vat_code'];
 
@@ -34,6 +34,11 @@ class CompanySetup extends Component
     {
         $this->tin = preg_replace('/\D/', '', $this->tin);
         $this->validateOnly('tin', ['tin' => $this->tinRules()]);
+        // the lookup service is paid: 10 lookups per user per hour
+        if (!\Illuminate\Support\Facades\RateLimiter::attempt('company-lookup:' . auth()->id(), 10, fn () => true, 3600)) {
+            $this->addError('tin', __('auth.throttle', ['seconds' => \Illuminate\Support\Facades\RateLimiter::availableIn('company-lookup:' . auth()->id())]));
+            return;
+        }
 
         $this->lookedUp = true;
         $found = $lookup->find($this->tin);
@@ -79,6 +84,7 @@ class CompanySetup extends Component
         $company = Company::create($values + \App\Domain\Billing\Billing::freePeriod()
             + ['tin' => $this->tin, 'source' => $this->lookupMessage === 'found' ? 'lookup' : 'manual', 'lookup_data' => $this->lookupData]);
         $user->update(['company_id' => $company->id, 'company_role' => 'owner']);
+        app(\App\Domain\Telegram\Notifier::class)->companyRegistered($company, $user); // Telegram alert to the super admin
 
         session()->flash('company_created', true);
         $this->redirectRoute('import-batches.index');

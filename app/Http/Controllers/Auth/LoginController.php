@@ -24,7 +24,14 @@ class LoginController extends Controller
             'password' => 'required|string',
         ]);
 
+        // brute force: 5 wrong passwords per email+IP per minute (plus a per-IP route limit)
+        $key = 'login:' . strtolower($credentials['email']) . '|' . $request->ip();
+        if (\Illuminate\Support\Facades\RateLimiter::tooManyAttempts($key, 5)) {
+            return back()->withErrors(['email' => __('auth.throttle', ['seconds' => \Illuminate\Support\Facades\RateLimiter::availableIn($key)])])->onlyInput('email');
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            \Illuminate\Support\Facades\RateLimiter::clear($key);
             $request->session()->regenerate();
 
             if (!Auth::user()->is_active) {
@@ -35,6 +42,8 @@ class LoginController extends Controller
             return redirect()->intended(route(Auth::user()->isAdmin() ? 'admin.clients' : 'import-batches.index'));
         }
 
+        \Illuminate\Support\Facades\RateLimiter::hit($key, 60);
+
         return back()->withErrors(['email' => __('auth.failed')])->onlyInput('email');
     }
 
@@ -42,7 +51,9 @@ class LoginController extends Controller
     {
         $token = trim($request->input('qr_token', ''));
 
-        $user = User::where('qr_token', $token)->where('is_active', true)->first();
+        $user = strlen($token) >= 24
+            ? User::where('qr_token', $token)->where('is_active', true)->where('role', '!=', 'admin')->first()
+            : null;
 
         if (!$user) {
             return redirect()->route('login')->with('error', __('auth.failed'));

@@ -87,7 +87,7 @@
         </label>
         <p class="text-xs text-stone-500 mt-2">{{ __('studio.upload_hint', ['max' => $maxLabels]) }}</p>
         <p x-show="total > rows.length" x-cloak class="text-xs text-amber-700 mt-1">
-            {{ __('studio.truncated', ['max' => $maxLabels]) }} (<span x-text="total"></span>)
+            {{ __('studio.truncated', ['max' => $maxLabels]) }} (<span x-text="total > {{ $maxLabels }} ? '{{ $maxLabels }}+' : total"></span>)
         </p>
         {{-- Asl Belgisi codes in the file: free trial of real GS1 marks --}}
         <div x-show="marking" x-cloak class="mt-3 rounded-lg border px-4 py-3 text-sm flex items-start justify-between gap-4 flex-wrap"

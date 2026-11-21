@@ -18,6 +18,7 @@ class ProfilePage extends Component
     public string $current_password = '';
     public string $password = '';
     public string $password_confirmation = '';
+    public bool $passwordModal = false;
 
     public function mount(): void
     {
@@ -46,6 +47,13 @@ class ProfilePage extends Component
         $this->dispatch('notify', type: 'success', message: __('common.saved'));
     }
 
+    public function openPassword(): void
+    {
+        $this->resetValidation();
+        $this->reset(['current_password', 'password', 'password_confirmation']);
+        $this->passwordModal = true;
+    }
+
     public function savePassword(): void
     {
         $this->validate([
@@ -54,7 +62,10 @@ class ProfilePage extends Component
         ]);
 
         auth()->user()->update(['password' => Hash::make($this->password)]);
-        $this->reset(['current_password', 'password', 'password_confirmation']);
+        // other devices logged in with the old password are signed out
+        \Illuminate\Support\Facades\DB::table('sessions')->where('user_id', auth()->id())->where('id', '!=', session()->getId())->delete();
+        auth()->user()->forceFill(['remember_token' => \Illuminate\Support\Str::random(60)])->save();
+        $this->reset(['current_password', 'password', 'password_confirmation', 'passwordModal']);
         $this->dispatch('notify', type: 'success', message: __('profile.password_changed'));
     }
 

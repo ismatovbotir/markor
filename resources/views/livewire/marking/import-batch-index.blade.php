@@ -64,6 +64,9 @@
                                 <div class="leading-tight {{ $loop->first ? '' : 'mt-1.5' }}">
                                     @if($item->name)
                                         <span class="font-medium text-stone-800">{{ $item->name }}</span>
+                                        @if($item->lookupStatus() === 'not_found' && auth()->user()->can('name', $item))
+                                            <button type="button" wire:click="openNaming({{ $item->id }}, {{ $batch->id }})" class="text-xs text-stone-400 hover:text-amber-700" title="{{ __('common.edit') }}">✎</button>
+                                        @endif
                                     @elseif($item->needsName())
                                         <span class="text-amber-700 text-xs">{{ __('import.item_not_found') }}</span>
                                         @can('name', $item)

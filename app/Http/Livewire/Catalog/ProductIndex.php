@@ -26,6 +26,7 @@ class ProductIndex extends Component
     public ?string $sku      = '';
     public ?string $barcode_ean = '';
     public bool $is_active  = true;
+    public ?string $lookupMessage = null;
 
     protected function rules(): array
     {
@@ -55,15 +56,66 @@ class ProductIndex extends Component
     public function openEdit(int $id): void
     {
         $product = Product::findOrFail($id);
-        $this->fill($product->only(['product_group_id', 'gtin', 'name_uz', 'name_ru', 'sku', 'barcode_ean', 'is_active']));
+        $this->authorize('editOwn', $product);
+        // a client sees and edits its own names (company copy); the super admin the shared product
+        $shown = auth()->user()->isAdmin() ? $product : $product->forCompany(auth()->user()->company_id);
+        $this->fill($shown->only(['product_group_id', 'gtin', 'name_uz', 'name_ru', 'sku', 'barcode_ean', 'is_active']));
         $this->editingId = $id;
+        $this->lookupMessage = null;
         $this->showForm  = true;
+    }
+
+    /** Fills the name from the national classifier (tasnif) — clean Latin Uzbek + Russian when AI is available. */
+    public function fetchFromTasnif(\App\Domain\Catalog\Services\GtinLookup $lookup, \App\Domain\Ai\ProductNamer $namer): void
+    {
+        $gtin = $this->editingId ? Product::findOrFail($this->editingId)->gtin : preg_replace('/\D/', '', $this->gtin);
+        if (!preg_match('/^\d{13,14}$/', (string) $gtin)) {
+            $this->lookupMessage = __('products.tasnif_bad_gtin');
+            return;
+        }
+        if (!\Illuminate\Support\Facades\RateLimiter::attempt('tasnif:' . auth()->id(), 20, fn () => true, 60)) {
+            $this->lookupMessage = __('auth.throttle', ['seconds' => 60]);
+            return;
+        }
+        $item = $lookup->find(str_pad($gtin, 14, '0', STR_PAD_LEFT));
+        if ($item === false) {
+            $this->lookupMessage = __('products.tasnif_error');
+            return;
+        }
+        if (!$item || blank($item['name'] ?? null)) {
+            $this->lookupMessage = __('products.tasnif_not_found');
+            return;
+        }
+        $name = $namer->suggest($item['name'], $gtin);
+        $this->name_uz = mb_substr($name['name_uz'], 0, 255);
+        if ($name['name_ru']) {
+            $this->name_ru = mb_substr($name['name_ru'], 0, 255);
+        }
+        $this->lookupMessage = '✓ ' . __('products.tasnif_filled');
     }
 
     public function save(ProductService $service): void
     {
         $product = $this->editingId ? Product::findOrFail($this->editingId) : null;
+
+        // a client: only its own name / SKU for this product; the shared product (and the GTIN) never change
+        if ($product && !auth()->user()->isAdmin()) {
+            $this->authorize('editOwn', $product);
+            $data = $this->validate(['name_uz' => 'nullable|string|max:255', 'name_ru' => 'nullable|string|max:255', 'sku' => 'nullable|string|max:100']);
+            \App\Domain\Catalog\Models\CompanyProductName::updateOrCreate(
+                ['company_id' => auth()->user()->company_id, 'product_id' => $product->id],
+                array_map(fn ($v) => filled($v) ? trim($v) : null, $data) + ['named_by' => auth()->id()]
+            );
+            \Illuminate\Support\Once::flush();
+            $this->showForm = false;
+            $this->dispatch('notify', type: 'success', message: __('common.saved'));
+            return;
+        }
+
         $this->authorize($product ? 'update' : 'create', $product ?? Product::class);
+        if ($product) {
+            $this->gtin = $product->gtin; // the GTIN is the product's identity: never changed by editing
+        }
 
         $this->product_group_id = $this->product_group_id ?: null;
         $data = $this->validate();
@@ -89,6 +141,11 @@ class ProductIndex extends Component
     public function render(ProductService $service)
     {
         $products = $service->paginate($this->search, $this->filterGroup);
+
+        // a client sees its own names over the shared ones
+        if (!auth()->user()->isAdmin()) {
+            $products->setCollection($products->getCollection()->map(fn ($p) => $p->forCompany(auth()->user()->company_id)));
+        }
 
         return view('livewire.catalog.product-index', [
             'products' => $products,

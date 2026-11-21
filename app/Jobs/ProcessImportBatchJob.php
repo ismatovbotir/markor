@@ -134,9 +134,12 @@ class ProcessImportBatchJob implements ShouldQueue
 
     private function markFailed(?\Throwable $e): void
     {
+        if ($e) {
+            report($e); // the real error goes to the log, the client sees a plain message
+        }
         $this->batch->update([
             'status'       => 'failed',
-            'error_log'    => [$e?->getMessage() ?? 'Import failed'],
+            'error_log'    => [__('import.failed_generic')],
             'processed_at' => now(),
         ]);
     }

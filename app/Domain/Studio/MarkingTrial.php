@@ -16,6 +16,23 @@ class MarkingTrial
 {
     public const LIMIT = 10;
 
+    /**
+     * The trial is per visitor and day, not per request: at most LIMIT different codes per IP per day
+     * (printing the same codes again is free). Returns false when these codes would go over it.
+     */
+    public function allowToday(string $ip, array $codes): bool
+    {
+        $key = 'marking-trial:' . sha1($ip) . ':' . now()->toDateString();
+        $used = \Illuminate\Support\Facades\Cache::get($key, []);
+        $all = array_values(array_unique([...$used, ...array_map('sha1', $codes)]));
+        if (count($all) > self::LIMIT) {
+            return false;
+        }
+        \Illuminate\Support\Facades\Cache::put($key, $all, now()->endOfDay());
+
+        return true;
+    }
+
     /** Pseudo symbology of the designer's "Asl Belgisi DataMatrix" element. */
     public const SYMBOLOGY = 'asl';
 

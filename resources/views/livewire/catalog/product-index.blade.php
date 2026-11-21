@@ -55,7 +55,7 @@
                             </span>
                         </td>
                         <td class="px-4 py-3 text-right space-x-2">
-                            @can('update', $product)
+                            @can('editOwn', $product)
                                 <button wire:click="openEdit({{ $product->id }})" class="text-stone-400 hover:text-amber-700 text-xs">{{ __('common.edit') }}</button>
                             @endcan
                             @can('delete', $product)
@@ -86,8 +86,18 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-stone-600 mb-1">GTIN (14)</label>
-                        <input wire:model="gtin" type="text" maxlength="14" class="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        <div class="flex gap-2">
+                            {{-- the GTIN is the product's identity: read-only once the product exists --}}
+                            <input wire:model="gtin" type="text" maxlength="14" @readonly($editingId) class="flex-1 border border-stone-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400 {{ $editingId ? 'bg-stone-100 text-stone-500 cursor-not-allowed' : '' }}">
+                            <button type="button" wire:click="fetchFromTasnif" wire:loading.attr="disabled" wire:target="fetchFromTasnif" class="inline-flex items-center gap-1.5 px-3 py-2 border border-stone-300 rounded-lg text-xs font-medium hover:bg-stone-100 whitespace-nowrap disabled:opacity-50">
+                                <span wire:loading.remove wire:target="fetchFromTasnif">@svg('heroicon-o-arrow-down-tray', 'w-4 h-4')</span>
+                                <span wire:loading wire:target="fetchFromTasnif">@svg('heroicon-o-arrow-path', 'w-4 h-4 animate-spin')</span>
+                                {{ __('products.tasnif_fetch') }}
+                            </button>
+                        </div>
+                        @if($lookupMessage)<p class="text-xs mt-1 {{ str_starts_with($lookupMessage, '✓') ? 'text-emerald-700' : 'text-amber-700' }}">{{ $lookupMessage }}</p>@endif
                         @error('gtin') <p class="text-rose-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        @cannot('admin')<p class="text-[11px] text-stone-500 mt-1">{{ __('products.own_names_hint') }}</p>@endcannot
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>

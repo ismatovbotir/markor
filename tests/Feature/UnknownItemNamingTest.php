@@ -47,8 +47,12 @@ class UnknownItemNamingTest extends TestCase
             ->set('naming.name_uz', 'Choynak X1')
             ->call('saveNaming')->assertHasNoErrors();
 
-        $this->assertSame('Choynak X1', $product->fresh()->name_uz);
-        Livewire::test(ImportBatchIndex::class)->call('openNaming', $product->id)->assertForbidden(); // named → admin only now
+        // the client's name is for its own labels; the shared product stays unnamed for other companies
+        $this->assertNull($product->fresh()->name_uz);
+        $this->assertSame('Choynak X1', $product->fresh()->forCompany($client->company_id)->name_uz);
+        $this->assertFalse($product->fresh()->forCompany($client->company_id)->needsName());
+        // and the client can correct its own name
+        Livewire::test(ImportBatchIndex::class)->call('openNaming', $product->id)->assertSet('naming.name_uz', 'Choynak X1');
     }
 
     public function test_other_company_cannot_name_it(): void
@@ -101,6 +105,7 @@ class UnknownItemNamingTest extends TestCase
         $component->set('naming.name_uz', 'B')->call('saveNaming')->set('naming.name_uz', 'C')->call('saveNaming');
 
         $this->assertNull($component->get('namingId'));
-        $this->assertSame(0, Product::withoutGlobalScope('owner')->get()->filter->needsName()->count());
+        $company = auth()->user()->company_id;
+        $this->assertSame(0, Product::withoutGlobalScope('owner')->get()->map->forCompany($company)->filter->needsName()->count());
     }
 }

@@ -120,6 +120,12 @@
                     <span class="flex-1">{{ __('nav.offer_requests') }}</span>
                     @if($newRequests)<span class="ml-2 px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-semibold">{{ $newRequests }}</span>@endif
                 </a>
+                @php $newTemplateRequests = \App\Domain\Printing\Models\TemplateRequest::where('status', 'new')->count(); @endphp
+                <a href="{{ route('admin.template-requests') }}" class="flex items-center px-4 py-2.5 rounded-lg font-medium transition {{ request()->routeIs('admin.template-requests') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
+                    @svg('heroicon-o-document-plus', 'w-5 h-5 mr-3')
+                    <span class="flex-1">{{ __('nav.template_requests') }}</span>
+                    @if($newTemplateRequests)<span class="ml-2 px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-semibold">{{ $newTemplateRequests }}</span>@endif
+                </a>
                 @foreach(\App\Domain\Offers\Models\OfferCategory::orderBy('sort_order')->orderBy('id')->get() as $offerCategory)
                     @php $route = $offerCategory->isTemplates() ? route('label-templates.index') : route('admin.offers', $offerCategory); @endphp
                     @php $active = $offerCategory->isTemplates() ? request()->routeIs('label-templates.*') || request()->is('admin/offers/' . $offerCategory->slug) : request()->is('admin/offers/' . $offerCategory->slug); @endphp

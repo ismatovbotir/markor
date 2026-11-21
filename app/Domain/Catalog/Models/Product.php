@@ -104,6 +104,33 @@ class Product extends Model implements Auditable
         return blank($this->name_uz) && blank($this->name_ru) && $this->lookupStatus() === 'not_found';
     }
 
+    /**
+     * This product as a company sees it: its own name for it (if it gave one) over the shared one.
+     * Returns a copy for display/printing — never save it.
+     */
+    public function forCompany(?int $companyId): static
+    {
+        $own = $companyId ? self::companyName($companyId, $this->id) : null;
+        if (!$own) {
+            return $this;
+        }
+        $copy = clone $this;
+        foreach (['name_uz', 'name_ru', 'sku'] as $field) {
+            if (filled($own[$field] ?? null)) {
+                $copy->setAttribute($field, $own[$field]);
+            }
+        }
+
+        return $copy;
+    }
+
+    /** A company's own name for a product (cached for the request / queue job). */
+    public static function companyName(int $companyId, int $productId): ?array
+    {
+        return once(fn () => CompanyProductName::where('company_id', $companyId)->where('product_id', $productId)
+            ->first(['name_uz', 'name_ru', 'sku'])?->toArray());
+    }
+
     /** Name if filled in, otherwise the GTIN — for dropdowns and lists. */
     public function getLabelAttribute(): string
     {

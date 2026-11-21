@@ -27,6 +27,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // route middleware re-checked on every Livewire call (a blocked company can't keep working in an open page)
+        \Livewire\Livewire::addPersistentMiddleware([\App\Http\Middleware\CompanyRequired::class]);
+
         // the cached home page shows Marketplace items and label sizes: refresh it when they change
         foreach ([\App\Domain\Offers\Models\Offer::class, \App\Domain\Offers\Models\OfferCategory::class, \App\Domain\Printing\Models\LabelTemplate::class] as $model) {
             $model::saved(fn () => \App\Support\PageCache::bump());

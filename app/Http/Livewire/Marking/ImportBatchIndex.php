@@ -50,7 +50,7 @@ class ImportBatchIndex extends Component
             return $batch->id;
         } catch (\Throwable $e) {
             report($e);
-            $this->dispatch('notify', type: 'error', message: __('common.error') . ': ' . $e->getMessage());
+            $this->dispatch('notify', type: 'error', message: __('import.upload_failed')); // details only in the log
         }
 
         return 0;
@@ -78,7 +78,10 @@ class ImportBatchIndex extends Component
         $pairs = \App\Domain\Marking\Models\MarkingCode::withoutGlobalScope('owner')
             ->whereIn('import_batch_id', $batchIds)->whereNotNull('product_id')
             ->select('import_batch_id', 'product_id')->distinct()->get();
-        $products = \App\Domain\Catalog\Models\Product::withoutGlobalScope('owner')->whereIn('id', $pairs->pluck('product_id')->unique())->get()->keyBy('id');
+        // each client sees its own names for the items (company_product_names) over the shared ones
+        $company = auth()->user()->company_id;
+        $products = \App\Domain\Catalog\Models\Product::withoutGlobalScope('owner')->whereIn('id', $pairs->pluck('product_id')->unique())->get()
+            ->map(fn ($p) => $p->forCompany($company))->keyBy('id');
 
         return $pairs->groupBy('import_batch_id')
             ->map(fn ($rows) => $rows->map(fn ($r) => $products[$r->product_id] ?? null)->filter()->values())
@@ -92,7 +95,8 @@ class ImportBatchIndex extends Component
         $this->authorize('name', $product);
         $this->resetValidation();
         $this->namingId = $product->id;
-        $this->naming = ['name_uz' => '', 'name_ru' => '', 'sku' => ''];
+        $own = auth()->user()->company_id ? \App\Domain\Catalog\Models\Product::companyName(auth()->user()->company_id, $product->id) : null;
+        $this->naming = ['name_uz' => $own['name_uz'] ?? '', 'name_ru' => $own['name_ru'] ?? '', 'sku' => $own['sku'] ?? ''];
     }
 
     public function saveNaming(): void
@@ -106,7 +110,17 @@ class ImportBatchIndex extends Component
             'naming.sku'     => 'nullable|string|max:100',
         ], [], ['naming.name_uz' => __('product_groups.name_uz'), 'naming.name_ru' => __('product_groups.name_ru')])['naming'];
 
-        $product->update(array_map(fn ($v) => filled($v) ? trim($v) : null, $data));
+        $values = array_map(fn ($v) => filled($v) ? trim($v) : null, $data);
+        if (auth()->user()->isAdmin()) {
+            $product->update($values); // the super admin sets the shared name
+        } else {
+            // a client's name is for its own labels only — never the shared product other companies print
+            \App\Domain\Catalog\Models\CompanyProductName::updateOrCreate(
+                ['company_id' => auth()->user()->company_id, 'product_id' => $product->id],
+                $values + ['named_by' => auth()->id()]
+            );
+        }
+        \Illuminate\Support\Once::flush(); // names cached earlier in this request are stale now
         $this->namingId = null;
         $this->dispatch('notify', type: 'success', message: __('common.saved'));
 

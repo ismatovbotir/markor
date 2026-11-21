@@ -104,8 +104,10 @@ class ClientIsolationTest extends TestCase
         $product = Product::withoutGlobalScope('owner')->firstOrFail();
 
         $this->actingAs($ali);
-        \Livewire\Livewire::test(\App\Http\Livewire\Catalog\ProductIndex::class)->call('openEdit', $product->id)->set('name_uz', 'X')->call('save')->assertForbidden();
+        // a client may edit only ITS OWN name for the product; the shared product never changes
+        \Livewire\Livewire::test(\App\Http\Livewire\Catalog\ProductIndex::class)->call('openEdit', $product->id)->set('name_uz', 'X')->call('save')->assertHasNoErrors();
         $this->assertNull($product->fresh()->name_uz);
+        $this->assertSame('X', $product->fresh()->forCompany($ali->company_id)->name_uz);
     }
 
     public function test_guest_is_sent_to_login(): void

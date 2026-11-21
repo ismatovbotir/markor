@@ -41,6 +41,9 @@ class SpreadsheetReader
                     }
 
                     $total++;
+                    if ($total > $maxRows) {
+                        break 2; // we only use $maxRows rows: don't read the rest of a (possibly huge) sheet
+                    }
                     if (count($rows) < $maxRows) {
                         $record = [];
                         foreach ($headers as $i => $header) {

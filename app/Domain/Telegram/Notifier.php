@@ -63,6 +63,57 @@ class Notifier
         ));
     }
 
+    /** New sign-up → super admin. */
+    public function userRegistered(User $user): void
+    {
+        $this->toAdmin('bot.admin_new_user', [
+            'name' => e($user->name), 'email' => e($user->email), 'phone' => e($user->phone ?: '—'),
+            'locale' => strtoupper((string) $user->locale), 'url' => route('admin.clients'),
+        ]);
+    }
+
+    /** A new user filled in the company (tax number) → super admin. */
+    public function companyRegistered(\App\Domain\Companies\Company $company, User $user): void
+    {
+        $this->toAdmin('bot.admin_new_company', [
+            'company' => e($company->name), 'tin' => e($company->tin), 'director' => e($company->director ?: '—'),
+            'phone' => e($company->phone ?: $user->phone ?: '—'), 'user' => e($user->name),
+            'free' => $company->free_until?->format('d.m.Y') ?? '—', 'source' => $company->source === 'lookup' ? '✓' : '✎',
+            'url' => route('admin.companies.show', $company),
+        ]);
+    }
+
+    /** A client ordered a new label template → super admin. */
+    public function templateRequested(\App\Domain\Printing\Models\TemplateRequest $request): void
+    {
+        $this->toAdmin('bot.admin_template_request', [
+            'company' => e($request->company?->name ?? ''), 'user' => e($request->user?->name ?? ''), 'phone' => e($request->user?->phone ?: '—'),
+            'size' => e($request->size()), 'gap' => $request->gap_mm !== null ? rtrim(rtrim(number_format($request->gap_mm, 1, '.', ''), '0'), '.') . ' mm' : '—',
+            'comment' => e($request->comment ?: '—'), 'url' => route('admin.template-requests'),
+        ]);
+    }
+
+    /** The super admin answered a template request → the client company. */
+    public function templateRequestAnswered(\App\Domain\Printing\Models\TemplateRequest $request): void
+    {
+        $this->toCompany($request->company_id, 'bot.template_request_' . $request->status, fn () => [
+            'size' => e($request->size()), 'note' => e($request->admin_note ?: '—'), 'url' => route('templates.catalog'),
+        ]);
+    }
+
+    /** An alert to the super admin's chat, in the super admin's language; never throws. */
+    private function toAdmin(string $key, array $replace): void
+    {
+        try {
+            if ($chat = $this->adminChat()) {
+                $locale = User::where('role', 'admin')->orderBy('id')->value('locale') ?: config('app.locale');
+                $this->api->sendMessage($chat, __($key, $replace, $locale));
+            }
+        } catch (\Throwable $e) {
+            report($e); // an alert must never break registration
+        }
+    }
+
     /** System alerts: TELEGRAM_ADMIN_CHAT_ID, otherwise the super admin's linked Telegram. */
     public function adminChat(): ?string
     {

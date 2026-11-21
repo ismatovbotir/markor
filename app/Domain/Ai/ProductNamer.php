@@ -41,6 +41,21 @@ class ProductNamer
         return 'fallback';
     }
 
+    /**
+     * A clean name for a classifier name, without saving anything: Claude (Latin Uzbek + Russian),
+     * or the transliterated short name when AI is unavailable.
+     * @return array{name_uz: string, name_ru: ?string, by: string}
+     */
+    public function suggest(string $classifierName, string $gtin): array
+    {
+        $ai = $this->claude->json('product_name', self::SYSTEM, "Classifier name: {$classifierName}\nGTIN: {$gtin}", self::SCHEMA, 1000);
+        if (filled($ai['name_uz'] ?? null)) {
+            return ['name_uz' => trim($ai['name_uz']), 'name_ru' => trim((string) ($ai['name_ru'] ?? '')) ?: null, 'by' => 'ai'];
+        }
+
+        return ['name_uz' => self::latin(GtinLookup::shortName($classifierName)), 'name_ru' => null, 'by' => 'fallback'];
+    }
+
     /** Still the automatic name: empty, the classifier's short name, or set by this class earlier. */
     private function isAutomatic(Product $product): bool
     {

@@ -110,12 +110,12 @@ class LayoutRenderer
     /** The values an Asl Belgisi template can bind to, for one marking code. */
     public static function markingRow(MarkingCode $code, ?string $batchName): array
     {
-        $product = $code->product;
+        $product = $code->product?->forCompany($code->company_id); // the company's own name, if it gave one
 
         return [
             'gtin'   => (string) $code->gtin,
             'serial' => (string) $code->serial,
-            'name'   => (string) ($product?->name ?? ''),
+            'name'   => (string) ($product?->name ?: $code->gtin), // not named (unknown to the classifier): the GTIN
             'sku'    => (string) ($product?->sku ?? ''),
             'batch'  => (string) ($batchName ?? ''),
             'code'   => (string) $code->code,

@@ -41,16 +41,31 @@
 
     @livewire(\App\Http\Livewire\Account\TelegramConnect::class)
 
-    <form wire:submit="savePassword" class="bg-white border border-stone-200 rounded-xl p-5 space-y-4">
-        <h2 class="font-semibold text-sm">{{ __('profile.change_password') }}</h2>
-        <div class="grid sm:grid-cols-3 gap-4">
-            @foreach(['current_password' => 'profile.current_password', 'password' => 'profile.new_password', 'password_confirmation' => 'auth.password_confirm'] as $prop => $label)
-                <label class="block text-xs font-medium text-stone-600">{{ __($label) }}
-                    <input wire:model="{{ $prop }}" type="password" autocomplete="{{ $prop === 'current_password' ? 'current-password' : 'new-password' }}" class="{{ $field }} mt-1">
-                    @error($prop) <span class="text-rose-500 text-xs">{{ $message }}</span> @enderror
-                </label>
-            @endforeach
+    {{-- password: only a button here; the fields are in a window so it can't be changed by accident --}}
+    <div class="bg-white border border-stone-200 rounded-xl p-5 flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <h2 class="font-semibold text-sm">{{ __('profile.change_password') }}</h2>
+            <p class="text-xs text-stone-500 mt-0.5">{{ __('profile.password_hint') }}</p>
         </div>
-        <div class="flex justify-end"><button type="submit" class="px-4 py-2 border border-stone-300 rounded-lg text-sm hover:bg-stone-100">{{ __('profile.change_password') }}</button></div>
-    </form>
+        <button type="button" wire:click="openPassword" class="px-4 py-2 border border-stone-300 rounded-lg text-sm hover:bg-stone-100">{{ __('profile.change_password') }}</button>
+    </div>
+
+    @if($passwordModal)
+        <div class="fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4" wire:keydown.escape="$set('passwordModal', false)">
+            <form wire:submit="savePassword" class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+                <h2 class="text-lg font-semibold">{{ __('profile.change_password') }}</h2>
+                @foreach(['current_password' => 'profile.current_password', 'password' => 'profile.new_password', 'password_confirmation' => 'auth.password_confirm'] as $prop => $label)
+                    <label class="block text-xs font-medium text-stone-600">{{ __($label) }}
+                        <input wire:model="{{ $prop }}" type="password" autocomplete="{{ $prop === 'current_password' ? 'current-password' : 'new-password' }}" class="{{ $field }} mt-1">
+                        @error($prop) <span class="text-rose-500 text-xs">{{ $message }}</span> @enderror
+                    </label>
+                @endforeach
+                <p class="text-[11px] text-stone-500">{{ __('profile.password_other_devices') }}</p>
+                <div class="flex justify-end gap-2 pt-1">
+                    <button type="button" wire:click="$set('passwordModal', false)" class="px-4 py-2 text-sm text-stone-600">{{ __('common.cancel') }}</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm font-medium hover:bg-amber-800">{{ __('common.save') }}</button>
+                </div>
+            </form>
+        </div>
+    @endif
 </div>
