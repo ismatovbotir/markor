@@ -71,4 +71,19 @@ class OfferCatalogTest extends TestCase
             $this->get($url)->assertOk();
         }
     }
+
+    public function test_short_rows_get_a_request_card_and_a_section_request_is_stored(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        $cat = \App\Domain\Offers\Models\OfferCategory::create(['slug' => 'svc-test', 'name_uz' => 'Xizmat test', 'is_active' => true, 'sort_order' => 99]);
+        \App\Domain\Offers\Models\Offer::create(['offer_category_id' => $cat->id, 'slug' => 'svc-one', 'category' => 'svc-test', 'title_uz' => 'Bitta xizmat', 'action' => 'order', 'is_active' => true]);
+
+        $html = $this->get('/?lang=uz')->assertOk()->getContent();
+        $this->assertStringContainsString('lg:col-span-3', $html, '1 item + a card spanning the other 3 columns');
+        $this->assertStringContainsString("category: {$cat->id}", $html);
+
+        $this->postJson(route('offer-request'), ['offer_category_id' => $cat->id, 'name' => 'Ali', 'phone' => '+998 90 123 45 67', 'comment' => '58 mm ribbon'])->assertOk();
+        $this->assertDatabaseHas('offer_requests', ['category' => 'Xizmat test', 'offer_id' => null, 'label_template_id' => null]);
+        $this->postJson(route('offer-request'), ['offer_category_id' => $cat->id, 'offer_id' => 1, 'name' => 'Ali', 'phone' => '+998 90 123 45 67'])->assertStatus(422);
+    }
 }

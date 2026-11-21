@@ -130,4 +130,15 @@ class TelegramBotTest extends TestCase
         $this->assertSame(0, ImportBatch::withoutGlobalScope('owner')->count());
         $this->assertStringContainsString('Markor', $this->lastText());
     }
+
+    public function test_same_file_name_is_refused_for_the_company(): void
+    {
+        $user = $this->client();
+        $user->update(['telegram_chat_id' => '555']);
+
+        $this->update(['document' => ['file_id' => 'F1', 'file_name' => 'partiya.csv', 'file_size' => 200]]);
+        $this->update(['document' => ['file_id' => 'F2', 'file_name' => 'PARTIYA.csv', 'file_size' => 200]]);
+        $this->assertSame(1, ImportBatch::withoutGlobalScope('owner')->count(), 'second file with the same name is not loaded');
+        $this->assertStringContainsString('#' . ImportBatch::withoutGlobalScope('owner')->value('id'), $this->lastText());
+    }
 }

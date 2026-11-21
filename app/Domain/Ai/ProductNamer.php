@@ -31,7 +31,10 @@ class ProductNamer
         $attributes = $product->attributes ?? [];
         if ($uz !== '') {
             $attributes['name_source'] = 'ai';
-            $product->update(['name_uz' => mb_substr($uz, 0, 255), 'name_ru' => $ru !== '' ? mb_substr($ru, 0, 255) : $product->name_ru, 'attributes' => $attributes]);
+            // the classifier's own Russian name wins over a translation; AI fills Russian only when tasnif has none
+            $officialRu = $product->attributes['classifier_name_ru'] ?? null;
+            $product->update(['name_uz' => mb_substr($uz, 0, 255),
+                'name_ru' => $officialRu ? mb_substr($officialRu, 0, 255) : ($ru !== '' ? mb_substr($ru, 0, 255) : $product->name_ru), 'attributes' => $attributes]);
             return 'ai';
         }
 

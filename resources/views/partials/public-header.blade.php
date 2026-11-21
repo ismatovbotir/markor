@@ -2,22 +2,33 @@
     $headerPhone = config('contact.phone');
     $headerTel = $headerPhone ? 'tel:' . preg_replace('/[^\d+]/', '', $headerPhone) : null;
 @endphp
-<header class="sticky top-0 z-30 border-b border-stone-200/80 bg-stone-50/90 backdrop-blur">
+<header x-data="{ menu: false }" x-on:keydown.escape.window="menu = false" class="sticky top-0 z-30 border-b border-stone-200/80 bg-stone-50/90 backdrop-blur">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
         <a href="{{ route('home') }}" class="flex items-center shrink-0" aria-label="{{ config('app.name') }}">
-            <img src="/images/logo.png" alt="{{ config('app.name') }}" width="112" height="28" class="h-7 w-auto">
+            <img src="/images/logo.png" alt="{{ config('app.name') }}" width="112" height="28" class="h-6 sm:h-7 w-auto">
         </a>
-        <nav class="hidden md:flex items-center gap-4 lg:gap-6 text-sm text-stone-600 whitespace-nowrap">
-            <a href="{{ route('studio') }}" class="hover:text-amber-700 {{ request()->routeIs('studio') ? 'text-amber-700 font-medium' : '' }}">{{ __('nav.studio') }}</a>
-            <a href="{{ route('home') }}#aslbelgi" class="hover:text-amber-700">Asl Belgisi</a>
-            <a href="{{ route('home') }}#offers" class="hover:text-amber-700">{{ __('nav.offers') }}</a>
-            <a href="{{ route('home') }}#faq" class="hidden lg:inline hover:text-amber-700">{{ __('home.nav.faq') }}</a>
-            @if(app()->getLocale() === 'zh')<a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('china', 'zh') }}" class="hover:text-amber-700 {{ request()->routeIs('china') ? 'text-amber-700 font-medium' : '' }}">{{ __('china.nav') }}</a>@endif
-            <a href="{{ route('guide') }}" class="hidden xl:inline hover:text-amber-700 {{ request()->routeIs('guide') ? 'text-amber-700 font-medium' : '' }}">{{ __('guide.title') }}</a>
-            <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('contact', app()->getLocale()) }}" class="hover:text-amber-700 {{ request()->routeIs('contact') ? 'text-amber-700 font-medium' : '' }}">{{ __('contact.title') }}</a>
+        @php
+            $loc = app()->getLocale();
+            $u = fn ($route) => \App\Http\Controllers\Guest\HomeController::localizedUrl($route, $loc);
+            // one list for the desktop menu and the phone menu: [url, label, active, desktop visibility]
+            $menu = array_values(array_filter([
+                [$u('studio'), __('nav.studio'), request()->routeIs('studio'), 'lg:inline'],
+                [route('home') . '#aslbelgi', 'Asl Belgisi', false, 'lg:inline'],
+                [route('home') . '#offers', __('nav.offers'), false, 'lg:inline'],
+                [route('home') . '#faq', __('home.nav.faq'), false, 'xl:inline'],
+                $loc === 'zh' ? [$u('china'), __('china.nav'), request()->routeIs('china'), 'lg:inline'] : null,
+                [route('guide'), __('guide.title'), request()->routeIs('guide'), 'xl:inline'],
+                [$u('drivers'), __('nav.drivers'), request()->routeIs('drivers*'), 'lg:inline'],
+                [$u('contact'), __('contact.title'), request()->routeIs('contact'), 'lg:inline'],
+            ]));
+        @endphp
+        <nav class="hidden lg:flex items-center gap-4 xl:gap-6 text-sm text-stone-600 whitespace-nowrap">
+            @foreach($menu as [$href, $label, $active, $show])
+                <a href="{{ $href }}" class="hidden {{ $show }} hover:text-amber-700 {{ $active ? 'text-amber-700 font-medium' : '' }}">{{ $label }}</a>
+            @endforeach
         </nav>
-        <div class="flex items-center gap-3 text-sm">
-            @include('partials.locale-switcher')
+        <div class="flex items-center gap-2 sm:gap-3 text-sm">
+            <span class="hidden sm:inline-flex">@include('partials.locale-switcher')</span>
             @guest
                 {{-- Register: a new person with a "+" badge, label shows on hover --}}
                 <a href="{{ route('register') }}" title="{{ __('auth.register') }}" aria-label="{{ __('auth.register') }}"
@@ -33,9 +44,22 @@
                 </a>
             @endguest
             <a href="{{ auth()->check() ? route('import-batches.index') : route('login') }}"
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-stone-900 text-stone-900 rounded-lg font-medium hover:bg-stone-900 hover:text-stone-50 transition">
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-stone-900 text-stone-900 rounded-lg font-medium whitespace-nowrap hover:bg-stone-900 hover:text-stone-50 transition">
                 {{ auth()->check() ? 'Asl Belgisi' : __('auth.login') }}
             </a>
+            {{-- phone / tablet: the menu opens as a list --}}
+            <button type="button" x-on:click="menu = !menu" class="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg border border-stone-300 text-stone-700" :aria-expanded="menu" aria-label="{{ __('nav.menu') }}">
+                <span x-show="!menu">@svg('heroicon-o-bars-3', 'w-5 h-5')</span>
+                <span x-show="menu" x-cloak>@svg('heroicon-o-x-mark', 'w-5 h-5')</span>
+            </button>
         </div>
     </div>
+    <nav x-show="menu" x-cloak x-transition.origin.top class="lg:hidden border-t border-stone-200 bg-stone-50">
+        <div class="max-w-6xl mx-auto px-4 py-2 grid sm:grid-cols-2 gap-x-6">
+            @foreach($menu as [$href, $label, $active])
+                <a href="{{ $href }}" x-on:click="menu = false" class="py-3 border-b border-stone-200/70 text-[15px] {{ $active ? 'text-amber-700 font-medium' : 'text-stone-700' }}">{{ $label }}</a>
+            @endforeach
+            <div class="py-3 sm:hidden">@include('partials.locale-switcher')</div>
+        </div>
+    </nav>
 </header>

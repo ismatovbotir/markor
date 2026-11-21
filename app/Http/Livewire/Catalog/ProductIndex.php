@@ -88,8 +88,10 @@ class ProductIndex extends Component
         }
         $name = $namer->suggest($item['name'], $gtin);
         $this->name_uz = mb_substr($name['name_uz'], 0, 255);
-        if ($name['name_ru']) {
-            $this->name_ru = mb_substr($name['name_ru'], 0, 255);
+        // Russian: the classifier's official name first, the AI translation only when tasnif has none
+        $ru = $lookup->nameIn(str_pad($gtin, 14, '0', STR_PAD_LEFT), 'ru') ?? $name['name_ru'];
+        if ($ru) {
+            $this->name_ru = mb_substr($ru, 0, 255);
         }
         $this->lookupMessage = '✓ ' . __('products.tasnif_filled');
     }

@@ -41,6 +41,31 @@ class GtinLookup
     }
 
     /**
+     * The official name in another language (the information endpoint answers only in Uzbek Cyrillic).
+     * Short form, without the MXIK category. null when not found or the service failed.
+     */
+    public function nameIn(string $gtin, string $lang = 'ru'): ?string
+    {
+        // the classifier stores 13-digit barcodes: a GTIN-14 with a leading 0 is the same EAN-13
+        $barcode = strlen($gtin) === 14 && str_starts_with($gtin, '0') ? substr($gtin, 1) : $gtin;
+        $url = str_replace(['{gtin}', '{lang}'], [rawurlencode($barcode), rawurlencode($lang)], (string) config('catalog.gtin_search_url'));
+        try {
+            $response = Http::timeout(15)->acceptJson()->withUserAgent('Markor/1.0')->get($url);
+        } catch (\Throwable $e) {
+            Log::warning('GTIN name lookup failed', ['gtin' => $gtin, 'lang' => $lang, 'error' => $e->getMessage()]);
+            return null;
+        }
+        if (!$response->ok() || $response->json('success') !== true) {
+            return null;
+        }
+        // search is a text search: take only the row with exactly this barcode
+        $row = collect($response->json('data') ?? [])->first(fn ($r) => ltrim((string) ($r['internationalCode'] ?? ''), '0') === ltrim($barcode, '0'));
+        $name = trim((string) ($row['name'] ?? ''));
+
+        return $name !== '' ? self::shortName($name) : null;
+    }
+
+    /**
      * Fills a product from the classifier. The product name is only set when nobody has named it yet.
      * Returns the lookup status: found / not_found / error.
      */
@@ -67,6 +92,7 @@ class GtinLookup
             'lookup'          => 'found',
             'mxik'            => $item['mxik'] ?? null,
             'classifier_name' => $item['name'] ?? null,
+            'classifier_name_ru' => $ru = $this->nameIn($product->gtin, 'ru'), // official Russian name
             'unit_uz'         => $package['nameUz'] ?? null,
             'unit_ru'         => $package['nameRu'] ?? null,
             'unit_lat'        => $package['nameLat'] ?? null,
@@ -77,6 +103,9 @@ class GtinLookup
         $values = ['attributes' => $attributes, 'lookup_status' => 'found', 'lookup_at' => now()];
         if (blank($product->name_uz) && filled($item['name'] ?? null)) {
             $values['name_uz'] = self::shortName($item['name']);
+        }
+        if (blank($product->name_ru) && $ru) {
+            $values['name_ru'] = mb_substr($ru, 0, 255);
         }
         $product->update($values);
         // clean name in Latin Uzbek + Russian (Claude, or transliteration when AI is unavailable)

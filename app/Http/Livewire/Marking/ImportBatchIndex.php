@@ -37,11 +37,28 @@ class ImportBatchIndex extends Component
      * Called from the modal; the modal closes itself after the promo time when this returns true.
      * (Not named `upload`: $wire.upload() is Livewire's own file-upload function.)
      */
+    /** First check, before the file is even sent: was a file with this name already loaded by the company? '' = ok. */
+    public function checkFileName(string $name): string
+    {
+        return ImportBatch::loadedWithName(auth()->user()?->company_id, $name)?->duplicateMessage() ?? '';
+    }
+
     /** Step 1 of the upload dialog: file to the server + batch record. Returns the batch id (0 on error). */
     public function queueUpload(ImportBatchService $service): int
     {
         $this->authorize('create', ImportBatch::class);
         $this->validate();
+
+        // the same check on the server: a file already loaded by this company is never loaded twice
+        if ($duplicate = ImportBatch::loadedWithName(auth()->user()?->company_id, $this->csvFile->getClientOriginalName())) {
+            if (method_exists($this->csvFile, 'delete')) {
+                $this->csvFile->delete();
+            }
+            $this->reset(['csvFile']);
+            $this->addError('csvFile', $duplicate->duplicateMessage());
+
+            return 0;
+        }
 
         try {
             $batch = $service->createFromUpload($this->csvFile, null, 'uploaded');

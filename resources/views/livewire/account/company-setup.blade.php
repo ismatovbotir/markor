@@ -1,5 +1,5 @@
 @php $field = 'w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white disabled:bg-stone-100 disabled:text-stone-500'; @endphp
-<div class="max-w-2xl">
+<div class="w-full">
     @unless($editing)
         <p class="text-xs font-semibold uppercase tracking-wide text-amber-700">{{ __('company.step') }}</p>
     @endunless

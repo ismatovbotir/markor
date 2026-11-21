@@ -114,4 +114,29 @@ class ScheduledImportTest extends TestCase
         // the modal's JavaScript must call this method, not Livewire's own $wire.upload()
         $this->assertStringContainsString('$wire.releaseUpload(id)', file_get_contents(resource_path('views/livewire/marking/import-batch-index.blade.php')));
     }
+
+    public function test_a_file_name_already_loaded_by_the_company_is_refused(): void
+    {
+        $company = \App\Domain\Companies\Company::create(['tin' => '306000002', 'name' => 'D']);
+        $client = User::create(['name' => 'C', 'email' => 'dup@t.uz', 'password' => 'secret123', 'role' => 'user', 'locale' => 'uz', 'is_active' => true,
+            'company_id' => $company->id, 'company_role' => 'owner']);
+        $this->actingAs($client);
+        $code = "0104780000000202" . "21" . str_repeat('Q', 20) . "\x1D91ABCD\x1D92" . str_repeat('w', 44);
+        $component = fn () => \Livewire\Livewire::test(\App\Http\Livewire\Marking\ImportBatchIndex::class);
+
+        $component()->set('csvFile', UploadedFile::fake()->createWithContent('Partiya-12.csv', $code))->call('queueUpload')->assertHasNoErrors();
+        $this->assertSame(1, \App\Domain\Marking\Models\ImportBatch::count());
+
+        // first check, before sending the file
+        $this->assertStringContainsString('Partiya-12.csv', $component()->instance()->checkFileName('partiya-12.CSV'));
+        $this->assertSame('', $component()->instance()->checkFileName('boshqa.csv'));
+
+        // and on the server
+        $component()->set('csvFile', UploadedFile::fake()->createWithContent('partiya-12.csv', $code))->call('queueUpload')->assertHasErrors('csvFile');
+        $this->assertSame(1, \App\Domain\Marking\Models\ImportBatch::count());
+
+        // another company may load a file with the same name; a failed batch can be loaded again
+        \App\Domain\Marking\Models\ImportBatch::query()->update(["status" => "failed"]);
+        $this->assertSame('', $component()->instance()->checkFileName('Partiya-12.csv'));
+    }
 }

@@ -1,5 +1,5 @@
 @php $field = 'w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white'; @endphp
-<div class="max-w-2xl space-y-6">
+<div class="w-full space-y-6">
     <h1 class="text-xl font-semibold">{{ __('nav.profile') }}</h1>
 
     <form wire:submit="saveProfile" class="bg-white border border-stone-200 rounded-xl p-5 space-y-4">

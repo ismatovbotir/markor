@@ -22,7 +22,7 @@ class MarketplaceController extends Controller
             'others'   => \App\Domain\Offers\Models\OfferCategory::active()->whereKeyNot($offer->offer_category_id)
                 ->orderBy('sort_order')->orderBy('id')
                 ->with(['offers' => fn ($q) => $q->where('is_active', true)->limit(60)])->get()
-                ->each(fn ($c) => $c->setRelation('offers', $c->offers->take(6)))
+                ->each(fn ($c) => $c->setRelation('offers', $c->offers->take(4)))
                 ->filter(fn ($c) => $c->offers->isNotEmpty())->values(),
         ]);
     }

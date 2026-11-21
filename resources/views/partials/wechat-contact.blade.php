@@ -6,7 +6,7 @@
     $compact ??= false;
 @endphp
 @if(app()->getLocale() === 'zh' && $qrSrc)
-    <{{ $compact ? 'span' : 'li' }} x-data="{ qr: false }" x-on:keydown.escape.window="qr = false" @class(['p-4 rounded-xl bg-emerald-50 border border-emerald-200 block' => !$compact])>
+    <{{ $compact ? 'span' : 'li' }} x-data="{ qr: false }" x-on:keydown.escape.window="qr = false" @class(['p-4 rounded-xl bg-emerald-50 border border-emerald-200 block sm:col-span-2' => !$compact])>
         @if($compact)
             <button type="button" x-on:click="qr = true" class="inline-flex items-center gap-1.5 hover:text-emerald-700"><span class="w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] font-bold flex items-center justify-center">微</span> WeChat</button>
         @else

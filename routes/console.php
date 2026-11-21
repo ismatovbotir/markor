@@ -12,3 +12,6 @@ Artisan::command('inspire', function () {
 
 // Local copies of label PDFs that were not archived to Telegram are kept 7 days.
 \Illuminate\Support\Facades\Schedule::command('pdfs:prune --days=7')->dailyAt('03:30');
+
+// visit statistics: keep 180 days of daily aggregates
+\Illuminate\Support\Facades\Schedule::call(fn () => \App\Domain\Stats\VisitCounter::prune())->name('visits:prune')->dailyAt('03:40');

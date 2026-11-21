@@ -396,3 +396,10 @@ Assalomu alaykum. Biz O'zbekistonda etiketka printerlari va sarf materiallari so
 - Текущие сроки обязательной маркировки по конкретным подгруппам товаров.
 - Порядок каналов по эффективности — это гипотеза до первых цифр.
 - Сроки, за которые статьи начнут давать переходы из поиска.
+
+
+## Drayverlar bo'limi (2026-11-22) — post uchun qoralama (faqat egasining roziligi bilan)
+
+**UZ:** Etiketka printeringiz uchun drayver kerakmi? markor.uz/drivers — Zebra, Godex, Xprinter modellari: rasmiy saytdan yuklab olish havolasi, o'rnatish bosqichlari va kalibrlash bo'yicha maslahatlar. O'rnatishda yordam kerak bo'lsa — yozing.
+
+**RU:** Нужен драйвер для принтера этикеток? markor.uz/drivers — модели Zebra, Godex, Xprinter: ссылка на официальную загрузку, шаги установки и советы по калибровке. Нужна помощь — пишите.

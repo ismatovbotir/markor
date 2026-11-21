@@ -3,7 +3,18 @@
 <head>
 @include('partials.public-head', [
     'seoTitle' => $title . ' — ' . __('guide.title') . ' | ' . config('app.name'),
-    'seoDescription' => \Illuminate\Support\Str::limit(trim(strip_tags($html)), 155),
+    'seoDescription' => (function () use ($html) {
+        // clean text of the article without its title; ends at a sentence when one fits
+        $max = app()->getLocale() === 'zh' ? 80 : 155;
+        $text = preg_replace('/\s+/u', ' ', trim(html_entity_decode(strip_tags(preg_replace('#<h1[^>]*>.*?</h1>#s', '', $html)))));
+        if (mb_strlen($text) <= $max) {
+            return $text;
+        }
+        $cut = mb_substr($text, 0, $max);
+        $end = max(mb_strrpos($cut, '. ') ?: 0, mb_strrpos($cut, '。') ?: 0);
+
+        return $end > $max / 2 ? trim(mb_substr($cut, 0, $end + 1)) : \Illuminate\Support\Str::limit($text, $max - 1);
+    })(),
     'seoRoute' => 'guide',
     'seoParams' => ['page' => $page],
     'jsonLd' => [[
@@ -25,7 +36,8 @@
 <body class="bg-stone-50 text-stone-800 font-body antialiased">
 @include('partials.public-header')
 <main class="max-w-6xl mx-auto px-4 py-8">
-    <h1 class="font-display font-bold text-2xl text-stone-900 tracking-tight">{{ __('guide.title') }}</h1>
+    {{-- the article has its own <h1> (the page title) --}}
+    <p class="font-display font-bold text-2xl text-stone-900 tracking-tight">{{ __('guide.title') }}</p>
     <p class="text-stone-500 mt-1 mb-6">{{ __('guide.subtitle') }}</p>
     <div class="flex gap-8 items-start flex-col md:flex-row">
         <nav class="w-full md:w-56 shrink-0 md:sticky md:top-6 text-sm space-y-1">

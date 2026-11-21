@@ -18,7 +18,7 @@ Asl Belgisi operatoridan olingan kodlar faylini Markor'ga yuklash. Faylda har bi
 1. Fayl saqlanadi va navbatga qo'yiladi.
 2. Bir necha soniyada kodlar bazaga yuklanadi.
 3. Shundan keyin fayl serverdan o'chiriladi.
-4. Partiya holatini CSV import ro'yxatida kuzating. Holat **Tayyor** bo'lganda yorliq yaratish mumkin.
+4. Partiya holatini CSV import ro'yxatida kuzating. Holat **Tayyor** bo'lganda etiketka yaratish mumkin.
 
 > Har bir kodni faqat bir marta yuklash mumkin. Avval yuklangan kodlar o'tkazib yuboriladi va sababi ro'yxatda ko'rsatiladi.
 

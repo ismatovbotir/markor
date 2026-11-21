@@ -18,18 +18,23 @@ class OfferRequestController extends Controller
         $data = $request->validate([
             'offer_id'          => 'nullable|integer|exists:offers,id',
             'label_template_id' => 'nullable|integer|exists:label_templates,id',
+            'offer_category_id' => 'nullable|integer|exists:offer_categories,id', // "didn't find it?" request for a whole section
             'name'              => 'required|string|max:120',
             'phone'             => ['required', 'string', 'max:30', 'regex:/^\+?[\d\s\-()]{7,}$/'],
             'quantity'          => 'nullable|string|max:40',
             'comment'           => 'nullable|string|max:1000',
             'website'           => 'prohibited', // honeypot
         ]);
-        abort_unless(filled($data['offer_id'] ?? null) xor filled($data['label_template_id'] ?? null), 422);
+        $targets = collect(['offer_id', 'label_template_id', 'offer_category_id'])->filter(fn ($k) => filled($data[$k] ?? null));
+        abort_unless($targets->count() === 1, 422); // exactly one: an item, a label size or a section
 
         if (filled($data['offer_id'] ?? null)) {
             $offer = Offer::with('offerCategory')->findOrFail($data['offer_id']);
             $title = $offer->title_uz;
             $category = $offer->offerCategory?->name_uz;
+        } elseif (filled($data['offer_category_id'] ?? null)) {
+            $category = \App\Domain\Offers\Models\OfferCategory::findOrFail($data['offer_category_id'])->name_uz;
+            $title = "So'rov: {$category} (katalogda yo'q narsa)";
         } else {
             $template = LabelTemplate::findOrFail($data['label_template_id']);
             $title = "Etiketka {$template->width_mm}×{$template->height_mm} mm ({$template->name})";

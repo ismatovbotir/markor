@@ -5,7 +5,7 @@
     $promoPhone = config('contact.phone');
 @endphp
 @if($promo && !auth()->user()?->isAdmin())
-    <div class="mt-5 border border-amber-200 bg-amber-50 rounded-xl p-3 flex items-center gap-3 text-left">
+    <div class="mb-5 border border-amber-200 bg-amber-50 rounded-xl p-3 flex items-center gap-3 text-left">
         @if($promo->image_url)
             <img src="{{ $promo->image_url }}" alt="" class="w-14 h-14 object-contain rounded-lg bg-white shrink-0">
         @else

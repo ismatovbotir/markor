@@ -47,6 +47,12 @@ class SettingsSeeder extends Seeder
         'seo.contact.description.uz' => 'Markor bilan bog\'laning: telefon, Telegram, email. Etiketka printerlari, ribbon, etiketka, skaner va Asl Belgisi kodlarini chop etish bo\'yicha savollar.',
         'seo.contact.description.ru' => 'Свяжитесь с Markor: телефон, Telegram, email. Вопросы о принтерах этикеток, риббонах, этикетках, сканерах и печати кодов Asl Belgisi.',
         'seo.contact.description.zh' => '联系Markor：微信、电话、Telegram、电子邮件。咨询标签打印机、碳带、标签、扫描枪及Asl Belgisi标识码打印。',
+        'seo.drivers.title.uz' => 'Printer drayverlari: Zebra, Godex, Xprinter | Markor',
+        'seo.drivers.title.ru' => 'Драйверы принтеров этикеток Zebra, Godex, Xprinter | Markor',
+        'seo.drivers.title.zh' => '标签打印机驱动｜Zebra、Godex、Xprinter',
+        'seo.drivers.description.uz' => 'Zebra, Godex, Xprinter etiketka printerlari uchun drayverlar: rasmiy saytdan yuklab olish, Windows va macOS\'da o\'rnatish, kalibrlash va muammolar.',
+        'seo.drivers.description.ru' => 'Драйверы для принтеров этикеток Zebra, Godex, Xprinter: скачать с официального сайта, установка в Windows и macOS, калибровка и частые проблемы.',
+        'seo.drivers.description.zh' => 'Zebra、Godex、Xprinter 标签打印机驱动：从官网下载，在 Windows 和 macOS 上安装，校准及常见问题。',
         'seo.ai_agents'        => 'all',   // AI search and assistants may read the site
     ];
 

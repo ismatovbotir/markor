@@ -30,6 +30,27 @@ class ImportBatch extends Model
         ];
     }
 
+    /**
+     * A file with this name the company already loaded (same name, any letter case). A failed batch doesn't
+     * count — its codes were removed, so the file may be loaded again.
+     */
+    public static function loadedWithName(?int $companyId, string $name): ?self
+    {
+        $name = mb_strtolower(trim(basename(str_replace('\\', '/', $name))));
+        if (!$companyId || $name === '') {
+            return null;
+        }
+
+        return static::withoutGlobalScope('owner')->where('company_id', $companyId)->where('status', '!=', 'failed')
+            ->whereRaw('lower(original_filename) = ?', [$name])->latest('id')->first();
+    }
+
+    /** The warning shown when a file was already loaded. */
+    public function duplicateMessage(?string $locale = null): string
+    {
+        return __('import.duplicate_file', ['file' => $this->original_filename, 'date' => $this->created_at->format('d.m.Y H:i'), 'id' => $this->id], $locale);
+    }
+
     protected static function booted(): void
     {
         static::creating(fn ($m) => $m->uuid ??= (string) Str::uuid());

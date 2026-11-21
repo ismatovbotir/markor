@@ -235,12 +235,12 @@
     {{-- Generating dialog: progress + one of our products --}}
     <div x-show="state !== 'idle'" x-cloak class="fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+            @include('partials.promo-offer')
             <div x-show="state === 'working'">
                 <p class="text-sm mb-2">{{ __('import.generating') }}</p>
                 <div class="h-2 bg-stone-100 rounded-full overflow-hidden"><div class="h-full bg-amber-600 transition-all duration-200" :style="`width:${progress}%`"></div></div>
             </div>
             <p x-show="state === 'done'" class="text-sm text-emerald-700 flex items-center gap-2">@svg('heroicon-o-check-circle', 'w-5 h-5') {{ __('import.ready') }}</p>
-            @include('partials.promo-offer')
             <div x-show="state === 'done'" class="flex justify-end pt-5">
                 <button type="button" x-on:click="state = 'idle'" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition">OK</button>
             </div>

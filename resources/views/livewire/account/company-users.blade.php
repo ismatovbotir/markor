@@ -1,5 +1,5 @@
 @php $field = 'w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white'; @endphp
-<div class="max-w-4xl">
+<div class="w-full">
     <div class="flex items-center justify-between gap-4 flex-wrap mb-2">
         <div>
             <p class="text-xs text-stone-500">{{ $company?->name }}</p>

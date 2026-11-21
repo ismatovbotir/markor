@@ -726,7 +726,7 @@ window.orderModal = (config) => ({
     form: { name: config.name || '', phone: config.phone || '', quantity: '', comment: '', website: '' },
 
     open(detail) {
-        this.target = detail.offer ? { offer_id: detail.offer } : { label_template_id: detail.template };
+        this.target = detail.offer ? { offer_id: detail.offer } : (detail.category ? { offer_category_id: detail.category } : { label_template_id: detail.template });
         this.title = detail.title;
         this.state = 'form';
         this.error = '';

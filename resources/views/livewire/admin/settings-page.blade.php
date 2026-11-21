@@ -1,5 +1,5 @@
 @php $field = 'w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white'; @endphp
-<div class="max-w-2xl">
+<div class="w-full">
     <h1 class="text-xl font-semibold mb-1">{{ __('nav.settings') }}</h1>
     <p class="text-sm text-stone-500 mb-6">{{ __('settings.hint') }}</p>
 

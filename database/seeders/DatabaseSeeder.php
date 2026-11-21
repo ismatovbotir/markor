@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call(OfferSeeder::class);
         $this->call(SettingsSeeder::class);
         $this->call(BannerSeeder::class);
+        $this->call(PrinterDriverSeeder::class);
 
         if (app()->isProduction()) {
             return; // demo client, company and printers are for development only

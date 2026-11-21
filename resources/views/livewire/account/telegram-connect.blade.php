@@ -20,6 +20,7 @@
     @if($open && $link)
         <div class="fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4" @if(in_array($link->status, ['pending', 'started', 'phone_ok'])) wire:poll.2s @endif>
             <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 text-center">
+                @include('partials.modal-promo')
                 <h2 class="text-lg font-semibold">{{ __('telegram.title') }}</h2>
 
                 @if(in_array($link->status, ['pending', 'started']))
@@ -46,8 +47,6 @@
                 @else
                     <p class="text-rose-600 text-sm mt-4">{{ __('telegram.expired') }}</p>
                 @endif
-
-                @include('partials.modal-promo')
 
                 <div class="flex justify-center gap-3 mt-5">
                     @if(in_array($link->status, ['phone_mismatch', 'failed', 'expired']))

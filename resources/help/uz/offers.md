@@ -6,12 +6,12 @@ Bu sahifada Markor sotadigan uskunalar va sarf materiallari ko'rsatiladi. Kerakl
 
 ## Kategoriyalar
 
-- Yorliqlar (har bir o'lcham)
+- Etiketkalar (har bir o'lcham)
 - Lentalar (ribbon)
 - Printerlar
 - Skanerlar
 - PDA (ma'lumot yig'ish terminallari)
-- Aksessuarlar: rewinder, applikator, yorliq ushlagich, peeler
+- Aksessuarlar: rewinder, applikator, etiketka ushlagich, peeler
 - Servis
 
 Har bir kategoriyada 5 tagacha mahsulot ko'rsatiladi.

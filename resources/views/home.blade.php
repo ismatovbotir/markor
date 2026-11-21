@@ -74,7 +74,7 @@
         <div style="grid-area: 1 / 1" class="transition-opacity duration-500" @if($extra->isNotEmpty()) :class="i === 0 ? 'opacity-100' : 'opacity-0 invisible pointer-events-none'" @endif>
     <section class="relative overflow-hidden">
             <div class="absolute inset-0 mat-grid" aria-hidden="true"></div>
-            <div class="relative max-w-6xl mx-auto px-4 pt-14 pb-20 lg:pt-20 lg:pb-28 grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
+            <div class="relative max-w-6xl mx-auto px-4 pt-10 pb-16 sm:pt-14 sm:pb-20 lg:pt-20 lg:pb-28 grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
                 <div>
                     <p class="rise inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-amber-800 bg-amber-100/70 border border-amber-200 rounded-full px-3 py-1">
                         <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>{{ __('home.hero.badge') }}
@@ -94,8 +94,8 @@
                     <p class="rise font-mono text-xs text-stone-500 mt-6" style="animation-delay:.24s">{{ __('home.hero.note') }}</p>
                 </div>
     
-                {{-- Labels coming off the roll --}}
-                <div class="relative mx-auto w-full max-w-md lg:max-w-none" aria-hidden="true">
+                {{-- Labels coming off the roll (decoration: hidden on phones so the slider fits one screen) --}}
+                <div class="relative mx-auto w-full max-w-md lg:max-w-none hidden sm:block" aria-hidden="true">
                     <div class="liner p-5 pb-0 rotate-[-3deg] overflow-hidden h-[420px]">
                         <div class="feed label-stock p-4 grid grid-cols-[112px_1fr] gap-4 items-start">
                             <img src="{{ route('studio.barcode', ['type' => 'datamatrix', 'data' => '010478001234567821MARKOR-0001']) }}" width="112" height="112" alt="" class="w-28 h-28" style="image-rendering:pixelated">
@@ -238,7 +238,7 @@
 
     {{-- Asl Belgisi --}}
     <section id="aslbelgi" class="bg-stone-900 text-stone-100 scroll-mt-16">
-        <div class="max-w-6xl mx-auto px-4 py-20 grid lg:grid-cols-[0.9fr_1.1fr] gap-12">
+        <div class="max-w-6xl mx-auto px-4 py-20 grid lg:grid-cols-2 gap-12">
             <div>
                 <p class="font-mono text-xs uppercase tracking-widest text-amber-400">Asl Belgisi · GS1 DataMatrix</p>
                 <h2 class="font-display font-bold text-2xl sm:text-3xl text-white tracking-tight mt-3">{{ __('home.aslbelgi.title') }}</h2>
@@ -257,7 +257,7 @@
                 <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('china', app()->getLocale()) }}" class="inline-block text-sm text-amber-300 hover:text-amber-200 mt-4">{{ __('china.home_link') }}</a>
                 <p class="flex items-start gap-2 text-sm text-stone-300 mt-6">@svg('heroicon-o-paper-airplane', 'w-4 h-4 mt-0.5 shrink-0') {{ __('home.aslbelgi.telegram') }}</p>
             </div>
-            <ol class="grid sm:grid-cols-2 gap-px bg-stone-700 rounded-2xl overflow-hidden self-start">
+            <ol class="grid sm:grid-cols-2 auto-rows-fr gap-px bg-stone-700 rounded-2xl overflow-hidden self-stretch">
                 @foreach([1, 2, 3, 4] as $i)
                     <li class="bg-stone-900 p-6">
                         <span class="font-mono text-xs text-amber-400">0{{ $i }}</span>

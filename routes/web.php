@@ -37,6 +37,8 @@ Route::get('/guide/{page?}', [HomeController::class, 'guide'])->name('guide');
 // landing page for Chinese manufacturers / exporters marking goods for Uzbekistan
 Route::view('/uzbekistan-marking', 'china')->name('china');
 Route::view('/contact', 'contact')->name('contact');
+Route::get('/drivers', [\App\Http\Controllers\Guest\DriverController::class, 'index'])->name('drivers');
+Route::get('/drivers/{driver:slug}', [\App\Http\Controllers\Guest\DriverController::class, 'show'])->name('drivers.show');
 // public page of a Marketplace item
 Route::get('/marketplace/{offer:slug}', [\App\Http\Controllers\Guest\MarketplaceController::class, 'show'])->name('marketplace.item');
 Route::get('/label-image/{w}x{h}.svg', [\App\Http\Controllers\Guest\LabelImageController::class, 'show'])->whereNumber(['w', 'h'])->name('label-image');
@@ -121,6 +123,8 @@ Route::middleware(['auth', 'can:admin'])->prefix('admin')->group(function () {
     Route::get('/settings', \App\Http\Livewire\Admin\SettingsPage::class)->name('admin.settings');
     Route::get('/seo', \App\Http\Livewire\Admin\SeoPage::class)->name('admin.seo');
     Route::get('/banners', \App\Http\Livewire\Admin\BannerIndex::class)->name('admin.banners');
+    Route::get('/drivers', \App\Http\Livewire\Admin\DriverIndex::class)->name('admin.drivers');
+    Route::get('/stats', \App\Http\Livewire\Admin\StatsPage::class)->name('admin.stats');
     Route::get('/telegram', \App\Http\Livewire\Admin\TelegramPage::class)->name('admin.telegram');
     Route::get('/payments', \App\Http\Livewire\Admin\PaymentIndex::class)->name('admin.payments');
     Route::get('/templates', LabelTemplateIndex::class)->name('label-templates.index');

@@ -9,7 +9,7 @@ use App\Http\Middleware\SetLocale;
 class HomeController extends Controller
 {
     /** Public pages that search engines should index. */
-    private const PUBLIC_ROUTES = ['home', 'studio', 'china', 'contact'];
+    private const PUBLIC_ROUTES = ['home', 'studio', 'china', 'contact', 'drivers'];
 
     public function index()
     {
@@ -29,7 +29,7 @@ class HomeController extends Controller
             'offers'  => Offer::active()->orderBy('sort_order')->get(),
             'catalog' => \App\Domain\Offers\Models\OfferCategory::catalog(),
             'templatePreviews' => \App\Domain\Offers\Models\OfferCategory::templatePreviews(),
-            'faq'    => collect(range(1, 8))
+            'faq'    => collect(range(1, 9))
                 ->map(fn ($i) => ['q' => __("home.faq.$i.q"), 'a' => __("home.faq.$i.a")])
                 ->reject(fn ($item) => str_starts_with($item['q'], 'home.faq.'))
                 ->values(),
@@ -145,6 +145,16 @@ class HomeController extends Controller
                     $xml .= '    <xhtml:link rel="alternate" hreflang="' . $hreflang . '" href="' . e(self::localizedUrl('marketplace.item', $alt, ['offer' => $item->slug])) . '"/>' . "\n";
                 }
                 $xml .= '    <lastmod>' . $item->updated_at?->toDateString() . "</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n";
+            }
+        }
+
+        foreach (\App\Domain\Content\PrinterDriver::active()->get(['slug', 'updated_at']) as $driver) {
+            foreach (array_keys(SetLocale::LOCALES) as $locale) {
+                $xml .= "  <url>\n    <loc>" . e(self::localizedUrl('drivers.show', $locale, ['driver' => $driver->slug])) . "</loc>\n";
+                foreach (SetLocale::HREFLANG as $alt => $hreflang) {
+                    $xml .= '    <xhtml:link rel="alternate" hreflang="' . $hreflang . '" href="' . e(self::localizedUrl('drivers.show', $alt, ['driver' => $driver->slug])) . '"/>' . "\n";
+                }
+                $xml .= '    <lastmod>' . $driver->updated_at?->toDateString() . "</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n";
             }
         }
 

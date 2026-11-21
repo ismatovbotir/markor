@@ -11,7 +11,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [\App\Http\Middleware\SetLocale::class, \App\Http\Middleware\EnsureActiveAccount::class, \App\Http\Middleware\SecurityHeaders::class]);
+        $middleware->web(prepend: [\App\Http\Middleware\CanonicalHost::class]); // markor.uz → www.markor.uz (host of APP_URL)
+        $middleware->web(append: [\App\Http\Middleware\SetLocale::class, \App\Http\Middleware\EnsureActiveAccount::class, \App\Http\Middleware\SecurityHeaders::class, \App\Http\Middleware\CountVisit::class]);
         // Telegram posts updates without a CSRF token; the webhook is protected by its secret URL instead
         $middleware->preventRequestForgery(except: ['telegram/webhook/*']);
         // the real visitor IP behind a web server on the same machine (nginx → php-fpm); nobody else can set the header

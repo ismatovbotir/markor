@@ -165,6 +165,11 @@ class BotHandler
             return;
         }
 
+        if ($duplicate = ImportBatch::loadedWithName($user->company_id, $name)) {
+            $this->say($chatId, $user, 'bot.duplicate_file', ['file' => e($duplicate->original_filename), 'date' => $duplicate->created_at->format('d.m.Y H:i'), 'id' => $duplicate->id]);
+            return;
+        }
+
         $contents = $this->api->download($document['file_id']);
         if ($contents === null) {
             $this->say($chatId, $user, 'bot.download_failed');

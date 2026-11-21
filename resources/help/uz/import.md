@@ -36,7 +36,7 @@ Yuqoridagi panelda shu oydagi kodlar soni × narx (har bir yuklangan kod uchun 9
 
 > Hozircha chegirma 100%, ya'ni xizmat bepul.
 
-## Yorliq yaratish
+## Etiketka yaratish
 
 1. Partiya holati **Tayyor** bo'lishini kuting.
 2. **PDF yaratish** tugmasini bosing.

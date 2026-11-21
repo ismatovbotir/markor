@@ -23,13 +23,19 @@
                 </div>
 
             </div>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            @php
+                // rows of 4 (2 on tablets): a short row is completed by a "request" card so every section ends at the same edge
+                $count = $items->count() + ($category->market_url ? 1 : 0);
+                $lgSpan = (4 - $count % 4) % 4;
+                $smSpan = $count % 2;
+            @endphp
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @foreach($items as $item)
                     @if($category->isTemplates())
                         <article class="bg-white border border-stone-200 rounded-xl p-3 flex flex-col">
                             <img src="{{ route('label-image', ['w' => $item->width_mm, 'h' => $item->height_mm]) }}" alt="{{ $item->width_mm }}×{{ $item->height_mm }} mm" loading="lazy" class="h-28 w-full object-contain rounded-lg">
                             <p class="font-semibold text-sm text-stone-900 mt-3">{{ $item->width_mm }}×{{ $item->height_mm }} mm</p>
-                            <p class="text-xs text-stone-500 flex-1">{{ $item->name }}</p>
+                            <p class="text-xs text-stone-500 flex-1">{{ __('offers.label_card_text') }}</p>
                             <button type="button" x-on:click="$dispatch('order-item', { template: {{ $item->id }}, title: @js($item->width_mm . '×' . $item->height_mm . ' mm — ' . __('offers.labels_title')) })"
                                     class="mt-3 text-xs font-semibold text-amber-700 hover:text-amber-900 text-left">{{ __('offers.action.order') }} →</button>
                         </article>
@@ -66,6 +72,22 @@
                         </article>
                     @endif
                 @endforeach
+                @if($lgSpan || $smSpan)
+                    <div @class([
+                        'hidden sm:flex border-2 border-dashed border-stone-300 rounded-xl p-5 flex-col items-center justify-center text-center gap-2',
+                        'sm:col-span-1' => $smSpan, 'sm:col-span-2' => !$smSpan,
+                        'lg:flex' => $lgSpan, 'lg:hidden' => !$lgSpan,
+                        'lg:col-span-1' => $lgSpan === 1, 'lg:col-span-2' => $lgSpan === 2, 'lg:col-span-3' => $lgSpan === 3,
+                    ])>
+                        @svg('heroicon-o-chat-bubble-left-ellipsis', 'w-6 h-6 text-amber-700')
+                        <p class="font-semibold text-sm text-stone-900">{{ __('offers.filler_title') }}</p>
+                        <p class="text-xs text-stone-500 max-w-xs">{{ __('offers.filler_text') }}</p>
+                        <div class="flex flex-wrap items-center justify-center gap-3 mt-1">
+                            <button type="button" x-on:click="$dispatch('order-item', { category: {{ $category->id }}, title: @js($category->name) })" class="text-xs font-semibold text-amber-700 hover:text-amber-900">{{ __('offers.filler_button') }} →</button>
+                            @if($catTel)<a href="{{ $catTel }}" class="text-xs text-stone-600 hover:text-amber-700">{{ __('offers.action.call') }}</a>@endif
+                        </div>
+                    </div>
+                @endif
                 @if($category->market_url)
                     <a href="{{ $category->market_url }}" target="_blank" rel="noopener"
                        class="border-2 border-dashed border-amber-300 rounded-xl p-3 flex flex-col items-center justify-center text-center text-amber-800 hover:bg-amber-50 transition min-h-40">

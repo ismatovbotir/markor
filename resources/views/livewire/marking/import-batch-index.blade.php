@@ -152,6 +152,7 @@
     @if($showForm)
         <div class="fixed inset-0 bg-black/40 z-40 flex items-center justify-center">
             <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+                @include('partials.modal-promo')
                 <h2 class="text-lg font-semibold mb-1">{{ __('import.upload_csv') }}</h2>
                 <p class="text-xs text-stone-500 mb-4">{{ __('import.hint') }}</p>
                 <form x-data="{ busy: false, progress: 0, timer: null }"
@@ -163,7 +164,8 @@
                     <div x-data="{ fileError: '', sending: false, rule: @js($rule) }">
                         {{-- checked here first (size, type); only a good file is sent to the server --}}
                         <input type="file" accept="{{ collect($rule['extensions'])->map(fn ($e) => '.' . $e)->implode(',') }}"
-                               x-on:change="fileError = window.checkUpload($event.target.files[0], rule);
+                               x-on:change="const f = $event.target.files[0]; fileError = window.checkUpload(f, rule);
+                                   if (!fileError && f) fileError = await $wire.checkFileName(f.name); // already loaded by this company?
                                    if (fileError) { $event.target.value = ''; $wire.set('csvFile', null); return; }
                                    sending = true;
                                    $wire.upload('csvFile', $event.target.files[0], () => sending = false, () => { sending = false; fileError = rule.typeError })"
@@ -185,7 +187,6 @@
                         </button>
                     </div>
                 </form>
-                @include('partials.modal-promo')
             </div>
         </div>
     @endif
@@ -194,6 +195,7 @@
         @php $namingProduct = \App\Domain\Catalog\Models\Product::find($namingId); @endphp
         <div class="fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4">
             <form wire:submit="saveNaming" class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+                @include('partials.modal-promo')
                 <div>
                     <h2 class="text-lg font-semibold">{{ __('import.fill_item_title') }}</h2>
                     <p class="text-sm text-stone-500 mt-1">GTIN <span class="font-mono">{{ $namingProduct?->gtin }}</span> — {{ __('import.fill_item_hint') }}</p>
@@ -208,7 +210,6 @@
                     <button type="button" wire:click="$set('namingId', null)" class="px-4 py-2 text-sm text-stone-600 hover:text-stone-800">{{ __('common.cancel') }}</button>
                     <button type="submit" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800">{{ __('common.save') }}</button>
                 </div>
-                @include('partials.modal-promo')
             </form>
         </div>
     @endif
@@ -216,6 +217,7 @@
     {{-- Generate & download labels PDF --}}
     <div x-show="batch" x-cloak class="fixed inset-0 bg-black/40 z-40 flex items-center justify-center" x-on:keydown.escape.window="close()">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6" x-on:click.outside="close()">
+            <div x-show="state === 'working' || state === 'done'">@include('partials.promo-offer')</div>
             <h2 class="text-lg font-semibold" x-text="batch?.name"></h2>
             <p class="text-sm text-stone-500 mb-4"><span x-text="batch?.count"></span> {{ __('import.labels_unit') }}</p>
 
@@ -265,12 +267,10 @@
                     <div class="h-full bg-amber-600 transition-all duration-300" :style="`width:${progress}%`"></div>
                 </div>
                 <p class="text-xs text-stone-500 mt-2">{{ __('import.estimate') }} <span x-text="remaining"></span> {{ __('import.seconds') }}</p>
-                @include('partials.promo-offer')
             </div>
 
             <div x-show="state === 'done'">
                 <p class="text-sm text-emerald-700 flex items-center gap-2">@svg('heroicon-o-check-circle', 'w-5 h-5') {{ __('import.ready') }}</p>
-                @include('partials.promo-offer')
                 <div class="flex justify-end pt-5">
                     <button type="button" x-on:click="close()" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition">OK</button>
                 </div>

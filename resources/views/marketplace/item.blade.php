@@ -17,8 +17,7 @@
         'itemListElement' => [
             ['@type' => 'ListItem', 'position' => 1, 'name' => config('app.name'), 'item' => route('home')],
             ['@type' => 'ListItem', 'position' => 2, 'name' => __('nav.offers'), 'item' => route('home') . '#offers'],
-            ['@type' => 'ListItem', 'position' => 3, 'name' => $category->name, 'item' => route('home') . '#offers'],
-            ['@type' => 'ListItem', 'position' => 4, 'name' => $offer->title, 'item' => $url],
+            ['@type' => 'ListItem', 'position' => 3, 'name' => $offer->title, 'item' => $url],
         ],
     ]];
     if ($faq) {
@@ -27,8 +26,11 @@
 @endphp
 @include('partials.public-head', [
     // "Name — Category | Markor"; a long name drops the category instead of being cut mid-word
-    'seoTitle' => (mb_strlen($offer->title . ' — ' . $category->name) <= 50 ? $offer->title . ' — ' . $category->name : \Illuminate\Support\Str::limit($offer->title, 50)) . ' | ' . config('app.name'),
-    'seoDescription' => \Illuminate\Support\Str::limit($offer->description ?: ($category->description ?: __('home.offers.subtitle')), 158),
+    // Chinese characters are wider in results: shorter limits there
+    'seoTitle' => (mb_strlen($offer->title . ' — ' . $category->name) <= ($zh = app()->getLocale() === 'zh' ? 22 : 50) ? $offer->title . ' — ' . $category->name : \Illuminate\Support\Str::limit($offer->title, $zh)) . ' | ' . config('app.name'),
+    'seoDescription' => \Illuminate\Support\Str::limit(trim(__('marketplace.meta', [
+        'title' => $offer->title, 'text' => rtrim((string) ($offer->description ?: $category->description), '. 。'), 'category' => $category->name,
+        'price' => $offer->price ?: __('offers.price_on_request')])), app()->getLocale() === 'zh' ? 84 : 158),
     'seoRoute' => 'marketplace.item',
     'seoParams' => ['offer' => $offer->slug],
     'jsonLd' => $jsonLd,
@@ -45,8 +47,8 @@
         <span>{{ $category->name }}</span>
     </nav>
 
-    <article class="grid md:grid-cols-2 gap-8 items-start">
-        <div class="bg-white border border-stone-200 rounded-2xl p-6 flex items-center justify-center aspect-square">
+    <article class="grid md:grid-cols-[2fr_3fr] gap-8 items-start">
+        <div @class(['bg-white border border-stone-200 rounded-2xl p-6 flex items-center justify-center', 'aspect-square max-h-[440px]' => $offer->image_url, 'h-56 md:h-72 bg-gradient-to-br from-amber-50 to-white' => !$offer->image_url])>
             @if($offer->image_url)
                 <img src="{{ $offer->image_url }}" alt="{{ $offer->title }}" class="max-h-full max-w-full object-contain">
             @else
@@ -73,6 +75,16 @@
                     <a href="{{ $offer->url }}" target="_blank" rel="noopener nofollow" class="inline-flex items-center gap-2 px-5 py-3 border border-stone-300 rounded-xl font-medium hover:bg-stone-100">@svg('heroicon-o-arrow-top-right-on-square', 'w-5 h-5') {{ __('marketplace.in_shop') }}</a>
                 @endif
             </div>
+            {{-- what comes with an order (fills the column, same for every item) --}}
+            <ul class="mt-8 grid sm:grid-cols-3 gap-3">
+                @foreach(['help' => 'heroicon-o-adjustments-horizontal', 'service' => 'heroicon-o-wrench-screwdriver', 'callback' => 'heroicon-o-phone-arrow-down-left'] as $point => $icon)
+                    <li class="bg-white border border-stone-200 rounded-xl p-3">
+                        @svg($icon, 'w-5 h-5 text-amber-700')
+                        <p class="text-sm font-semibold text-stone-900 mt-2">{{ __("marketplace.points.$point.title") }}</p>
+                        <p class="text-xs text-stone-500 mt-1 leading-relaxed">{{ __("marketplace.points.$point.text") }}</p>
+                    </li>
+                @endforeach
+            </ul>
             @if($category->market_url)
                 <p class="text-sm mt-4"><a href="{{ $category->market_url }}" target="_blank" rel="noopener nofollow" class="text-amber-700 hover:underline">{{ __('offers.more_items') }} →</a></p>
             @endif
@@ -96,7 +108,7 @@
     @if($related->isNotEmpty())
         <section class="mt-12">
             <h2 class="font-display font-bold text-xl text-stone-900 mb-4">{{ __('marketplace.related', ['category' => $category->name]) }}</h2>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div @class(['grid grid-cols-2 gap-4', 'lg:grid-cols-4' => $related->count() >= 4, 'lg:grid-cols-3' => $related->count() === 3, 'lg:grid-cols-2' => $related->count() <= 2])>
                 @foreach($related as $item)
                     <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace.item', app()->getLocale(), ['offer' => $item->slug]) }}" class="bg-white border border-stone-200 rounded-xl p-3 hover:border-amber-400 transition">
                         @if($item->image_url)<img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy" class="h-28 w-full object-contain">@else<div class="h-28 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">@svg($item->icon ?: $category->icon ?: 'heroicon-o-cube', 'w-9 h-9')</div>@endif
@@ -115,7 +127,8 @@
                 @foreach($others as $cat)
                     <div>
                         <h3 class="flex items-center gap-2 text-sm font-semibold text-stone-700">@svg($cat->icon ?: 'heroicon-o-cube', 'w-4 h-4 text-amber-700') {{ $cat->name }}</h3>
-                        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 mt-3">
+                        @php $n = $cat->offers->count(); $sm = (4 - $n % 4) % 4; $xs = $n % 2; @endphp
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
                             @foreach($cat->offers as $item)
                                 <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace.item', app()->getLocale(), ['offer' => $item->slug]) }}" class="bg-white border border-stone-200 rounded-lg p-2 hover:border-amber-400 transition">
                                     @if($item->image_url)<img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy" class="h-16 w-full object-contain">@else<div class="h-16 rounded bg-amber-50 text-amber-700 flex items-center justify-center">@svg($item->icon ?: $cat->icon ?: 'heroicon-o-cube', 'w-6 h-6')</div>@endif
@@ -123,6 +136,12 @@
                                     <p class="text-[11px] text-stone-500 mt-0.5 truncate">{{ $item->price ?: __('offers.price_on_request') }}</p>
                                 </a>
                             @endforeach
+                            @if($sm || $xs)
+                                <a href="{{ route('home') }}#offers" @class(['border-2 border-dashed border-stone-300 rounded-lg p-2 flex items-center justify-center text-center text-xs font-medium text-amber-700 hover:bg-amber-50',
+                                    'hidden' => !$xs, 'col-span-1' => $xs, 'sm:flex' => $sm, 'sm:hidden' => !$sm, 'sm:col-span-1' => $sm === 1, 'sm:col-span-2' => $sm === 2, 'sm:col-span-3' => $sm === 3, 'flex' => $xs])>
+                                    {{ __('marketplace.all_items') }} →
+                                </a>
+                            @endif
                         </div>
                     </div>
                 @endforeach

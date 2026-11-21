@@ -406,5 +406,36 @@
       "Without ICP filing and a China-hosted server, Baidu ranking for an overseas site is limited; expect Google/Bing (and WeChat/word-of-mouth links) to bring most Chinese traffic, and measure with Baidu Tongji only if the owner agrees.",
       "Mobile: most Baidu traffic is mobile; keep the responsive layout and add <meta name=\"applicable-device\" content=\"pc,mobile\">."
     ]
+  },
+  "drivers_pages": {
+    "url": "/drivers, /drivers/{brand-model}",
+    "note": "Driver pages link to the manufacturer's official download page; no files are hosted.",
+    "keywords": {
+      "uz": [
+        "zebra drayver",
+        "printer drayveri yuklab olish",
+        "godex drayver",
+        "xprinter drayver",
+        "etiketka printer drayveri"
+      ],
+      "ru": [
+        "драйвер zebra zd421",
+        "драйвер godex g500",
+        "драйвер xprinter xp-365b",
+        "скачать драйвер принтера этикеток",
+        "драйвер термопринтера"
+      ],
+      "zh": [
+        "斑马打印机驱动",
+        "Godex 驱动下载",
+        "Xprinter 驱动",
+        "标签打印机驱动下载"
+      ]
+    },
+    "title_pattern": {
+      "uz": ":name drayveri — yuklab olish va o'rnatish | Markor",
+      "ru": "Драйвер :name — скачать и установить | Markor",
+      "zh": ":name 驱动下载与安装｜Markor"
+    }
   }
 }

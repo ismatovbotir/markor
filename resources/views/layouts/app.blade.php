@@ -75,6 +75,10 @@
 
                 @can('admin')
                 <p class="px-4 pt-2 pb-1 text-xs font-semibold uppercase tracking-wide text-stone-400">{{ __('nav.admin') }}</p>
+                <a href="{{ route('admin.stats') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.stats') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
+                    @svg('heroicon-o-chart-bar', 'w-5 h-5 mr-3')
+                    <span>{{ __('nav.stats') }}</span>
+                </a>
                 <a href="{{ route('admin.clients') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.clients', 'admin.companies.*') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
                     @svg('heroicon-o-building-office-2', 'w-5 h-5 mr-3')
                     <span>{{ __('nav.companies') }}</span>
@@ -106,6 +110,10 @@
                 <a href="{{ route('admin.settings') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.settings') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
                     @svg('heroicon-o-cog-6-tooth', 'w-5 h-5 mr-3')
                     <span>{{ __('nav.settings') }}</span>
+                </a>
+                <a href="{{ route('admin.drivers') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.drivers') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
+                    @svg('heroicon-o-arrow-down-tray', 'w-5 h-5 mr-3')
+                    <span>{{ __('nav.drivers') }}</span>
                 </a>
                 <a href="{{ route('admin.banners') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.banners') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
                     @svg('heroicon-o-photo', 'w-5 h-5 mr-3')
