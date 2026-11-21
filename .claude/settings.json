@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan*)",
+      "Bash(composer*)",
+      "Bash(npm*)",
+      "Bash(grep*)",
+      "Bash(find*)",
+      "Bash(ls*)",
+      "Bash(mkdir*)",
+      "Bash(cp*)",
+      "Bash(mv*)",
+      "Bash(xargs php *)",
+      "Bash(sqlite3 /Users/botirismatov/project/laravel/markor/database/database.sqlite \"SELECT gtin, serial, LENGTH\\(serial\\) as sn_len, LENGTH\\(crypto_tail\\) as crypto_len FROM marking_codes LIMIT 5;\")",
+      "Bash(curl -s -X POST http://localhost:8000/login -H 'Content-Type: application/json' -d '{\"email\":\"admin@aslbelgi.local\", \"password\":\"admin123\"}' -c /tmp/cookies.txt)",
+      "Bash(pkill -f \"php artisan serve\")",
+      "Bash(chmod -R 775 /Users/botirismatov/project/laravel/markor/storage/app/)",
+      "Bash(tee /tmp/laravel_server.log)",
+      "Bash(sqlite3 /Users/botirismatov/project/laravel/markor/database/database.sqlite \"SELECT COUNT\\(*\\) FROM marking_codes WHERE code LIKE '%AF9%';\")"
+    ],
+    "deny": [],
+    "additionalDirectories": [
+      "/Users/botirismatov/project/laravel/markor/.claude",
+      "/private/tmp"
+    ]
+  }
+}

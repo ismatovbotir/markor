@@ -1,0 +1,119 @@
+<?php
+
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Guest\HomeController;
+use App\Http\Controllers\Guest\LabelStudioController;
+use App\Http\Controllers\Printing\LabelPdfController;
+use App\Http\Livewire\Aggregation\AggregationIndex;
+use App\Http\Livewire\Aggregation\AggregationScanner;
+use App\Http\Livewire\Catalog\ProductGroupIndex;
+use App\Http\Livewire\Catalog\ProductIndex;
+use App\Http\Livewire\Marking\ImportBatchIndex;
+use App\Http\Livewire\Marking\MarkingCodeIndex;
+use App\Http\Livewire\Offers\OfferIndex;
+use App\Http\Livewire\Printing\LabelTemplateIndex;
+use App\Http\Livewire\Printing\PrinterIndex;
+use App\Http\Livewire\Settings\UserIndex;
+use Illuminate\Support\Facades\Route;
+
+/*
+ * Three areas:
+ *   /               home page (marketing, SEO)
+ *   /label-design   public label studio — any spreadsheet, any design, nothing stored
+ *   /aslbelgi   registered users (role `user`), login required — each sees only their own Asl Belgisi data
+ *   /admin      super admin (role `admin`), sees all clients — label templates, users, reference data
+ */
+
+// Public label studio
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/robots.txt', [HomeController::class, 'robots'])->name('robots');
+Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
+Route::get('/label-image/{w}x{h}.svg', [\App\Http\Controllers\Guest\LabelImageController::class, 'show'])->whereNumber(['w', 'h'])->name('label-image');
+Route::post('/telegram/webhook/{secret}', function (string $secret, \Illuminate\Http\Request $request, \App\Domain\Telegram\BotHandler $bot) {
+    abort_unless(filled(config('telegram.webhook_secret')) && hash_equals(config('telegram.webhook_secret'), $secret), 404);
+    $bot->handle($request->all());
+
+    return response()->json(['ok' => true]);
+})->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class])->name('telegram.webhook');
+Route::post('/offer-request', [\App\Http\Controllers\Guest\OfferRequestController::class, 'store'])->middleware('throttle:6,1')->name('offer-request');
+Route::prefix('label-design')->group(function () {
+    Route::get('/', [LabelStudioController::class, 'index'])->name('studio');
+    Route::post('/parse', [LabelStudioController::class, 'parse'])->middleware('throttle:20,1')->name('studio.parse');
+    Route::get('/barcode.png', [LabelStudioController::class, 'barcode'])->middleware('throttle:300,1')->name('studio.barcode');
+    Route::post('/generate', [LabelStudioController::class, 'generate'])->middleware('throttle:10,1')->name('studio.generate');
+});
+
+// Interface language (uz / ru / zh)
+Route::get('/lang/{locale}', function (string $locale) {
+    abort_unless(isset(\App\Http\Middleware\SetLocale::LOCALES[$locale]), 404);
+    session(['locale' => $locale]);
+    auth()->user()?->update(['locale' => $locale]);
+
+    return back();
+})->name('locale');
+
+// Development only: switch between the super admin and a demo client (see config app.dev_role_switch)
+Route::get('/dev/as/{role}', function (string $role) {
+    abort_unless(config('app.dev_role_switch') && app()->isLocal(), 404);
+
+    $user = $role === 'admin'
+        ? \App\Models\User::where('role', 'admin')->where('is_active', true)->orderBy('id')->firstOrFail()
+        : \App\Models\User::firstOrCreate(
+            ['email' => 'demo-client@markor.local'],
+            ['name' => 'Demo mijoz', 'password' => \Illuminate\Support\Str::random(32), 'role' => 'user', 'locale' => app()->getLocale(), 'is_active' => true]
+        );
+
+    auth()->login($user);
+    session()->regenerate();
+
+    return redirect()->route($user->isAdmin() ? 'admin.clients' : 'import-batches.index');
+})->whereIn('role', ['admin', 'client'])->name('dev.as');
+
+// Auth
+Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+Route::post('/login/qr', [LoginController::class, 'loginByQr'])->name('login.qr');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('/register', [RegisterController::class, 'show'])->name('register');
+Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:5,1')->name('register.post');
+
+// Clients: Asl Belgisi marking codes
+Route::middleware('auth')->prefix('aslbelgi')->group(function () {
+    // available before the company is registered
+    Route::get('/company', \App\Http\Livewire\Account\CompanySetup::class)->middleware('client.only:admin.clients')->name('company.setup');
+    Route::get('/profile', \App\Http\Livewire\Account\ProfilePage::class)->name('profile');
+    Route::get('/help/{page?}', \App\Http\Livewire\Account\HelpPage::class)->name('help');
+});
+
+Route::middleware(['auth', 'company'])->prefix('aslbelgi')->group(function () {
+    Route::get('/', ImportBatchIndex::class)->middleware('client.only:admin.clients')->name('import-batches.index');
+    Route::get('/imports/{batch}/labels.pdf', [LabelPdfController::class, 'batch'])->name('import-batches.labels');
+    Route::get('/imports/{batch}/parts', [LabelPdfController::class, 'parts'])->name('import-batches.parts');
+    Route::get('/codes', MarkingCodeIndex::class)->name('marking-codes.index');
+    Route::get('/users', \App\Http\Livewire\Account\CompanyUsers::class)->middleware('client.only:admin.clients')->name('company.users');
+    Route::get('/balance', \App\Http\Livewire\Account\BalancePage::class)->middleware('client.only:admin.payments')->name('balance');
+    Route::get('/products', ProductIndex::class)->name('products.index');
+    Route::get('/offers', OfferIndex::class)->name('offers.index');
+    Route::get('/templates', \App\Http\Livewire\Printing\TemplateCatalog::class)->middleware('client.only:label-templates.index')->name('templates.catalog');
+    Route::get('/templates/{template}/preview.pdf', [LabelPdfController::class, 'preview'])->name('templates.preview');
+});
+
+// Service owner
+Route::middleware(['auth', 'can:admin'])->prefix('admin')->group(function () {
+    Route::redirect('/', '/admin/companies')->name('admin');
+    Route::get('/companies', \App\Http\Livewire\Admin\CompanyIndex::class)->name('admin.clients');
+    Route::get('/companies/{company}', \App\Http\Livewire\Admin\CompanyShow::class)->name('admin.companies.show');
+    Route::get('/offers/{category:slug}', \App\Http\Livewire\Admin\OfferCategoryManager::class)->name('admin.offers');
+    Route::get('/offer-requests', \App\Http\Livewire\Admin\OfferRequestIndex::class)->name('admin.offer-requests');
+    Route::get('/settings', \App\Http\Livewire\Admin\SettingsPage::class)->name('admin.settings');
+    Route::get('/telegram', \App\Http\Livewire\Admin\TelegramPage::class)->name('admin.telegram');
+    Route::get('/payments', \App\Http\Livewire\Admin\PaymentIndex::class)->name('admin.payments');
+    Route::get('/templates', LabelTemplateIndex::class)->name('label-templates.index');
+    Route::get('/templates/{template}/preview.pdf', [LabelPdfController::class, 'preview'])->name('label-templates.preview');
+    Route::get('/product-groups', ProductGroupIndex::class)->name('product-groups.index');
+    Route::get('/users', UserIndex::class)->name('users.index');
+    Route::get('/printers', PrinterIndex::class)->name('printers.index');
+    Route::get('/aggregations', AggregationIndex::class)->name('aggregations.index');
+    Route::get('/aggregations/scanner', AggregationScanner::class)->name('aggregations.scanner');
+});

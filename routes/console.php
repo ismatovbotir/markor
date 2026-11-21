@@ -1,0 +1,14 @@
+<?php
+
+use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Artisan;
+
+Artisan::command('inspire', function () {
+    $this->comment(Inspiring::quote());
+})->purpose('Display an inspiring quote');
+
+// Every minute: load queued CSV batches and check their products; keeps polling ~55 s so uploads start within seconds.
+\Illuminate\Support\Facades\Schedule::command('batches:process --for=55')->everyMinute()->withoutOverlapping(5);
+
+// Local copies of label PDFs that were not archived to Telegram are kept 7 days.
+\Illuminate\Support\Facades\Schedule::command('pdfs:prune --days=7')->dailyAt('03:30');

@@ -1,0 +1,84 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+[x-cloak] { display: none !important; }
+
+/* ---------- Public pages (home, label design) ---------- */
+@theme {
+    --font-display: 'Unbounded', 'Golos Text', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Golos Text', ui-sans-serif, system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Cutting-mat grid behind the hero */
+.mat-grid {
+    background-image:
+        linear-gradient(to right, rgb(120 113 108 / 0.10) 1px, transparent 1px),
+        linear-gradient(to bottom, rgb(120 113 108 / 0.10) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(ellipse 80% 70% at 60% 40%, #000 30%, transparent 80%);
+}
+
+/* A die-cut label on its liner */
+.label-stock {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 0 rgb(0 0 0 / 0.04), 0 12px 30px -12px rgb(68 64 60 / 0.35);
+}
+.liner {
+    background: repeating-linear-gradient(135deg, #e7e2da 0 10px, #ebe6df 10px 20px);
+    border-radius: 14px;
+}
+
+@keyframes feed {
+    from { transform: translateY(46px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+@keyframes rise {
+    from { transform: translateY(14px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+.feed { animation: feed 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.rise { animation: rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+    .feed, .rise { animation: none; }
+}
+
+/* ---------- Client help guides ---------- */
+.help-article h1 { font-size: 1.4rem; font-weight: 700; color: #1c1917; margin-bottom: .75rem; }
+.help-article h2 { font-size: 1.05rem; font-weight: 600; color: #1c1917; margin: 1.75rem 0 .6rem; }
+.help-article p { color: #44403c; line-height: 1.7; margin: .6rem 0; }
+.help-article ol { list-style: decimal; padding-left: 1.4rem; margin: .6rem 0; color: #44403c; line-height: 1.7; }
+.help-article ul { list-style: disc; padding-left: 1.4rem; margin: .6rem 0; color: #44403c; line-height: 1.7; }
+.help-article li { margin: .25rem 0; }
+.help-article strong { color: #1c1917; }
+.help-article blockquote { border-left: 3px solid #d97706; background: #fffbeb; padding: .6rem 1rem; border-radius: 0 .5rem .5rem 0; margin: 1rem 0; }
+.help-article blockquote p { margin: 0; color: #78350f; }
+.help-article code { background: #f5f5f4; padding: .1rem .35rem; border-radius: .25rem; font-size: .85em; }
+.help-article .help-shot { margin: 1rem 0 1.25rem; }
+.help-article .help-shot img { width: 100%; border: 1px solid #e7e5e4; border-radius: .75rem; box-shadow: 0 8px 24px -12px rgb(68 64 60 / .35); }
+
+/* "We offer" menu item: a soft light sweep, a gentle icon nudge and a pulsing dot */
+.offer-nav::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / .55) 50%, transparent 65%);
+    transform: translateX(-120%); animation: offer-sweep 6s ease-in-out infinite;
+}
+.offer-nav-icon { animation: offer-nudge 6s ease-in-out infinite; transform-origin: 50% 80%; }
+.offer-nav:hover .offer-nav-icon { animation-duration: .8s; }
+.offer-nav-ping { animation: offer-ping 2s cubic-bezier(0, 0, .2, 1) infinite; }
+@keyframes offer-sweep { 0%, 70% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+@keyframes offer-nudge { 0%, 80%, 100% { transform: rotate(0); } 84% { transform: rotate(-12deg); } 88% { transform: rotate(10deg); } 92% { transform: rotate(-6deg); } 96% { transform: rotate(3deg); } }
+@keyframes offer-ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+    .offer-nav::after, .offer-nav-icon, .offer-nav-ping { animation: none; }
+}

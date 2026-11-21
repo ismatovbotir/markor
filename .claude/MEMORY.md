@@ -1,0 +1,1 @@
+- [Phase 1 MVP Build Complete](project_state.md) — All 11 models + core infra built, seeded, tested
