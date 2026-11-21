@@ -69,8 +69,9 @@
     {{-- Hero --}}
     @php $banners = \App\Domain\Content\Banner::forHome(); $extra = $banners->where('is_default', false)->values(); @endphp
     {{-- Banners: the built-in hero is the default and first one; brand / reseller banners follow (Admin → Bannerlar) --}}
-    <div class="relative" @if($extra->isNotEmpty()) x-data="{ i: 0, n: {{ $extra->count() + 1 }}, t: null, go(k) { this.i = (k + this.n) % this.n }, start() { this.t = setInterval(() => this.go(this.i + 1), 7000) }, stop() { clearInterval(this.t) } }" x-init="start()" x-on:mouseenter="stop()" x-on:mouseleave="start()" @endif>
-        <div @if($extra->isNotEmpty()) x-show="i === 0" x-transition.opacity.duration.500ms @endif>
+    {{-- all slides share one grid cell: the slider keeps the height of the tallest (the default hero), nothing below jumps --}}
+    <div class="relative grid" @if($extra->isNotEmpty()) x-data="{ i: 0, n: {{ $extra->count() + 1 }}, t: null, go(k) { this.i = (k + this.n) % this.n }, start() { this.t = setInterval(() => this.go(this.i + 1), 7000) }, stop() { clearInterval(this.t) } }" x-init="start()" x-on:mouseenter="stop()" x-on:mouseleave="start()" @endif>
+        <div style="grid-area: 1 / 1" class="transition-opacity duration-500" @if($extra->isNotEmpty()) :class="i === 0 ? 'opacity-100' : 'opacity-0 invisible pointer-events-none'" @endif>
     <section class="relative overflow-hidden">
             <div class="absolute inset-0 mat-grid" aria-hidden="true"></div>
             <div class="relative max-w-6xl mx-auto px-4 pt-14 pb-20 lg:pt-20 lg:pb-28 grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
@@ -141,8 +142,8 @@
                 $external = $link && preg_match('#^https?://#i', $link);
                 $rel = trim(($external ? 'noopener ' : '') . ($b->is_sponsored ? 'sponsored' : ($external ? 'nofollow' : '')));
             @endphp
-            <section x-show="i === {{ $k + 1 }}" x-cloak x-transition.opacity.duration.500ms class="{{ $theme[0] }}">
-                <div class="max-w-6xl mx-auto px-4 py-14 lg:py-20 grid lg:grid-cols-2 gap-10 items-center min-h-[460px]">
+            <section style="grid-area: 1 / 1" class="{{ $theme[0] }} flex items-center transition-opacity duration-500 opacity-0 invisible pointer-events-none" :class="i === {{ $k + 1 }} ? '!opacity-100 !visible !pointer-events-auto' : ''" aria-hidden="true" :aria-hidden="i !== {{ $k + 1 }}">
+                <div class="w-full max-w-6xl mx-auto px-4 py-14 lg:py-20 grid lg:grid-cols-2 gap-10 items-center">
                     <div>
                         @if($b->is_sponsored)<span class="inline-block text-[11px] uppercase tracking-wider px-2 py-0.5 rounded border {{ $b->style === 'light' ? 'border-stone-300 text-stone-500' : 'border-white/40 text-white/80' }}">{{ __('banners.ad') }}</span>@endif
                         <h2 class="font-display font-bold text-3xl sm:text-4xl tracking-tight mt-3 {{ $theme[1] }}">{{ $b->localized('title') }}</h2>
@@ -155,7 +156,9 @@
                     </div>
                     @if($b->imageUrl())
                         <div class="flex items-center justify-center">
-                            <img src="{{ $b->imageUrl() }}" alt="{{ $b->localized('title') }}" loading="lazy" class="max-h-80 w-auto object-contain drop-shadow-xl">
+                            <div class="bg-white rounded-3xl shadow-2xl ring-1 ring-black/5 p-6 w-full max-w-md">
+                                <img src="{{ $b->imageUrl() }}" alt="{{ $b->localized('title') }}" loading="lazy" class="w-full h-72 object-contain">
+                            </div>
                         </div>
                     @endif
                 </div>

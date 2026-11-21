@@ -17,7 +17,11 @@ class BannerTest extends TestCase
     {
         parent::setUp();
         $this->seed(\Database\Seeders\BannerSeeder::class);
-        $this->assertSame(['Zebra etiketka printerlari', 'Godex etiketka printerlari'], Banner::where('is_default', false)->orderBy('sort_order')->pluck('title_uz')->all(), 'brand banners seeded');
+        $this->assertSame(4, Banner::where('is_default', false)->count(), 'Zebra printer, Godex, DS2278, MC3300 seeded');
+        foreach (Banner::where('is_default', false)->get() as $b) {
+            $this->assertFileExists(public_path($b->image_path), 'seeded picture ships with the code');
+            $this->assertSame('/' . $b->image_path, $b->imageUrl());
+        }
         Banner::where('is_default', false)->delete(); // tests below start from the default banner only
         $this->actingAs(User::create(['name' => 'A', 'email' => 'a@t.uz', 'password' => 'secret123', 'role' => 'admin', 'locale' => 'uz', 'is_active' => true]));
     }

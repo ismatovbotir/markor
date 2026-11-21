@@ -18,7 +18,6 @@
         </nav>
         <div class="flex items-center gap-3 text-sm">
             @include('partials.locale-switcher')
-            @if($headerTel)<a href="{{ $headerTel }}" class="text-stone-600 hover:text-amber-700 hidden xl:inline font-mono text-xs whitespace-nowrap">{{ $headerPhone }}</a>@endif
             @guest
                 {{-- Register: a new person with a "+" badge, label shows on hover --}}
                 <a href="{{ route('register') }}" title="{{ __('auth.register') }}" aria-label="{{ __('auth.register') }}"

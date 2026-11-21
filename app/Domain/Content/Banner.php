@@ -37,7 +37,9 @@ class Banner extends Model
 
     public function imageUrl(): ?string
     {
-        return \App\Domain\Offers\Models\Offer::publicUrl($this->image_path);
+        // seeded brand pictures ship with the code (public/images/…); uploaded ones are in storage
+        return str_starts_with((string) $this->image_path, 'images/') ? '/' . $this->image_path
+            : \App\Domain\Offers\Models\Offer::publicUrl($this->image_path);
     }
 
     /** A safe link: a site path ("/label-design") or http(s) URL only. */
