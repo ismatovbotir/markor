@@ -1127,8 +1127,7 @@
     "offers.drivers_hint": "Драйверы для этого принтера: на странице товара появится ссылка на драйвер.",
     "offers.add_driver": "Добавить драйвер",
     "offers.slug": "Адрес страницы",
-    "offers.slug_hint": "Создаётся из узбекского названия; латиница, цифры и дефис.",
-    "offers.slug_hint_edit": "Внимание: при смене адреса старые ссылки перестанут работать.",
+    "offers.slug_hint": "Создаётся автоматически из узбекского названия при сохранении и потом не меняется.",
     "offers.category": "Раздел",
     "offers.languages": "Языки",
     "banners.use_product_image": "Фото товара",
@@ -1145,5 +1144,9 @@
     "seo.faq.description": "Вопросы о Markor: этикетки из Excel, печать на принтер, коды Asl Belgisi, GS1 DataMatrix, драйверы принтеров и цены.",
     "seo_admin.page.aslbelgi": "Asl Belgisi",
     "seo_admin.page.marketplace": "Маркетплейс",
-    "seo_admin.page.faq": "Вопросы и ответы (FAQ)"
+    "seo_admin.page.faq": "Вопросы и ответы (FAQ)",
+    "nav.group.clients": "Клиенты",
+    "nav.group.site": "Сайт",
+    "nav.group.system": "Система",
+    "offers.slug_hint_fixed": "Адрес не меняется — ссылки и результаты поиска всегда работают."
 }

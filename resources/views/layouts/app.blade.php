@@ -74,78 +74,7 @@
                 @endcannot
 
                 @can('admin')
-                <p class="px-4 pt-2 pb-1 text-xs font-semibold uppercase tracking-wide text-stone-400">{{ __('nav.admin') }}</p>
-                <a href="{{ route('admin.stats') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.stats') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-chart-bar', 'w-5 h-5 mr-3')
-                    <span>{{ __('nav.stats') }}</span>
-                </a>
-                <a href="{{ route('admin.clients') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.clients', 'admin.companies.*') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-building-office-2', 'w-5 h-5 mr-3')
-                    <span>{{ __('nav.companies') }}</span>
-                </a>
-                <a href="{{ route('products.index') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('products.*') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-tag', 'w-5 h-5 mr-3')
-                    <span>{{ __('nav.products') }}</span>
-                </a>
-                <a href="{{ route('marking-codes.index') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('marking-codes.*') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-qr-code', 'w-5 h-5 mr-3')
-                    <span>{{ __('nav.codes') }}</span>
-                </a>
-                <a href="{{ route('product-groups.index') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('product-groups.*') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-rectangle-group', 'w-5 h-5 mr-3')
-                    <span>{{ __('nav.product_groups') }}</span>
-                </a>
-                @php $pendingPayments = \App\Domain\Billing\Payment::where('status', 'pending')->count(); @endphp
-                <a href="{{ route('admin.payments') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.payments') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-banknotes', 'w-5 h-5 mr-3')
-                    <span class="flex-1">{{ __('nav.payments') }}</span>
-                    @if($pendingPayments)<span class="ml-2 px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-semibold">{{ $pendingPayments }}</span>@endif
-                </a>
-                @php $tgUnmatched = \App\Domain\Telegram\TelegramLink::where('status', 'phone_mismatch')->where('updated_at', '>=', now()->subDays(7))->count(); @endphp
-                <a href="{{ route('admin.telegram') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.telegram') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-paper-airplane', 'w-5 h-5 mr-3')
-                    <span class="flex-1">Telegram</span>
-                    @if($tgUnmatched)<span class="ml-2 px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-semibold" title="{{ __('tg_admin.tab_unmatched') }}">{{ $tgUnmatched }}</span>@endif
-                </a>
-                <a href="{{ route('admin.settings') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.settings') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-cog-6-tooth', 'w-5 h-5 mr-3')
-                    <span>{{ __('nav.settings') }}</span>
-                </a>
-                <a href="{{ route('admin.drivers') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.drivers') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-arrow-down-tray', 'w-5 h-5 mr-3')
-                    <span>{{ __('nav.drivers') }}</span>
-                </a>
-                <a href="{{ route('admin.banners') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.banners') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-photo', 'w-5 h-5 mr-3')
-                    <span>{{ __('nav.banners') }}</span>
-                </a>
-                <a href="{{ route('admin.seo') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('admin.seo') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-magnifying-glass', 'w-5 h-5 mr-3')
-                    <span class="flex-1">SEO</span>
-                    @if(\App\Support\Seo::noindex())<span class="ml-2 px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-semibold">noindex</span>@endif
-                </a>
-
-                <p class="px-4 pt-4 pb-1 text-xs font-semibold uppercase tracking-wide text-teal-700 flex items-center gap-1.5"><span class="offer-nav-icon inline-flex">@svg('heroicon-o-shopping-bag', 'w-3.5 h-3.5')</span>{{ __('nav.offers') }}</p>
-                @php $newRequests = \App\Domain\Offers\Models\OfferRequest::where('status', 'new')->count(); @endphp
-                <a href="{{ route('admin.offer-requests') }}" class="flex items-center px-4 py-2.5 rounded-lg font-medium transition {{ request()->routeIs('admin.offer-requests') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-inbox-arrow-down', 'w-5 h-5 mr-3')
-                    <span class="flex-1">{{ __('nav.offer_requests') }}</span>
-                    @if($newRequests)<span class="ml-2 px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-semibold">{{ $newRequests }}</span>@endif
-                </a>
-                @php $newTemplateRequests = \App\Domain\Printing\Models\TemplateRequest::where('status', 'new')->count(); @endphp
-                <a href="{{ route('admin.template-requests') }}" class="flex items-center px-4 py-2.5 rounded-lg font-medium transition {{ request()->routeIs('admin.template-requests') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-document-plus', 'w-5 h-5 mr-3')
-                    <span class="flex-1">{{ __('nav.template_requests') }}</span>
-                    @if($newTemplateRequests)<span class="ml-2 px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-semibold">{{ $newTemplateRequests }}</span>@endif
-                </a>
-                @foreach(\App\Domain\Offers\Models\OfferCategory::orderBy('sort_order')->orderBy('id')->get() as $offerCategory)
-                    @php $route = $offerCategory->isTemplates() ? route('label-templates.index') : route('admin.offers', $offerCategory); @endphp
-                    @php $active = $offerCategory->isTemplates() ? request()->routeIs('label-templates.*') || request()->is('admin/offers/' . $offerCategory->slug) : request()->is('admin/offers/' . $offerCategory->slug); @endphp
-                    <a href="{{ $route }}" class="flex items-center px-4 py-2.5 rounded-lg font-medium transition {{ $active ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }} {{ $offerCategory->is_active ? '' : 'opacity-50' }}">
-                        @svg($offerCategory->icon ?: 'heroicon-o-cube', 'w-5 h-5 mr-3')
-                        <span>{{ $offerCategory->name }}</span>
-                    </a>
-                @endforeach
+                    @include('partials.admin-nav')
                 @endcan
             @endauth
         </nav>

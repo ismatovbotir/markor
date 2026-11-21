@@ -53,11 +53,14 @@ class OfferCatalogTest extends TestCase
         $this->assertSame('termo-printer-x1', $item->slug);
         Storage::disk('public')->assertExists($item->image_path);
 
-        // edit page: same item, own address; a taken address is refused
-        $this->get(route('admin.offers.edit', [$printers, $item]))->assertOk()->assertSee(__('offers.sec_texts'));
-        $other = $printers->offers()->where('id', '!=', $item->id)->firstOrFail();
+        // the address is fixed: renaming or a forged slug change keeps it; a same-name item gets "-2"
+        $this->get(route('admin.offers.edit', [$printers, $item]))->assertOk()->assertSee('/marketplace/termo-printer-x1');
         Livewire::test(\App\Http\Livewire\Admin\OfferForm::class, ['category' => $printers, 'offer' => $item])
-            ->set('item.slug', $other->slug)->call('save')->assertHasErrors('item.slug');
+            ->set('item.title_uz', 'Boshqa nom')->set('item.slug', 'hacked')->call('save')->assertHasNoErrors();
+        $this->assertSame('termo-printer-x1', $item->fresh()->slug);
+        Livewire::test(\App\Http\Livewire\Admin\OfferForm::class, ['category' => $printers])
+            ->set('item.title_uz', 'Termo printer X1')->call('save')->assertHasNoErrors();
+        $this->assertTrue($printers->offers()->where('slug', 'termo-printer-x1-2')->exists());
 
         auth()->logout();
         $this->get('/')->assertOk()->assertSee('https://uzum.uz/uz/shop/markor')->assertSee("Ko'proq mahsulotlar");

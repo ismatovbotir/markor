@@ -7,7 +7,6 @@ use App\Domain\Offers\Models\Offer;
 use App\Domain\Offers\Models\OfferCategory;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -27,7 +26,6 @@ class OfferForm extends Component
     public $addDriver = '';
     public $photo = null;
     public bool $removeImage = false;
-    public bool $slugTouched = false;
     public string $locale = 'uz';
     public string $aiNotes = '';
     public ?string $aiMessage = null;
@@ -48,18 +46,27 @@ class OfferForm extends Component
             $this->item['faq'] = $offer->faq ?? [];
             $this->item['is_active'] = (bool) $offer->is_active;
             $this->driverIds = $offer->drivers()->pluck('printer_drivers.id')->all();
-            $this->slugTouched = true;
         }
     }
 
-    /** New item: the address follows the Uzbek name until the admin edits it. */
+    /** New item: the address preview follows the Uzbek name (it is fixed once the item is saved). */
     public function updatedItem($value, $key): void
     {
-        if ($key === 'slug') {
-            $this->slugTouched = true;
-        } elseif ($key === 'title_uz' && !$this->slugTouched) {
+        if ($key === 'title_uz' && !$this->offerId) {
             $this->item['slug'] = Str::slug($value);
         }
+    }
+
+    /** A free address from the Uzbek name: "godex-g500u", then "godex-g500u-2" … */
+    private static function freeSlug(string $title): string
+    {
+        $base = Str::slug($title) ?: 'item';
+        $slug = $base;
+        for ($i = 2; Offer::where('slug', $slug)->exists(); $i++) {
+            $slug = "$base-$i";
+        }
+
+        return $slug;
     }
 
     public function updatedAddDriver($id): void
@@ -140,7 +147,7 @@ class OfferForm extends Component
             $this->item["description_$l"] = $result["description_$l"];
         }
         $this->item['faq'] = $result['faq'];
-        if (!$this->slugTouched) {
+        if (!$this->offerId) {
             $this->item['slug'] = Str::slug($this->item['title_uz']);
         }
         $this->aiMessage = '✓ ' . __('ai.generated');
@@ -148,9 +155,7 @@ class OfferForm extends Component
 
     public function save()
     {
-        $this->item['slug'] = Str::slug($this->item['slug'] ?: $this->item['title_uz']);
         $data = $this->validate([
-            'item.slug'           => ['required', 'string', 'max:120', 'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/', Rule::unique('offers', 'slug')->ignore($this->offerId)],
             'item.title_uz'       => 'required|string|max:160',
             'item.title_ru'       => 'nullable|string|max:160',
             'item.title_zh'       => 'nullable|string|max:160',
@@ -167,7 +172,8 @@ class OfferForm extends Component
             'driverIds'           => 'array', 'driverIds.*' => 'integer|exists:printer_drivers,id',
         ] + $this->photoRules());
 
-        $values = collect($data['item'])->except('image_path')->map(fn ($v) => is_string($v) && trim($v) === '' ? null : $v)->all();
+        // the page address is never edited: set once from the Uzbek name, links and search results keep working
+        $values = collect($data['item'])->except(['image_path', 'slug'])->map(fn ($v) => is_string($v) && trim($v) === '' ? null : $v)->all();
         // keep only questions that have an Uzbek question and answer
         $values['faq'] = collect($values['faq'] ?? [])->filter(fn ($f) => filled($f['q_uz'] ?? null) && filled($f['a_uz'] ?? null))->values()->all() ?: null;
 
@@ -186,6 +192,7 @@ class OfferForm extends Component
             $offer->update($values);
         } else {
             $offer = $this->category->offers()->create($values + [
+                'slug' => self::freeSlug($values['title_uz']),
                 'category' => $this->category->slug, 'icon' => $this->category->icon,
                 'sort_order' => (int) $this->category->offers()->max('sort_order') + 1,
             ]);

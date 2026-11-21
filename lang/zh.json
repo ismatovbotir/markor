@@ -1127,8 +1127,7 @@
     "offers.drivers_hint": "适用于此打印机的驱动：商品页面将显示驱动链接。",
     "offers.add_driver": "添加驱动",
     "offers.slug": "页面地址",
-    "offers.slug_hint": "根据乌兹别克语名称自动生成；拉丁字母、数字和连字符。",
-    "offers.slug_hint_edit": "注意：更改地址后，旧链接将失效。",
+    "offers.slug_hint": "保存时根据乌兹别克语名称自动生成，之后不再更改。",
     "offers.category": "分类",
     "offers.languages": "语言",
     "banners.use_product_image": "商品图片",
@@ -1145,5 +1144,9 @@
     "seo.faq.description": "关于Markor的常见问题：用Excel制作标签、打印机打印、Asl Belgisi标识码、GS1 DataMatrix、打印机驱动及价格。",
     "seo_admin.page.aslbelgi": "Asl Belgisi",
     "seo_admin.page.marketplace": "商品市场",
-    "seo_admin.page.faq": "常见问题（FAQ）"
+    "seo_admin.page.faq": "常见问题（FAQ）",
+    "nav.group.clients": "客户",
+    "nav.group.site": "网站",
+    "nav.group.system": "系统",
+    "offers.slug_hint_fixed": "地址固定不变，链接和搜索结果始终有效。"
 }

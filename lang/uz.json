@@ -1127,8 +1127,7 @@
     "offers.drivers_hint": "Shu printerga mos drayverlar: mahsulot sahifasida drayver havolasi chiqadi.",
     "offers.add_driver": "Drayver qo'shish",
     "offers.slug": "Sahifa manzili",
-    "offers.slug_hint": "O'zbekcha nomdan avtomatik yasaladi; lotin harflari, raqamlar va chiziqcha.",
-    "offers.slug_hint_edit": "Diqqat: manzil o'zgarsa, eski havolalar ishlamay qoladi.",
+    "offers.slug_hint": "Saqlanganda o'zbekcha nomdan avtomatik yasaladi va keyin o'zgarmaydi.",
     "offers.category": "Bo'lim",
     "offers.languages": "Tillar",
     "banners.use_product_image": "Mahsulot rasmi",
@@ -1145,5 +1144,9 @@
     "seo.faq.description": "Markor haqida savollar: etiketkani Exceldan yaratish, printerda chop etish, Asl Belgisi kodlari, GS1 DataMatrix, printer drayverlari va narxlar.",
     "seo_admin.page.aslbelgi": "Asl Belgisi",
     "seo_admin.page.marketplace": "Marketplace",
-    "seo_admin.page.faq": "Savol-javob (FAQ)"
+    "seo_admin.page.faq": "Savol-javob (FAQ)",
+    "nav.group.clients": "Mijozlar",
+    "nav.group.site": "Sayt",
+    "nav.group.system": "Tizim",
+    "offers.slug_hint_fixed": "Manzil o'zgarmaydi — havolalar va qidiruv natijalari doim ishlaydi."
 }

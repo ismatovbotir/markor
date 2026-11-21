@@ -210,13 +210,12 @@
                         <span class="relative shrink-0 w-10 h-6 rounded-full bg-stone-300 peer-checked:bg-emerald-600 transition after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-4"></span>
                     </label>
                     <div>
-                        <label for="o-slug" class="block text-xs font-medium text-stone-700 mb-1">{{ __('offers.slug') }}</label>
-                        <div class="flex rounded-lg border border-stone-200 focus-within:ring-2 focus-within:ring-amber-400 overflow-hidden bg-white">
-                            <span class="px-3 py-2 text-sm text-stone-400 bg-stone-50 border-r border-stone-200 whitespace-nowrap">/marketplace/</span>
-                            <input id="o-slug" wire:model.live.debounce.500ms="item.slug" type="text" maxlength="120" class="flex-1 min-w-0 px-3 py-2 text-sm focus:outline-none">
-                        </div>
-                        <p class="text-[11px] text-stone-500 mt-1">{{ $offerId ? __('offers.slug_hint_edit') : __('offers.slug_hint') }}</p>
-                        @error('item.slug')<p class="text-rose-600 text-xs mt-1">{{ $message }}</p>@enderror
+                        <p class="text-xs font-medium text-stone-700 mb-1">{{ __('offers.slug') }}</p>
+                        <p class="flex items-center gap-2 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-600 font-mono break-all">
+                            @svg('heroicon-o-lock-closed', 'w-4 h-4 text-stone-400 shrink-0')
+                            /marketplace/{{ $item['slug'] ?: '…' }}
+                        </p>
+                        <p class="text-[11px] text-stone-500 mt-1">{{ $offerId ? __('offers.slug_hint_fixed') : __('offers.slug_hint') }}</p>
                     </div>
                 </div>
             </section>
