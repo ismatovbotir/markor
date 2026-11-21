@@ -488,9 +488,6 @@
     "bot.items_need_name": "⚠️ Товары из партии <b>:file</b> не найдены в классификаторе tasnif.soliq.uz:\n:gtins\n\nПожалуйста, укажите название товара в кабинете: :url",
     "import.more_unnamed": "Ещё :count без названия — укажите",
     "import.unnamed_title": "Без названия: :count. PDF создать можно, но на этикетке не будет названия.",
-    "settings.pdf_archive": "Архив PDF (Telegram)",
-    "settings.archive_chat": "ID чата архива",
-    "settings.archive_hint": "Каждый созданный PDF отправляется в этот чат и хранится там; повторные выдачи клиентам берутся оттуда. ID закрытого канала (-100…) или оставьте пустым — тогда в Telegram супер-админа, если он подключён.",
     "templates.labels_per_pdf": "Этикеток в PDF",
     "templates.labels_per_pdf_hint": "Большая партия делится на PDF-части с таким числом этикеток (целыми рядами, обычно один рулон).",
     "import.parts_title": "Части PDF",
@@ -676,5 +673,17 @@
     "seo_admin.robots_extra": "robots.txt — дополнительные строки",
     "seo_admin.robots_hint": "Каждая строка: Disallow:, Allow:, User-agent:, Clean-param:, Crawl-delay: или # комментарий. Кабинет, админка и служебные адреса уже закрыты.",
     "seo_admin.robots_error": "Каждая строка должна быть директивой robots.txt (например Disallow: /путь) или # комментарием.",
-    "seo_admin.sitemap_hint": "sitemap.xml формируется сам: :count адресов (каждая страница на 3 языках) с hreflang; lastmod — дата последнего изменения текстов."
+    "seo_admin.sitemap_hint": "sitemap.xml формируется сам: :count адресов (каждая страница на 3 языках) с hreflang; lastmod — дата последнего изменения текстов.",
+    "tg_admin.bot_settings": "Telegram-бот и webhook",
+    "tg_admin.check": "Проверить",
+    "tg_admin.admin_chat": "Чат админа (системные уведомления)",
+    "tg_admin.test": "Тестовое сообщение",
+    "tg_admin.test_text": "Markor: системные уведомления приходят в этот чат (:site).",
+    "tg_admin.test_sent": "✓ Тестовое сообщение отправлено.",
+    "tg_admin.test_failed": "Не отправлено: неверный ID чата или боту не нажали /start.",
+    "tg_admin.settings_moved": "Настройки бота, webhook и чата админа:",
+    "tg_admin.archive_chat": "Группа архива PDF",
+    "tg_admin.chat_fallback": "нет в .env — используется :chat",
+    "tg_admin.chat_missing": "не указан в .env",
+    "tg_admin.chats_env_hint": "ID чатов меняются в файле .env, затем php artisan config:clear. Бот должен быть админом группы."
 }

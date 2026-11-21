@@ -488,9 +488,6 @@
     "bot.items_need_name": "⚠️ 批次 <b>:file</b> 中的以下商品在 tasnif.soliq.uz 分类目录中未找到：\n:gtins\n\n请在个人中心填写商品名称：:url",
     "import.more_unnamed": "另有 :count 个商品无名称，请填写",
     "import.unnamed_title": ":count 个商品未填写名称。仍可生成 PDF，但标签上不会显示名称。",
-    "settings.pdf_archive": "PDF 存档（Telegram）",
-    "settings.archive_chat": "存档聊天 ID",
-    "settings.archive_hint": "每个生成的 PDF 都会发送到此聊天并保存，再次发给客户时从这里获取。填写私有频道 ID（-100…），或留空则发送到已绑定 Telegram 的超级管理员。",
     "templates.labels_per_pdf": "每个 PDF 标签数",
     "templates.labels_per_pdf_hint": "大批次按此数量拆分为多个 PDF（按整行，通常为一卷）。",
     "import.parts_title": "PDF 分段",
@@ -676,5 +673,17 @@
     "seo_admin.robots_extra": "robots.txt 附加规则",
     "seo_admin.robots_hint": "每行：Disallow:、Allow:、User-agent:、Clean-param:、Crawl-delay: 或 # 注释。个人中心、后台和服务地址已默认禁止。",
     "seo_admin.robots_error": "每行必须是 robots.txt 指令（如 Disallow: /路径）或 # 注释。",
-    "seo_admin.sitemap_hint": "sitemap.xml 自动生成：:count 个地址（每个页面 3 种语言），含 hreflang；lastmod 为文本最后修改日期。"
+    "seo_admin.sitemap_hint": "sitemap.xml 自动生成：:count 个地址（每个页面 3 种语言），含 hreflang；lastmod 为文本最后修改日期。",
+    "tg_admin.bot_settings": "Telegram 机器人和 webhook",
+    "tg_admin.check": "检查",
+    "tg_admin.admin_chat": "管理员聊天（系统通知）",
+    "tg_admin.test": "测试消息",
+    "tg_admin.test_text": "Markor：系统通知将发送到此聊天（:site）。",
+    "tg_admin.test_sent": "✓ 测试消息已发送。",
+    "tg_admin.test_failed": "未发送：聊天 ID 错误或未对机器人点击 /start。",
+    "tg_admin.settings_moved": "机器人、webhook 和管理员聊天设置：",
+    "tg_admin.archive_chat": "PDF 存档群组",
+    "tg_admin.chat_fallback": ".env 中未设置——使用 :chat",
+    "tg_admin.chat_missing": ".env 中未设置",
+    "tg_admin.chats_env_hint": "聊天 ID 在 .env 文件中修改，然后运行 php artisan config:clear。机器人需是群组管理员。"
 }

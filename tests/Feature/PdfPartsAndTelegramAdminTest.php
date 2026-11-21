@@ -69,7 +69,7 @@ class PdfPartsAndTelegramAdminTest extends TestCase
 
     public function test_admin_telegram_lists_and_webhook(): void
     {
-        config(['telegram.token' => 'TEST', 'app.url' => 'https://markor.uz']);
+        config(['telegram.token' => 'TEST', 'app.url' => 'https://markor.uz', 'telegram.admin_chat' => '987654321', 'telegram.archive_chat' => '-1005555']);
         Http::fake(['api.telegram.org/*' => Http::response(['ok' => true, 'result' => ['username' => 'markor_bot', 'first_name' => 'Markor', 'url' => '']])]);
         $client = $this->client();
         TelegramLink::create(['user_id' => $client->id, 'token' => 'a', 'chat_id' => '1', 'status' => 'phone_mismatch', 'shared_phone' => '+998909999999', 'tg_username' => 'ali_tg', 'expires_at' => now()]);
@@ -79,10 +79,21 @@ class PdfPartsAndTelegramAdminTest extends TestCase
         $this->actingAs($admin);
         Livewire::test(TelegramPage::class)
             ->set('tab', 'unmatched')->assertSee('+998909999999')->assertSee('ali_tg')
-            ->set('tab', 'matched')->assertSee('+998901112233')
-            ->call('setWebhook')->assertSee('Webhook o\'rnatildi');
+            ->set('tab', 'matched')->assertSee('+998901112233');
+        Livewire::test(\App\Http\Livewire\Admin\TelegramBotSettings::class)
+            ->call('check')->assertSee('@markor_bot')
+            ->call('setWebhook')->assertSee('Webhook o\'rnatildi')
+            ->call('deleteWebhook')->assertSee(__('tg_admin.webhook_deleted'))
+            ->call('testChat', 'admin')->assertSee(__('tg_admin.test_sent'))
+            ->assertSee('987654321')->assertSee('-1005555');   // both chats from .env shown
+        $this->assertSame('987654321', app(\App\Domain\Telegram\Notifier::class)->adminChat(), 'alerts go to the admin chat');
+        $this->assertSame('-1005555', app(\App\Domain\Telegram\Notifier::class)->archiveChat(), 'PDFs go to the archive group');
+
+        $this->get(route('admin.settings'))->assertOk()->assertSeeLivewire(\App\Http\Livewire\Admin\TelegramBotSettings::class);
 
         Http::assertSent(fn ($r) => str_contains($r->url(), 'setWebhook') && str_starts_with($r['url'], 'https://markor.uz/telegram/webhook/'));
+        Http::assertSent(fn ($r) => str_contains($r->url(), 'deleteWebhook'));
+        Http::assertSent(fn ($r) => str_contains($r->url(), 'sendMessage') && $r['chat_id'] == '987654321');
         $this->actingAs($client)->get(route('admin.telegram'))->assertForbidden();
     }
 }

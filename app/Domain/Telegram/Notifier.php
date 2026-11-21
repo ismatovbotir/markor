@@ -63,15 +63,25 @@ class Notifier
         ));
     }
 
-    /** The super admin's chat: the archive chat from Sozlamalar, otherwise the super admin's linked Telegram. */
+    /** System alerts: TELEGRAM_ADMIN_CHAT_ID, otherwise the super admin's linked Telegram. */
     public function adminChat(): ?string
     {
         if (!$this->api->enabled()) {
             return null;
         }
 
-        return config('telegram.archive_chat')
+        return config('telegram.admin_chat')
             ?: User::where('role', 'admin')->whereNotNull('telegram_chat_id')->orderBy('id')->value('telegram_chat_id');
+    }
+
+    /** PDF archive: TELEGRAM_ARCHIVE_CHAT_ID, otherwise the admin chat. */
+    public function archiveChat(): ?string
+    {
+        if (!$this->api->enabled()) {
+            return null;
+        }
+
+        return config('telegram.archive_chat') ?: $this->adminChat();
     }
 
     private function toCompany(?int $companyId, string $key, \Closure $replace): void

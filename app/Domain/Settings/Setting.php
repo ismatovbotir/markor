@@ -20,7 +20,6 @@ class Setting extends Model
         'contact.telegram'     => 'contact.telegram',
         'contact.telegram_bot' => 'contact.telegram_bot',
         'contact.email'        => 'contact.email',
-        'telegram.archive_chat' => 'telegram.archive_chat',
         'telegram.webhook_secret' => 'telegram.webhook_secret',
         'billing.card_number'  => 'billing.card_number',
         'billing.card_holder'  => 'billing.card_holder',

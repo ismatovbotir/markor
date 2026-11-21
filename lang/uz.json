@@ -488,9 +488,6 @@
     "bot.items_need_name": "⚠️ <b>:file</b> partiyasidagi quyidagi mahsulotlar tasnif.soliq.uz klassifikatorida topilmadi:\n:gtins\n\nIltimos, kabinetda mahsulot nomini kiriting: :url",
     "import.more_unnamed": "Yana :count ta mahsulot nomsiz — nomini kiriting",
     "import.unnamed_title": ":count ta mahsulot nomi kiritilmagan. PDF yaratish mumkin, lekin etiketkada nom bo'lmaydi.",
-    "settings.pdf_archive": "PDF arxivi (Telegram)",
-    "settings.archive_chat": "Arxiv chat ID",
-    "settings.archive_hint": "Yaratilgan har bir PDF shu chatga yuboriladi va saqlanadi; mijozlarga qayta yuborish shundan olinadi. Yopiq kanal ID si (-100…) yoki bo'sh qoldiring — unda Telegram ulangan super admin chatiga yuboriladi.",
     "templates.labels_per_pdf": "PDF'da etiketka",
     "templates.labels_per_pdf_hint": "Katta partiya shu sondagi etiketkali PDF qismlarga bo'linadi (to'liq qatorlar bilan, odatda bitta rulon).",
     "import.parts_title": "PDF qismlari",
@@ -676,5 +673,17 @@
     "seo_admin.robots_extra": "robots.txt — qo'shimcha qatorlar",
     "seo_admin.robots_hint": "Har bir qator: Disallow:, Allow:, User-agent:, Clean-param:, Crawl-delay: yoki # izoh. Kabinet, admin va xizmat manzillari allaqachon yopilgan.",
     "seo_admin.robots_error": "Har bir qator robots.txt buyrug'i (masalan Disallow: /yo'l) yoki # izoh bo'lishi kerak.",
-    "seo_admin.sitemap_hint": "sitemap.xml avtomatik: :count ta manzil (har bir sahifa 3 tilda), hreflang bilan; lastmod — matnlar oxirgi o'zgargan sana."
+    "seo_admin.sitemap_hint": "sitemap.xml avtomatik: :count ta manzil (har bir sahifa 3 tilda), hreflang bilan; lastmod — matnlar oxirgi o'zgargan sana.",
+    "tg_admin.bot_settings": "Telegram bot va webhook",
+    "tg_admin.check": "Tekshirish",
+    "tg_admin.admin_chat": "Admin chat (tizim xabarlari)",
+    "tg_admin.test": "Sinov xabari",
+    "tg_admin.test_text": "Markor: tizim xabarlari shu chatga keladi (:site).",
+    "tg_admin.test_sent": "✓ Sinov xabari yuborildi.",
+    "tg_admin.test_failed": "Yuborilmadi: chat ID noto'g'ri yoki botga /start bosilmagan.",
+    "tg_admin.settings_moved": "Bot, webhook va admin chat sozlamalari:",
+    "tg_admin.archive_chat": "PDF arxivi guruhi",
+    "tg_admin.chat_fallback": ".env da yo'q — :chat ishlatiladi",
+    "tg_admin.chat_missing": ".env da kiritilmagan",
+    "tg_admin.chats_env_hint": "Chat ID'lar .env faylida o'zgartiriladi, keyin php artisan config:clear. Bot guruhda admin bo'lishi kerak."
 }

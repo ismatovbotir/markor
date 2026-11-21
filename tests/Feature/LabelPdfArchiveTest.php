@@ -47,7 +47,7 @@ class LabelPdfArchiveTest extends TestCase
     /** Fake Telegram: archives documents and serves them back via getFile. */
     private function fakeTelegram(): void
     {
-        config(['telegram.token' => 'TEST', 'telegram.archive_chat' => '-1009999']);
+        config(['telegram.token' => 'TEST', 'telegram.admin_chat' => '-1009999']);
         $this->classifier = Http::response(['success' => true, 'data' => []]);
         Http::fake(function ($request) {
             $url = $request->url();

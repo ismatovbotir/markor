@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call(SuperAdminSeeder::class);
         $this->call(ProductGroupSeeder::class);
         $this->call(OfferSeeder::class);
+        $this->call(SettingsSeeder::class);
 
         if (app()->isProduction()) {
             return; // demo client, company and printers are for development only

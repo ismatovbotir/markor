@@ -118,6 +118,6 @@ class LabelPdfStore
             return null;
         }
 
-        return app(\App\Domain\Telegram\Notifier::class)->adminChat();
+        return app(\App\Domain\Telegram\Notifier::class)->archiveChat();
     }
 }

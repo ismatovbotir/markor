@@ -6,6 +6,9 @@ return [
     'token'          => env('TELEGRAM_BOT_TOKEN'),
     'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
     'link_ttl'       => 15,   // minutes a QR link stays valid
-    // chat where generated PDFs are archived (a private channel id like -100…, or a user chat id); empty = the super admin's linked Telegram
-    'archive_chat'   => env('TELEGRAM_ARCHIVE_CHAT'),
+    // Set in .env only (shown read-only in Sozlamalar):
+    // super admin chat for system alerts (user id or group id -100…); empty = the super admin's linked Telegram
+    'admin_chat'     => env('TELEGRAM_ADMIN_CHAT_ID'),
+    // group / channel where every generated PDF is archived and re-sent to clients by file id; empty = the admin chat
+    'archive_chat'   => env('TELEGRAM_ARCHIVE_CHAT_ID', env('TELEGRAM_ARCHIVE_CHAT')),
 ];

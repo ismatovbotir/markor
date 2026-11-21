@@ -33,15 +33,12 @@
             </label>
             <p class="text-[11px] text-stone-500 sm:col-span-2">{{ __('settings.card_hint') }}</p>
         </div>
-        <div class="pt-4 border-t border-stone-100">
-            <h2 class="font-semibold text-sm mb-3">{{ __('settings.pdf_archive') }}</h2>
-            <label class="block text-xs font-medium text-stone-600 mb-1" for="archive">{{ __('settings.archive_chat') }}</label>
-            <input id="archive" wire:model="archiveChat" type="text" placeholder="-1001234567890" class="{{ $field }} font-mono">
-            <p class="text-[11px] text-stone-500 mt-1">{{ __('settings.archive_hint') }}</p>
-            @error('archiveChat') <p class="text-rose-500 text-xs mt-1">{{ $message }}</p> @enderror
-        </div>
         <div class="flex justify-end pt-2">
             <button type="submit" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition">{{ __('common.save') }}</button>
         </div>
     </form>
+
+    <div class="mt-6">
+        @livewire(\App\Http\Livewire\Admin\TelegramBotSettings::class)
+    </div>
 </div>
