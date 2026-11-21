@@ -45,7 +45,11 @@
         <div>
             <h1 class="font-display font-bold text-2xl text-stone-900 tracking-tight">{{ __('studio.title') }}</h1>
             <p class="text-stone-500 mt-1">{{ __('studio.subtitle') }}</p>
-            <p class="text-xs text-stone-400 mt-1">{{ __('studio.autosave') }}</p>
+            <p class="text-xs text-stone-400 mt-1">
+                <span x-show="consent === 'yes'">{{ __('studio.autosave') }}</span>
+                <span x-show="consent !== 'yes'" x-cloak>{{ __('studio.storage_off') }}</span>
+                · <button type="button" x-on:click="consentModal = true" class="underline hover:text-amber-700">{{ __('studio.storage_change') }}</button>
+            </p>
         </div>
         <button type="button" x-on:click="if (confirm(@js(__('studio.start_over_confirm')))) startOver()"
                 class="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-rose-600 mt-1">
@@ -168,6 +172,36 @@
             <a href="{{ auth()->check() ? route('import-batches.index') : route('register') }}" class="font-semibold underline">{{ __('studio.marking_cta') }}</a></p>
         <p x-show="error" x-cloak x-text="error" class="text-sm text-rose-600 mt-3"></p>
     </section>
+
+    {{-- Saving the design in this browser: asked on entering the page, nothing is saved before "allow" --}}
+    <div x-show="consentModal" x-cloak x-transition.opacity class="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4" role="dialog" aria-modal="true" aria-labelledby="storage-title">
+            <div class="flex items-start gap-3">
+                <span class="shrink-0 w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center">@svg('heroicon-o-bookmark-square', 'w-6 h-6')</span>
+                <div>
+                    <h2 id="storage-title" class="font-semibold text-lg">{{ __('studio.storage_title') }}</h2>
+                    <p class="text-sm text-stone-600 mt-1">{{ __('studio.storage_intro') }}</p>
+                </div>
+            </div>
+            <div class="text-sm space-y-2">
+                <p class="font-medium text-stone-800">{{ __('studio.storage_what') }}</p>
+                <ul class="text-stone-600 space-y-1 list-disc pl-5">
+                    <li>{{ __('studio.storage_item_design') }}</li>
+                    <li>{{ __('studio.storage_item_not') }}</li>
+                </ul>
+                <p class="font-medium text-stone-800 pt-1">{{ __('studio.storage_where') }}</p>
+                <ul class="text-stone-600 space-y-1 list-disc pl-5">
+                    <li>{{ __('studio.storage_where_1') }}</li>
+                    <li>{{ __('studio.storage_where_2') }}</li>
+                    <li>{{ __('studio.storage_where_3') }}</li>
+                </ul>
+            </div>
+            <div class="flex flex-col-reverse sm:flex-row gap-2 pt-1">
+                <button type="button" x-on:click="declineStorage()" class="flex-1 px-4 py-2.5 border border-stone-300 rounded-lg text-sm hover:bg-stone-50">{{ __('studio.storage_decline') }}</button>
+                <button type="button" x-on:click="acceptStorage()" class="flex-1 px-4 py-2.5 bg-amber-700 text-white rounded-lg text-sm font-medium hover:bg-amber-800">{{ __('studio.storage_accept') }}</button>
+            </div>
+        </div>
+    </div>
 
     {{-- Asl Belgisi codes found: warning, offer of the Asl Belgisi section, or continue with 10 codes --}}
     <div x-show="markingModal" x-cloak x-transition.opacity class="fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4" x-on:keydown.escape.window="markingModal = false">

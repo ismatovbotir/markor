@@ -27,6 +27,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // the cached home page shows Marketplace items and label sizes: refresh it when they change
+        foreach ([\App\Domain\Offers\Models\Offer::class, \App\Domain\Offers\Models\OfferCategory::class, \App\Domain\Printing\Models\LabelTemplate::class] as $model) {
+            $model::saved(fn () => \App\Support\PageCache::bump());
+            $model::deleted(fn () => \App\Support\PageCache::bump());
+        }
+
         \App\Domain\Settings\Setting::applyToConfig();
 
         Gate::define('admin', fn (User $user) => $user->isAdmin());

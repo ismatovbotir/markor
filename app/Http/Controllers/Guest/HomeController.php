@@ -13,11 +13,23 @@ class HomeController extends Controller
 
     public function index()
     {
+        // visitors get the cached page (6 hours, per language); logged-in users always a fresh one
+        if (\App\Support\PageCache::enabled()) {
+            [$html, $hit] = \App\Support\PageCache::remember('home', fn () => $this->homeView()->render());
+
+            return response($html)->header('X-Page-Cache', $hit ? 'HIT' : 'MISS');
+        }
+
+        return $this->homeView();
+    }
+
+    private function homeView()
+    {
         return view('home', [
             'offers'  => Offer::active()->orderBy('sort_order')->get(),
             'catalog' => \App\Domain\Offers\Models\OfferCategory::catalog(),
             'templatePreviews' => \App\Domain\Offers\Models\OfferCategory::templatePreviews(),
-            'faq'    => collect(range(1, 6))
+            'faq'    => collect(range(1, 8))
                 ->map(fn ($i) => ['q' => __("home.faq.$i.q"), 'a' => __("home.faq.$i.a")])
                 ->reject(fn ($item) => str_starts_with($item['q'], 'home.faq.'))
                 ->values(),

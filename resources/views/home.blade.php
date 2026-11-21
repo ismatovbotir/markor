@@ -41,6 +41,7 @@
         'rotate' => 'heroicon-o-arrow-path', 'overlap' => 'heroicon-o-exclamation-triangle',
         'generated' => 'heroicon-o-hashtag',
         'privacy' => 'heroicon-o-shield-check', 'autosave' => 'heroicon-o-bookmark-square',
+        'print' => 'heroicon-o-printer', 'trial' => 'heroicon-o-gift', 'guide' => 'heroicon-o-book-open',
     ];
 @endphp
 @include('partials.public-head', [
@@ -201,7 +202,8 @@
                 </div>
                 <p class="text-sm text-stone-400 mt-4">{{ __('home.aslbelgi.private') }}</p>
                 <p class="text-sm text-amber-300 mt-1">{{ __('home.aslbelgi.price') }}</p>
-                <p class="flex items-center gap-2 text-sm text-stone-400 mt-6">@svg('heroicon-o-paper-airplane', 'w-4 h-4') {{ __('home.aslbelgi.soon') }}</p>
+                <p class="text-sm text-stone-400 mt-1">{{ __('home.aslbelgi.topup') }}</p>
+                <p class="flex items-start gap-2 text-sm text-stone-300 mt-6">@svg('heroicon-o-paper-airplane', 'w-4 h-4 mt-0.5 shrink-0') {{ __('home.aslbelgi.telegram') }}</p>
             </div>
             <ol class="grid sm:grid-cols-2 gap-px bg-stone-700 rounded-2xl overflow-hidden self-start">
                 @foreach([1, 2, 3, 4] as $i)

@@ -435,14 +435,41 @@ window.labelStudio = (config) => {
         },
         markingModal: false,
 
+        // The design (not the table) can be kept in this browser's Local Storage — only after the
+        // visitor agrees (consent window on entering the page). Nothing goes to the server.
+        consentKey: 'markor.studio.consent', // 'yes' / 'no' — remembers the answer only
+        consent: null,
+        consentModal: false,
         // The work in progress (design + loaded table) is kept in this browser's localStorage,
         // so a language switch, reload or accidental close does not lose it. Nothing goes to the server.
         storageKey: 'markor.studio.v1',
         saveTimer: null,
         init() {
-            this.restore();
-            ['elements', 'width', 'height', 'columns', 'gap', 'copies', 'rows', 'headers', 'hasHeader', 'fileName']
+            try { this.consent = localStorage.getItem(this.consentKey); } catch (e) { this.consent = null; }
+            if (this.consent === 'yes') this.restore();
+            else if (this.consent !== 'no') this.consentModal = true;  // first visit: ask before saving anything
+            ['elements', 'width', 'height', 'columns', 'gap', 'copies', 'headers', 'hasHeader']
                 .forEach((prop) => this.$watch(prop, () => this.persist()));
+        },
+        acceptStorage() {
+            const firstTime = this.consent !== 'yes';
+            this.consent = 'yes';
+            this.consentModal = false;
+            try { localStorage.setItem(this.consentKey, 'yes'); } catch (e) { /* private mode: nothing can be saved */ }
+            // a design saved before (e.g. earlier visit) comes back only now; otherwise save the current one
+            if (firstTime && !this.fileName && this.hasSavedDesign()) this.restore(); else this.persist();
+        },
+        declineStorage() {
+            this.consent = 'no';
+            this.consentModal = false;
+            clearTimeout(this.saveTimer);
+            try {
+                localStorage.removeItem(this.storageKey);   // delete anything saved earlier
+                localStorage.setItem(this.consentKey, 'no'); // remember only the answer, so we don't ask every time
+            } catch (e) { /* ignore */ }
+        },
+        hasSavedDesign() {
+            try { return !!localStorage.getItem(this.storageKey); } catch (e) { return false; }
         },
         restore() {
             try {
@@ -453,38 +480,36 @@ window.labelStudio = (config) => {
                 this.columns = saved.columns || 1;
                 this.gap = saved.gap || 0;
                 this.copies = saved.copies || 1;
+                // design only: no table is restored (upload the file again); column names are kept so the
+                // elements reconnect to the same columns
                 this.headers = saved.headers || [];
-                this.rows = saved.rows || [];
-                this.total = saved.total || this.rows.length;
+                this.rows = [];
+                this.total = 0;
                 this.hasHeader = saved.hasHeader !== false;
-                this.fileName = this.rows.length ? saved.fileName || '' : '';
-                this.sample = this.rows[0] || {};
+                this.fileName = '';
+                this.sample = {};
                 this.elements = saved.elements.map((el, i) => ({ ...el, id: i + 1 }));
                 this.nextId = this.elements.length + 1;
-                if (!this.rows.length) {
-                    // The table did not fit into storage last time: unbind elements from its columns.
-                    this.headers = [];
-                    this.elements.forEach((el) => { if (el.source && !this.isGenerated(el)) { el.text = el.text || el.source; el.source = ''; el.caption = false; } });
-                }
             } catch (e) {
                 localStorage.removeItem(this.storageKey);
             }
         },
         persist() {
+            if (this.consent !== 'yes') return; // no consent: nothing is written to the browser
             clearTimeout(this.saveTimer);
             this.saveTimer = setTimeout(() => {
                 const state = {
                     width: this.width, height: this.height, columns: this.columns, gap: this.gap, copies: this.copies,
                     hasHeader: this.hasHeader, fileName: this.fileName, total: this.total, headers: this.headers,
                     elements: this.elements.map(({ id, ...el }) => el),
-                    rows: this.rows,
                 };
+                // only the design: the table rows and file name are never saved (column names stay, so
+                // elements reconnect when the same file is uploaded again); Asl Belgisi codes — not even those
+                state.rows = []; state.fileName = ''; state.total = 0;
+                if (this.marking) state.headers = [];
                 try {
                     localStorage.setItem(this.storageKey, JSON.stringify(state));
-                } catch (e) {
-                    // Storage full (very large table): keep at least the design.
-                    try { localStorage.setItem(this.storageKey, JSON.stringify({ ...state, rows: [] })); } catch (e2) { /* private mode */ }
-                }
+                } catch (e) { /* private mode / storage blocked: nothing saved */ }
             }, 300);
         },
         startOver() {

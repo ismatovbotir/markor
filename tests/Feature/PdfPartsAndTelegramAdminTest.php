@@ -96,4 +96,17 @@ class PdfPartsAndTelegramAdminTest extends TestCase
         Http::assertSent(fn ($r) => str_contains($r->url(), 'sendMessage') && $r['chat_id'] == '987654321');
         $this->actingAs($client)->get(route('admin.telegram'))->assertForbidden();
     }
+
+    public function test_webhook_buttons_work_when_telegram_answers_just_true(): void
+    {
+        config(['telegram.token' => 'TEST', 'app.url' => 'https://markor.uz']);
+        Http::fake(['api.telegram.org/*' => Http::response(['ok' => true, 'result' => true, 'description' => 'Webhook was set'])]);
+        $admin = User::create(['name' => 'A', 'email' => 'wh@t.uz', 'password' => 'secret123', 'role' => 'admin', 'locale' => 'uz', 'is_active' => true]);
+        $this->actingAs($admin);
+
+        $this->assertSame([], app(\App\Domain\Telegram\TelegramApi::class)->call('setWebhook', ['url' => 'https://markor.uz/x']));
+        Livewire::test(\App\Http\Livewire\Admin\TelegramBotSettings::class)
+            ->call('setWebhook')->assertSee(__('tg_admin.webhook_set'))
+            ->call('deleteWebhook')->assertSee(__('tg_admin.webhook_deleted'));
+    }
 }

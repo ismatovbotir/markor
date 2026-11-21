@@ -71,7 +71,7 @@ Telegram — самая популярная платформа в стране,
 - **Платные размещения в каналах:** только после того, как увидите, какой пост лучше работает бесплатно. Официальная реклама Telegram Ads локально используется мало из-за высокого порога входа, рынок работает через прямые размещения в каналах **[Проверено: Spot.uz, январь 2025]**. Цены размещений я не проверял.
 - **Как часто:** 2 поста в неделю в свой канал, 15 минут в день на чаты.
 - **Усилия:** 2 часа в неделю.
-- **Задел:** когда выйдет Telegram-бот (CSV → PDF), он сам станет главным поводом для постов. До запуска упоминать только как «скоро».
+- **Повод для постов:** Telegram-бот раздела Asl Belgisi (CSV → статус загрузки → готовый PDF) сделан и проверен. Пост 4 о нём публиковать только после того, как бот включён на рабочем домене и вы сами прошли подключение. Другие поводы: кнопка «Печать» в дизайнере, 10 бесплатных кодов Asl Belgisi для пробы, иллюстрированное руководство `/guide`.
 
 ### 4. Поиск: Google и Яндекс
 
@@ -105,9 +105,9 @@ Telegram — самая популярная платформа в стране,
 ### Что не делать в первый месяц
 
 - Не покупать рекламу, пока нет цифр по бесплатным каналам.
-- Не обещать то, чего нет: прямую печать на принтер, API, интеграции, мобильное приложение, одобрение со стороны Asl Belgisi или CRPT Turon.
+- Не обещать то, чего нет: сетевую печать на принтер по IP (TCP), API, интеграции, мобильное приложение, одобрение со стороны Asl Belgisi или CRPT Turon. Печать из браузера через системное окно печати — есть, о ней писать можно.
 - Не называть количество клиентов и не публиковать цены на сервис.
-- Не писать о Telegram-боте как о работающем.
+- Не писать о Telegram-боте, пока он не включён на рабочем домене.
 
 ## 3. Чек-лист запуска на 30 дней
 
@@ -117,7 +117,7 @@ Telegram — самая популярная платформа в стране,
 - [ ] Поставить счётчики: Яндекс Метрика и Google Analytics. Настроить цели: «скачан PDF», «вход в Asl Belgisi», «загружен CSV», «клик по телефону/Telegram».
 - [ ] Добавить сайт в Google Search Console и Яндекс Вебмастер.
 - [ ] Завести простую таблицу обращений: дата, откуда пришёл, что спросил, что купил.
-- [ ] Снять 2 ролика с экрана по 30–40 секунд: «Excel → этикетки → PDF» и «CSV Asl Belgisi → PDF».
+- [ ] Снять 2 ролика с экрана по 30–40 секунд: «Excel → этикетки → кнопка „Печать“ → принтер печатает» и «CSV Asl Belgisi → PDF».
 - [ ] Написать лично всем существующим клиентам.
 - [ ] Напечатать листки-вкладыши с адресом сайта для отгрузок.
 
@@ -160,11 +160,14 @@ Markor da buni ro'yxatdan o'tmasdan, bepul qilish mumkin:
 
 1. Jadvalni yuklaysiz (XLSX, ODS yoki CSV). Har bir qator bitta etiketka.
 2. Etiketka o'lchamini mm da kiritasiz, matn va shtrix-kodlarni sichqoncha bilan joylashtirasiz.
-3. Tayyor PDF ni yuklab olasiz.
+3. PDF ni yuklab olasiz yoki «Chop etish» tugmasini bosasiz: etiketkalar kompyuteringizdagi printerga ketadi, PDF kerak emas.
 
-Matn, QR, DataMatrix, Code 128 va EAN-13 bor. Yuklangan fayl serverda saqlanmaydi.
+Matn, QR, DataMatrix, Code 128 va EAN-13 bor. Bir martada 300 tagacha etiketka. Yuklangan fayl serverda saqlanmaydi. Xohlasangiz, dizaynni brauzeringizda saqlab qo'yasiz (faqat roziligingiz bilan, jadval saqlanmaydi).
+
+Faylda Asl Belgisi kodlari bo'lsa, birinchi 10 tasini bepul GS1 DataMatrix qilib chop etib ko'rishingiz mumkin.
 
 Sinab ko'ring: {{SAYT}}/label-design
+Rasmli qo'llanma: {{SAYT}}/guide
 Printer, etiketka va ribbon bo'yicha savollar: {{TELEFON}}
 
 **RU**
@@ -175,11 +178,14 @@ Printer, etiketka va ribbon bo'yicha savollar: {{TELEFON}}
 
 1. Загружаете таблицу (XLSX, ODS или CSV). Одна строка — одна этикетка.
 2. Задаёте размер этикетки в мм, расставляете текст и штрихкоды мышью.
-3. Скачиваете готовый PDF.
+3. Скачиваете PDF или жмёте «Печать»: этикетки уходят на принтер, установленный на компьютере, PDF не нужен.
 
-Есть текст, QR, DataMatrix, Code 128 и EAN-13. Загруженный файл на сервере не хранится.
+Есть текст, QR, DataMatrix, Code 128 и EAN-13. До 300 этикеток за раз. Загруженный файл на сервере не хранится. Дизайн можно сохранить в браузере (только с вашего согласия, таблица не сохраняется).
+
+Если в файле коды Asl Belgisi, первые 10 можно бесплатно напечатать настоящим GS1 DataMatrix для пробы.
 
 Попробовать: {{SAYT}}/label-design
+Руководство с картинками: {{SAYT}}/guide
 Вопросы по принтерам, этикеткам и риббонам: {{TELEFON}}
 
 ### Telegram, пост 2 — Asl Belgisi
@@ -191,12 +197,10 @@ Asl Belgisi kodlarini oldingiz, endi ularni etiketkaga chiqarish kerakmi?
 Markor da tartib shunday:
 
 — operatordan olingan CSV faylni yuklaysiz;
-— kodlar bazaga tushadi, mahsulotlar GTIN bo'yicha avtomatik yaratiladi;
-— bir tugma bilan butun partiyaning etiketkalari PDF bo'lib chiqadi (standart shablon 20×20 mm).
+— kodlar navbat bilan bazaga tushadi, mahsulotlar GTIN bo'yicha avtomatik yaratiladi, nomlari soliq klassifikatoridan lotin o'zbek va rus tilida olinadi;
+— butun partiyaning etiketkalari PDF bo'lib chiqadi (tayyor shablon 20×20 mm), fayl taxminan bir rulondan iborat qismlarga bo'linadi.
 
-Kod to'g'ri GS1 DataMatrix sifatida kodlanadi (FNC1 va GS ajratgichlari bilan), dekoder bilan tekshirilgan. Yuklangan fayl kodlar bazaga tushgach serverdan o'chiriladi.
-
-Sinovda 1100 ta kod bir soniyadan tez yuklandi, PDF taxminan 26 soniyada tayyor bo'ldi.
+Kod to'g'ri GS1 DataMatrix sifatida kodlanadi (FNC1 va GS ajratgichlari bilan). Kompaniyada bir nechta xodim ishlashi mumkin, har bir kompaniya faqat o'z kodlarini ko'radi. Birinchi oy bepul.
 
 Kirish: {{SAYT}}/aslbelgi
 Savollar: {{TELEFON}}
@@ -208,12 +212,10 @@ Savollar: {{TELEFON}}
 В Markor это выглядит так:
 
 — загружаете CSV от оператора;
-— коды попадают в базу, товары создаются автоматически по GTIN;
-— одной кнопкой получаете PDF с этикетками всей партии (шаблон по умолчанию 20×20 мм).
+— коды через очередь попадают в базу, товары создаются автоматически по GTIN, а названия берутся из налогового классификатора на узбекском (латиница) и русском;
+— получаете PDF с этикетками всей партии (готовый шаблон 20×20 мм), файл делится на части примерно по одному рулону.
 
-Код кодируется как корректный GS1 DataMatrix (с FNC1 и разделителями GS) и проверен декодером. Исходный файл удаляется с сервера после загрузки кодов.
-
-На тесте 1100 кодов загрузились меньше чем за секунду, PDF был готов примерно за 26 секунд.
+Код кодируется как корректный GS1 DataMatrix (с FNC1 и разделителями GS). В компании могут работать несколько сотрудников, каждая компания видит только свои коды. Первый месяц бесплатно.
 
 Вход: {{SAYT}}/aslbelgi
 Вопросы: {{TELEFON}}
@@ -244,17 +246,47 @@ Skaner yoki printer bo'yicha savol bo'lsa, yozing: {{TELEFON}}
 
 Вопросы по сканерам и принтерам: {{TELEFON}}
 
+### Telegram, пост 4 — бот Asl Belgisi
+
+Публиковать только после того, как бот включён на рабочем домене и вы сами проверили подключение.
+
+**UZ**
+
+Asl Belgisi kodlari etiketkasini endi Telegramdan ham olish mumkin.
+
+1. Markor dagi Asl Belgisi bo'limida botni ulaysiz: QR kod, telefon raqam va 6 xonali kod.
+2. Operatordan olingan CSV faylni botga yuborasiz.
+3. Bot yuklash holatini yozadi va tayyor PDF ni shu yerga yuboradi.
+
+Kodlar GS1 DataMatrix sifatida, FNC1 va GS ajratgichlari bilan kodlanadi.
+
+Kirish: {{SAYT}}/aslbelgi
+Savollar: {{TELEFON}}
+
+**RU**
+
+PDF с этикетками кодов Asl Belgisi теперь можно получать прямо в Telegram.
+
+1. В разделе Asl Belgisi в Markor подключаете бота: QR-код, номер телефона и 6-значный код.
+2. Отправляете боту CSV от оператора.
+3. Бот сообщает статус загрузки и присылает готовый PDF.
+
+Коды кодируются как GS1 DataMatrix с FNC1 и разделителями GS.
+
+Вход: {{SAYT}}/aslbelgi
+Вопросы: {{TELEFON}}
+
 ### Объявление для OLX
 
 **RU**
 
-Заголовок: Принтеры этикеток, 2D-сканеры, этикетки и риббоны + бесплатный онлайн-дизайнер этикеток
+Заголовок: Принтеры этикеток, 2D-сканеры, ТСД, этикетки и риббоны + бесплатный онлайн-дизайнер этикеток
 
-Продаём принтеры этикеток, 2D-сканеры, смотчики этикеток, этикетки и риббоны.
+Продаём принтеры этикеток, риббоны, 2D-сканеры, терминалы сбора данных (ТСД), этикетки и аксессуары. Проводим техническое обслуживание.
 
 К оборудованию — наш онлайн-сервис Markor:
 
-• Дизайнер этикеток: загружаете таблицу Excel, ODS или CSV, расставляете текст и штрихкоды мышью, скачиваете PDF. Без регистрации, бесплатно. Текст, QR, DataMatrix, Code 128, EAN-13, любой размер в мм.
+• Дизайнер этикеток: загружаете таблицу Excel, ODS или CSV, расставляете текст и штрихкоды мышью, скачиваете PDF или сразу печатаете на свой принтер из браузера. Без регистрации, бесплатно. Текст, QR, DataMatrix, Code 128, EAN-13, любой размер в мм.
 • Раздел для кодов маркировки Asl Belgisi: загружаете CSV от оператора и получаете PDF с этикетками партии. Код формируется как GS1 DataMatrix.
 
 Поможем подобрать принтер, этикетки и риббон под вашу задачу.
@@ -264,13 +296,13 @@ Skaner yoki printer bo'yicha savol bo'lsa, yozing: {{TELEFON}}
 
 **UZ**
 
-Sarlavha: Etiketka printerlari, 2D skanerlar, etiketka va ribbonlar + bepul onlayn etiketka dizayneri
+Sarlavha: Etiketka printerlari, 2D skanerlar, TSD, etiketka va ribbonlar + bepul onlayn etiketka dizayneri
 
-Etiketka printerlari, 2D skanerlar, etiketka o'ragichlar, etiketkalar va ribbonlar sotamiz.
+Etiketka printerlari, ribbonlar, 2D skanerlar, ma'lumot yig'ish terminallari (TSD), etiketkalar va aksessuarlar sotamiz. Texnik xizmat ko'rsatamiz.
 
 Uskunaga qo'shimcha — Markor onlayn xizmatimiz:
 
-• Etiketka dizayneri: Excel, ODS yoki CSV jadvalini yuklaysiz, matn va shtrix-kodlarni sichqoncha bilan joylashtirasiz, PDF ni yuklab olasiz. Ro'yxatdan o'tmasdan, bepul. Matn, QR, DataMatrix, Code 128, EAN-13, istalgan o'lcham mm da.
+• Etiketka dizayneri: Excel, ODS yoki CSV jadvalini yuklaysiz, matn va shtrix-kodlarni sichqoncha bilan joylashtirasiz, PDF ni yuklab olasiz yoki brauzerdan darhol o'z printeringizga chop etasiz. Ro'yxatdan o'tmasdan, bepul. Matn, QR, DataMatrix, Code 128, EAN-13, istalgan o'lcham mm da.
 • Asl Belgisi markirovka kodlari bo'limi: operatordan olingan CSV ni yuklaysiz va partiya etiketkalarining PDF faylini olasiz. Kod GS1 DataMatrix sifatida shakllanadi.
 
 Vazifangizga mos printer, etiketka va ribbon tanlashda yordam beramiz.
@@ -282,11 +314,11 @@ Telefon: {{TELEFON}}
 
 **RU**
 
-Здравствуйте. Мы продаём принтеры этикеток и расходники в Узбекистане и сделали сервис Markor для тех, кто печатает коды Asl Belgisi: загружаете CSV от оператора и получаете PDF с этикетками, код кодируется как GS1 DataMatrix. Если печать кодов у вас сейчас занимает время или сканер читает их через раз, могу показать на вашем файле за 10 минут. Сайт: {{SAYT}}, телефон: {{TELEFON}}.
+Здравствуйте. Мы продаём принтеры этикеток и расходники в Узбекистане и сделали сервис Markor для тех, кто печатает коды Asl Belgisi: загружаете CSV от оператора и получаете PDF с этикетками, код кодируется как GS1 DataMatrix, названия товаров подставляются из налогового классификатора. Первый месяц бесплатно. Если печать кодов у вас сейчас занимает время или сканер читает их через раз, могу показать на вашем файле за 10 минут. Сайт: {{SAYT}}, телефон: {{TELEFON}}.
 
 **UZ**
 
-Assalomu alaykum. Biz O'zbekistonda etiketka printerlari va sarf materiallari sotamiz. Asl Belgisi kodlarini chop etadiganlar uchun Markor xizmatini ishga tushirdik: operatordan olingan CSV ni yuklaysiz va etiketkalar PDF faylini olasiz, kod GS1 DataMatrix sifatida kodlanadi. Agar kodlarni chop etish hozir ko'p vaqt olayotgan bo'lsa yoki skaner ularni har doim ham o'qimayotgan bo'lsa, o'z faylingizda 10 daqiqada ko'rsatib beraman. Sayt: {{SAYT}}, telefon: {{TELEFON}}.
+Assalomu alaykum. Biz O'zbekistonda etiketka printerlari va sarf materiallari sotamiz. Asl Belgisi kodlarini chop etadiganlar uchun Markor xizmatini ishga tushirdik: operatordan olingan CSV ni yuklaysiz va etiketkalar PDF faylini olasiz, kod GS1 DataMatrix sifatida kodlanadi, mahsulot nomlari soliq klassifikatoridan olinadi. Birinchi oy bepul. Agar kodlarni chop etish hozir ko'p vaqt olayotgan bo'lsa yoki skaner ularni har doim ham o'qimayotgan bo'lsa, o'z faylingizda 10 daqiqada ko'rsatib beraman. Sayt: {{SAYT}}, telefon: {{TELEFON}}.
 
 ## 5. Что измерять
 

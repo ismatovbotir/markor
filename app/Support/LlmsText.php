@@ -41,6 +41,8 @@ class LlmsText
         }
         $out[] = '- ' . $t('home.aslbelgi.private');
         $out[] = '- ' . $t('home.aslbelgi.price');
+        $out[] = '- ' . $t('home.aslbelgi.topup');
+        $out[] = '- ' . $t('home.aslbelgi.telegram');
         $out[] = '- ' . $t('home.aslbelgi.register') . ': ' . route('register');
 
         $catalog = OfferCategory::catalog();

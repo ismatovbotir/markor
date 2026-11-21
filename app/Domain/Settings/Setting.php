@@ -37,6 +37,7 @@ class Setting extends Model
         }
         Cache::forget('settings');
         static::applyToConfig();
+        \App\Support\PageCache::bump(); // contacts / SEO texts appear on the cached home page
     }
 
     public static function applyToConfig(): void

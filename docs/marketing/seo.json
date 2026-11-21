@@ -1,173 +1,197 @@
 {
   "locales": {
     "uz": {
-      "title": "Markor — Exceldan etiketka, Asl Belgisi kodlarini chop etish",
-      "description": "Excel jadvalidan etiketka (yorliq) yarating va PDF yuklab oling: QR, DataMatrix, shtrix-kod. Asl Belgisi markirovka kodlarini CSV fayldan etiketkaga chiqaring.",
-      "h1": "Etiketka yaratish va Asl Belgisi kodlarini chop etish",
-      "og_title": "Markor — etiketka yaratish va Asl Belgisi kodlarini chop etish",
-      "og_description": "Excel, ODS yoki CSV jadvalidan etiketkalar tayyorlang va PDF yuklab oling. Asl Belgisi markirovka kodlari CSV fayldan bir bosishda tayyor etiketkaga aylanadi.",
+      "title": "Etiketka chop etish: Excel va Asl Belgisi kodlari | Markor",
+      "description": "Exceldan etiketka yarating va o'z printeringizda PDFsiz chop eting yoki PDF oling: QR, DataMatrix, shtrix-kod. Asl Belgisi kodlari — to'g'ri GS1 DataMatrix.",
+      "h1": "Etiketka chop etish — Excel jadvalidan va Asl Belgisi kodlaridan",
+      "og_title": "Markor — etiketka chop etish va Asl Belgisi kodlari",
+      "og_description": "Bepul onlayn konstruktor: Excel jadvalidan etiketkalar, printerda darhol chop etish yoki PDF. Asl Belgisi kodlari CSV fayldan GS1 DataMatrix etiketkaga.",
       "keywords": [
-        "etiketka yaratish",
-        "yorliq yaratish onlayn",
+        "etiketka chop etish",
+        "etiketka yaratish onlayn",
         "Exceldan etiketka chop etish",
-        "Asl Belgisi markirovka kodlarini chop etish",
+        "etiketka printerda chop etish",
+        "termoprinterda etiketka chop etish",
+        "Asl Belgisi kodlarini chop etish",
+        "Asl Belgisi DataMatrix etiketka",
+        "GS1 DataMatrix chop etish",
         "markirovka kodi etiketka",
-        "DataMatrix chop etish",
         "QR kodli etiketka",
         "shtrix-kod etiketka yaratish",
-        "etiketka dizayni",
-        "raqamli markirovka etiketka",
-        "Asl Belgisi CSV fayl",
-        "termoetiketka shablon 20x20",
-        "etiketka PDF yuklab olish",
-        "этикетка яратиш",
+        "EAN-13 shtrix-kod yaratish",
+        "etiketka dizayni bepul",
+        "etiketka 20x20 shablon",
+        "etiketka printeri sotib olish",
+        "yorliq yaratish onlayn",
+        "этикетка чоп этиш",
         "Асл Белгиси маркировка кодини чоп этиш"
       ],
       "faq": [
         {
           "q": "Excel jadvalidan etiketkalarni qanday chop etish mumkin?",
-          "a": "Etiketka dizayni sahifasiga Excel, ODS yoki CSV jadvalini yuklang: jadvalning har bir qatori bitta etiketka bo'ladi. Elementlarni jadval ustunlariga bog'lang, o'lchamni millimetrda kiriting va tayyor PDF faylni yuklab olib, o'z printeringizda chop eting."
+          "a": "Etiketka dizayni sahifasiga Excel, ODS yoki CSV faylni (2 MB gacha) yuklang: har bir qator bitta etiketka bo'ladi, bitta faylda 300 tagacha. Elementlarni jadval ustunlariga bog'lang, o'lchamni millimetrda kiriting, so'ng darhol chop eting yoki PDF yuklab oling."
         },
         {
-          "q": "Etiketkaga QR kod yoki shtrix-kod qo'shsa bo'ladimi?",
-          "a": "Ha. Konstruktorda matn, QR kod, DataMatrix, Code 128 va EAN-13 elementlari bor, ularning qiymati jadval ustunidan olinadi. Elementlarni yoki butun etiketkani burish va bir qatorga bir nechta etiketkani oraliq bilan joylashtirish mumkin."
+          "q": "Etiketkani PDFsiz, to'g'ridan-to'g'ri termoprinterda chop etsa bo'ladimi?",
+          "a": "Ha. «Chop etish» tugmasi etiketkalarni printer o'lchamidagi sahifa sifatida ochadi va ular kompyuterga o'rnatilgan printer orqali tizim oynasida chop etiladi, PDF kerak emas. Bir martada 300 tagacha etiketka chop etish mumkin."
+        },
+        {
+          "q": "Etiketkaga QR kod, DataMatrix yoki shtrix-kod qo'shsa bo'ladimi?",
+          "a": "Ha. Konstruktorda matn, QR kod, DataMatrix, Code 128 va EAN-13 (chiziqlar ostida raqamli yoki raqamsiz) bor, qiymatlari jadval ustunidan olinadi. Chop etish sanasi va tartib raqamini ham qo'shish mumkin."
         },
         {
           "q": "Asl Belgisi markirovka kodlarini etiketkaga qanday chiqarish mumkin?",
-          "a": "Hisobingizga kiring va operatordan olingan kodlar faylini (CSV) yuklang. Fayl navbatda qayta ishlanadi, mahsulotlar GTIN bo'yicha avtomatik yaratiladi va bir bosishda shablon asosida etiketkalar PDF fayli tayyor bo'ladi; standart shablon o'lchami 20×20 mm."
+          "a": "Asl Belgisi bo'limiga kiring va operatordan olingan CSV faylni yuklang yoki Telegram botga yuboring. Fayl navbatda qayta ishlanadi, mahsulotlar GTIN bo'yicha nomi bilan yaratiladi va 20×20 mm shablonda etiketkalar PDF qismlarga bo'lib tayyorlanadi. Rasmli bosqichma-bosqich qo'llanma /guide sahifasida."
         },
         {
-          "q": "Nega chop etilgan DataMatrix kodi skanerda markirovka kodi sifatida o'qilmaydi?",
-          "a": "Ko'pincha kod oddiy DataMatrix sifatida kodlangan bo'ladi, markirovka uchun esa GS1 DataMatrix kerak: unda FNC1 va GS xizmat belgilari bo'lishi shart. Markor Asl Belgisi kodlarini aynan GS1 DataMatrix formatida, shu belgilar bilan kodlaydi."
+          "q": "Nega chop etilgan DataMatrix skanerda markirovka kodi sifatida o'qilmaydi?",
+          "a": "Ko'pincha kod oddiy DataMatrix bo'lib kodlangan, markirovka uchun esa FNC1 va GS xizmat belgilari bor GS1 DataMatrix kerak. Markor Asl Belgisi kodlarini aynan GS1 DataMatrix qilib chiqaradi; etiketka dizayniga kodlar fayli yuklansa, birinchi 10 tasi bepul shunday chop etiladi."
         },
         {
-          "q": "Yuklagan fayllarim serverda saqlanadimi?",
-          "a": "Etiketka dizayni uchun yuklangan jadval serverda saqlanmaydi. Asl Belgisi kodlari fayli kodlar bazaga yuklangach o'chiriladi."
+          "q": "Qaysi etiketka o'lchami va qaysi printer mos keladi?",
+          "a": "Etiketka o'lchami millimetrda istalgancha beriladi, etiketkani burish va bir qatorga oraliq bilan bir nechta etiketka joylashtirish mumkin. Kompyuterga o'rnatilgan har qanday printerda chop etiladi; etiketka printerlari, lentalar, etiketkalar va 2D skanerlarni saytdan buyurtma qilish mumkin."
+        },
+        {
+          "q": "Jadvalim va etiketka dizaynim saqlanadimi?",
+          "a": "Etiketka dizayni uchun yuklangan jadval serverda saqlanmaydi. Dizaynni rozilik berganingizdan keyin faqat brauzeringizda (Local Storage) saqlash mumkin, serverga hech narsa yuborilmaydi."
         },
         {
           "q": "Xizmat bepulmi, ro'yxatdan o'tish kerakmi?",
-          "a": "Etiketka dizayni bepul va ro'yxatdan o'tishni talab qilmaydi; mehmon sifatida bitta PDF faylda 300 tagacha etiketka yuklab olish mumkin. Asl Belgisi kodlari bilan ishlash uchun hisobga kirish kerak."
+          "a": "Etiketka dizayni bepul va ro'yxatdan o'tishsiz ishlaydi. Asl Belgisi bo'limi kompaniyalar uchun, hisobga kirish bilan: birinchi oy bepul, keyin har bir kod uchun 9 so'm, oldindan to'lov asosida."
         }
       ]
     },
     "ru": {
-      "title": "Markor — печать этикеток из Excel и кодов Asl Belgisi",
-      "description": "Онлайн-конструктор этикеток: загрузите Excel, добавьте QR, DataMatrix или штрихкод и скачайте PDF. Печать кодов маркировки Asl Belgisi из CSV на этикетки.",
+      "title": "Печать этикеток из Excel и кодов Asl Belgisi | Markor",
+      "description": "Создайте этикетки из Excel и печатайте на своём принтере без PDF или скачайте PDF: QR, DataMatrix, штрихкод. Коды Asl Belgisi — корректный GS1 DataMatrix.",
       "h1": "Печать этикеток из Excel и кодов маркировки Asl Belgisi",
-      "og_title": "Markor — конструктор этикеток и печать кодов Asl Belgisi",
-      "og_description": "Соберите этикетку из таблицы Excel, ODS или CSV и скачайте готовый PDF. Коды маркировки Asl Belgisi из файла CSV превращаются в этикетки в один клик.",
+      "og_title": "Markor — печать этикеток и кодов маркировки Asl Belgisi",
+      "og_description": "Бесплатный онлайн-конструктор: этикетки из таблицы Excel, печать прямо на принтер или PDF. Коды Asl Belgisi из CSV — в этикетки с GS1 DataMatrix.",
       "keywords": [
+        "печать этикеток",
         "печать этикеток из Excel",
         "конструктор этикеток онлайн",
-        "генератор этикеток",
+        "печать этикеток на термопринтере",
+        "печать этикеток без PDF",
         "печать кодов маркировки Asl Belgisi",
-        "этикетка с QR-кодом",
-        "печать DataMatrix на этикетке",
-        "создать этикетку со штрихкодом",
-        "этикетки для маркировки товаров Узбекистан",
         "GS1 DataMatrix этикетка",
-        "коды маркировки из CSV в PDF",
+        "DataMatrix не читается сканером",
+        "этикетка с QR-кодом",
+        "создать этикетку со штрихкодом",
+        "штрихкод EAN-13 онлайн",
+        "этикетки с порядковым номером",
         "шаблон этикетки 20x20",
-        "этикетка EAN-13 онлайн",
-        "цифровая маркировка Узбекистан этикетки",
+        "принтер этикеток Ташкент",
         "Асл Белгиси печать кодов"
       ],
       "faq": [
         {
           "q": "Как напечатать этикетки из таблицы Excel?",
-          "a": "Загрузите на странице дизайна этикеток файл Excel, ODS или CSV: каждая строка таблицы станет отдельной этикеткой. Привяжите элементы к столбцам, задайте размер в миллиметрах и скачайте готовый PDF, который можно напечатать на своём принтере."
+          "a": "Загрузите на странице дизайна этикеток файл Excel, ODS или CSV до 2 МБ: каждая строка станет этикеткой, до 300 в одном файле. Привяжите элементы к столбцам, задайте размер в миллиметрах и сразу печатайте или скачайте PDF."
         },
         {
-          "q": "Можно ли добавить на этикетку QR-код или штрихкод?",
-          "a": "Да. В конструкторе есть текст, QR-код, DataMatrix, Code 128 и EAN-13, значения для них берутся из столбцов таблицы. Элементы и всю этикетку можно поворачивать, а в одном ряду размещать несколько этикеток с зазорами."
+          "q": "Можно ли печатать этикетки на термопринтер напрямую, без PDF?",
+          "a": "Да. Кнопка «Печать» открывает этикетки страницей под размер принтера, и они печатаются через установленный на компьютере принтер в системном диалоге, без PDF. За один раз — до 300 этикеток."
+        },
+        {
+          "q": "Можно ли добавить на этикетку QR-код, DataMatrix или штрихкод?",
+          "a": "Да. В конструкторе есть текст, QR-код, DataMatrix, Code 128 и EAN-13 (с цифрами под штрихами или без), значения берутся из столбцов таблицы. Можно добавить дату печати и порядковый номер."
         },
         {
           "q": "Как распечатать коды маркировки Asl Belgisi на этикетках?",
-          "a": "Войдите в аккаунт и загрузите файл с кодами (CSV), полученный от оператора. Файл обрабатывается в очереди, товары создаются автоматически по GTIN, а PDF с этикетками по шаблону формируется в один клик; размер шаблона по умолчанию 20×20 мм."
+          "a": "Войдите в раздел Asl Belgisi и загрузите CSV от оператора или отправьте его Telegram-боту. Файл обрабатывается в очереди, товары создаются по GTIN с названиями, а PDF с этикетками по шаблону 20×20 мм готовится частями. Пошаговая инструкция с картинками — на странице /guide."
         },
         {
           "q": "Почему напечатанный DataMatrix не читается сканером как код маркировки?",
-          "a": "Частая причина в том, что код закодирован как обычный DataMatrix, а для маркировки нужен GS1 DataMatrix со служебными символами FNC1 и GS. Markor кодирует коды Asl Belgisi именно как GS1 DataMatrix с этими символами."
+          "a": "Часто код закодирован как обычный DataMatrix, а для маркировки нужен GS1 DataMatrix со служебными символами FNC1 и GS. Markor печатает коды Asl Belgisi именно так; если загрузить файл кодов в дизайн этикеток, первые 10 печатаются бесплатно."
         },
         {
-          "q": "Хранятся ли загруженные файлы на сервере?",
-          "a": "Таблица, загруженная для дизайна этикеток, на сервере не хранится. Файл с кодами Asl Belgisi удаляется после того, как коды загружены в базу."
+          "q": "Какой размер этикетки и какой принтер подходят?",
+          "a": "Размер этикетки задаётся в миллиметрах, этикетку можно повернуть и разместить несколько в ряд с зазором. Печать идёт на любой принтер, установленный на компьютере; принтеры этикеток, риббоны, этикетки и 2D-сканеры можно заказать на сайте."
+        },
+        {
+          "q": "Сохраняются ли моя таблица и дизайн этикетки?",
+          "a": "Таблица, загруженная для дизайна этикеток, на сервере не хранится. Дизайн с вашего согласия можно сохранить только в браузере (Local Storage), на сервер ничего не отправляется."
         },
         {
           "q": "Сервис бесплатный, нужна ли регистрация?",
-          "a": "Дизайн этикеток бесплатный и работает без регистрации; гость может скачать PDF до 300 этикеток. Для работы с кодами Asl Belgisi нужно войти в аккаунт."
+          "a": "Дизайн этикеток бесплатный и работает без регистрации. Раздел Asl Belgisi — для компаний, со входом: первый месяц бесплатно, затем 9 сумов за код по предоплате."
         }
       ]
     },
     "zh": {
-      "title": "Markor — Excel批量标签打印与Asl Belgisi标识码打印",
-      "description": "面向乌兹别克斯坦的在线标签工具：上传Excel表格，添加二维码、DataMatrix或条形码，下载PDF即可打印；还可将Asl Belgisi强制标识码CSV文件一键生成标签。",
-      "h1": "在线标签设计与乌兹别克斯坦Asl Belgisi标识码打印",
-      "og_title": "Markor — 在线标签设计与Asl Belgisi标识码打印",
-      "og_description": "用Excel、ODS或CSV表格批量制作标签并下载PDF；Asl Belgisi标识码CSV文件一键生成标签，界面支持中文。",
+      "title": "Markor — Excel标签打印与Asl Belgisi标识码打印",
+      "description": "用Excel表格制作标签，可直接用电脑上的打印机打印或下载PDF；支持二维码、DataMatrix、条形码。Asl Belgisi标识码按GS1 DataMatrix正确编码。",
+      "h1": "标签打印：从Excel表格和Asl Belgisi标识码生成标签",
+      "og_title": "Markor — 标签打印与Asl Belgisi标识码打印",
+      "og_description": "免费在线标签设计器：Excel表格批量生成标签，直接打印或下载PDF。Asl Belgisi标识码CSV文件生成GS1 DataMatrix标签。",
       "keywords": [
         "乌兹别克斯坦 Asl Belgisi 标识码打印",
-        "乌兹别克斯坦强制标识",
-        "乌兹别克斯坦数字标识",
         "Excel批量打印标签",
-        "在线标签设计",
-        "DataMatrix标签打印",
+        "标签打印",
+        "在线标签设计器",
+        "热敏标签打印机 直接打印",
         "GS1 DataMatrix 标签",
+        "DataMatrix扫描不识别",
         "二维码标签制作",
         "条形码标签生成",
-        "CSV标识码转PDF标签",
+        "EAN-13条形码生成",
+        "乌兹别克斯坦强制标识",
         "乌兹别克斯坦进口家电标识",
         "20×20标签模板",
-        "标签生成器 PDF"
+        "标签打印机 塔什干"
       ],
       "faq": [
         {
           "q": "如何用Excel表格批量打印标签？",
-          "a": "在标签设计页面上传Excel、ODS或CSV表格，表格的每一行对应一张标签。把元素绑定到表格列，以毫米设置标签尺寸，然后下载生成的PDF并用自己的打印机打印。"
+          "a": "在标签设计页面上传Excel、ODS或CSV文件（最大2 MB），每一行对应一张标签，每个文件最多300张。把元素绑定到表格列，以毫米设置尺寸，然后直接打印或下载PDF。"
         },
         {
-          "q": "标签上可以添加二维码或条形码吗？",
-          "a": "可以。设计器提供文本、二维码、DataMatrix、Code 128和EAN-13元素，内容取自表格列。元素或整张标签都可以旋转，一行还可以并排多张标签并设置间距。"
+          "q": "可以不用PDF，直接用热敏标签打印机打印吗？",
+          "a": "可以。点击“打印”后，标签以符合打印机尺寸的页面打开，通过电脑上已安装的打印机在系统打印对话框中打印，无需PDF。每次最多打印300张。"
+        },
+        {
+          "q": "标签上可以添加二维码、DataMatrix或条形码吗？",
+          "a": "可以。设计器提供文本、二维码、DataMatrix、Code 128和EAN-13（条下可显示或不显示数字），内容取自表格列。还可以添加打印日期和序号。"
         },
         {
           "q": "如何把Asl Belgisi标识码打印成标签？",
-          "a": "登录账户后上传从运营方获得的标识码文件（CSV）。文件进入队列处理，系统按GTIN自动创建商品，一键即可按模板生成标签PDF，默认模板尺寸为20×20毫米。"
+          "a": "登录Asl Belgisi板块，上传运营方提供的CSV文件，或发送给Telegram机器人。文件在队列中处理，系统按GTIN创建带名称的商品，并按20×20毫米模板分批生成标签PDF。图文分步指南见 /guide 页面。"
         },
         {
-          "q": "为什么打印出来的DataMatrix码不能被扫描枪识别为标识码？",
-          "a": "常见原因是它被编码成了普通DataMatrix，而标识码需要带FNC1和GS控制符的GS1 DataMatrix。Markor按GS1 DataMatrix格式并带上这些控制符对Asl Belgisi标识码进行编码。"
+          "q": "为什么打印出来的DataMatrix不能被扫描枪识别为标识码？",
+          "a": "常见原因是它被编码成普通DataMatrix，而标识码需要带FNC1和GS控制符的GS1 DataMatrix。Markor正是这样编码Asl Belgisi标识码；在标签设计器中上传标识码文件时，前10个码可免费打印。"
         },
         {
-          "q": "上传的文件会保存在服务器上吗？",
-          "a": "用于标签设计的表格不会保存在服务器上。Asl Belgisi标识码文件在标识码导入完成后即被删除。"
+          "q": "适合什么标签尺寸和打印机？",
+          "a": "标签尺寸以毫米自由设置，可旋转标签，一行可并排多张并设置间距。可用电脑上已安装的任何打印机打印；标签打印机、碳带、标签纸和二维扫描枪可在本站下单。"
+        },
+        {
+          "q": "我的表格和标签设计会被保存吗？",
+          "a": "用于标签设计的表格不会保存在服务器上。经您同意后，设计可仅保存在浏览器（Local Storage）中，不会发送到服务器。"
         },
         {
           "q": "服务是否免费，需要注册吗？",
-          "a": "标签设计免费且无需注册，访客可下载最多300张标签的PDF。使用Asl Belgisi标识码功能需要登录账户。"
+          "a": "标签设计免费，无需注册。Asl Belgisi板块面向企业，需要登录：首月免费，之后每个码9苏姆，预付费。"
         }
       ]
     }
   },
   "label_design_page": {
     "uz": {
-      "title": "Etiketka dizayni onlayn — Exceldan PDF | Markor",
-      "description": "Bepul etiketka konstruktori, ro'yxatdan o'tmasdan: Excel, ODS yoki CSV yuklang, o'lchamni mm da kiriting, QR, DataMatrix, Code 128, EAN-13 qo'shing, PDF oling."
+      "title": "Etiketka yaratish onlayn — bepul, Exceldan | Markor",
+      "description": "Bepul etiketka konstruktori, ro'yxatdan o'tmasdan: Excel yoki CSV yuklang, QR, DataMatrix, EAN-13 qo'shing, printerda darhol chop eting yoki PDF oling."
     },
     "ru": {
-      "title": "Конструктор этикеток онлайн — из Excel в PDF | Markor",
-      "description": "Бесплатный конструктор этикеток без регистрации: загрузите Excel, ODS или CSV, задайте размер в мм, добавьте QR, DataMatrix, Code 128, EAN-13 и скачайте PDF."
+      "title": "Конструктор этикеток онлайн — бесплатно, из Excel | Markor",
+      "description": "Бесплатный конструктор этикеток без регистрации: загрузите Excel или CSV, добавьте QR, DataMatrix, EAN-13 и печатайте сразу на принтер или скачайте PDF."
     },
     "zh": {
-      "title": "在线标签设计器 — Excel批量生成PDF标签 | Markor",
-      "description": "免费在线标签设计器，无需注册：上传Excel、ODS或CSV表格，以毫米自定义尺寸，添加二维码、DataMatrix、Code 128、EAN-13，下载PDF打印，表格不保存在服务器上。"
+      "title": "在线标签设计器 — 免费，Excel批量生成标签 | Markor",
+      "description": "免费在线标签设计器，无需注册：上传Excel或CSV，添加二维码、DataMatrix、EAN-13，直接用打印机打印或下载PDF。"
     }
   },
   "notes": {
-    "primary_keyword_per_locale": {
-      "uz": "etiketka yaratish",
-      "ru": "печать этикеток из Excel",
-      "zh": "乌兹别克斯坦 Asl Belgisi 标识码打印"
-    },
     "competitors": [
       "moysklad.ru — ranks for «программа для печати этикеток» and «генератор этикеток для маркетплейсов» (part of a paid inventory product, Russia-oriented)",
       "kontur.ru (Контур.Маркировка) — ranks for «конструктор этикеток с кодами маркировки» (Russian Честный знак, not Asl Belgisi)",
@@ -189,7 +213,8 @@
       "Publish a small set of problem-solving pages in uz and ru targeting long-tail queries: «DataMatrix не читается сканером (FNC1, GS1)», «как распечатать коды Asl Belgisi из CSV», «печать этикеток из Excel на термопринтере», «etiketka 58x40 / 20x20 shablon», each linking to the tool.",
       "Cross-link the tool with the equipment business: from label printer, scanner, label and ribbon pages to /label-design and the Asl Belgisi landing page, and from the tool pages back to compatible label sizes and printers.",
       "Use «etiketka» as the main Uzbek term in headings and add «yorliq» as a synonym in body text; mention the Cyrillic spellings (этикетка яратиш, Асл Белгиси) once in body copy or FAQ rather than creating a separate Cyrillic page.",
-      "Add per-locale Open Graph image and og:locale tags so links shared in Telegram show a clear preview; Telegram is a major sharing channel in Uzbekistan and the planned bot should only be mentioned as coming soon."
+      "Add per-locale Open Graph image and og:locale tags so links shared in Telegram show a clear preview; Telegram is a major sharing channel in Uzbekistan and the Telegram bot (send CSV, receive PDF) is available and can be mentioned in posts.",
+      "Link the /guide pages (uz/ru/zh) from the home FAQ and the label designer; they are indexable how-to content for long-tail queries such as «Asl Belgisi kodlarini qanday chop etish» and «как печатать этикетки на термопринтере»."
     ],
     "assumptions": [
       "No search-volume tool was available; keyword order and the choice of primary keywords are judgement based on search intent and visible competition, not measured volume.",
@@ -198,7 +223,20 @@
       "The Chinese texts are written for Chinese-speaking importers and suppliers who use Google or Bing; Baidu demand for these topics could not be checked. «强制标识» and «数字标识» are used as translations of the marking system; there is no single established Chinese term.",
       "The Chinese meta descriptions are 85–100 characters rather than 140–160, because CJK characters are double-width and search engines truncate Chinese snippets at roughly 80 characters; lengthen them if a strict character count is required.",
       "The site's current URL structure, locale routing, existing meta tags and domain were not inspected; technical recommendations are conditional on how locales are currently served.",
-      "The 300-label guest limit is stated as given; any higher limit for logged-in users is not claimed because it was not provided."
-    ]
+      "The 300-label limit is stated per file and per print; no higher limit for logged-in users is claimed."
+    ],
+    "primary_keyword_per_page": {
+      "home": {
+        "uz": "etiketka chop etish",
+        "ru": "печать этикеток из Excel",
+        "zh": "Excel标签打印 / Asl Belgisi标识码打印"
+      },
+      "label_design": {
+        "uz": "etiketka yaratish onlayn",
+        "ru": "конструктор этикеток онлайн",
+        "zh": "在线标签设计器"
+      }
+    },
+    "updated": "2026-11-21: added direct print without PDF, design saved in browser Local Storage, Asl Belgisi codes recognised in the designer (first 10 free), /guide pages, Telegram bot as available, marketplace; FAQ extended to 8."
   }
 }

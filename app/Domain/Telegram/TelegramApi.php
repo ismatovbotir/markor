@@ -31,7 +31,11 @@ class TelegramApi
             return null;
         }
 
-        return $response->json('result') ?? [];
+        // some methods (setWebhook, deleteWebhook, answerCallbackQuery …) answer just `true`:
+        // a successful call without data is an empty array, null always means it failed
+        $result = $response->json('result');
+
+        return is_array($result) ? $result : [];
     }
 
     public function sendMessage(string|int $chatId, string $text, ?array $replyMarkup = null): ?array
