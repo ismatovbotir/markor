@@ -14,4 +14,6 @@ return [
     // Welcome discount for a newly registered company: percent for N months (0 months = none).
     // free period of a new company in months (companies.free_until); the super admin can prolong it per company
     'free_months'      => (int) env('BILLING_FREE_MONTHS', 1),
+    // free period cap: at most this many codes are free; the rest of the period is charged normally (0 = no cap)
+    'free_codes_limit' => (int) env('BILLING_FREE_CODES_LIMIT', 5000),
 ];

@@ -153,4 +153,55 @@ class SecurityFixesTest extends TestCase
         $code = MarkingCode::withoutGlobalScope('owner')->where('serial', 'GTN0000000001')->first();
         $this->assertSame('04780000000777', \App\Domain\Printing\Renderers\LayoutRenderer::markingRow($code, null)['name']);
     }
+
+    private function sampleCodes(int $n): array
+    {
+        $this->seed(\Database\Seeders\ProductGroupSeeder::class);
+
+        return array_map('trim', array_slice(file(base_path('.claude/sample/sh_0175_06979497790395_60_2026-11-20.csv'), FILE_IGNORE_NEW_LINES), 0, $n));
+    }
+
+    public function test_real_marks_only_from_a_table_column(): void
+    {
+        $codes = $this->sampleCodes(3);
+        $typed = ['type' => 'barcode', 'symbology' => 'asl', 'text' => $codes[0], 'source' => '', 'x' => 1, 'y' => 1, 'w' => 20, 'h' => 20];
+        $this->post(route('studio.print'), ['width_mm' => 30, 'height_mm' => 30, 'copies' => 1, 'elements' => [$typed]])
+            ->assertStatus(422)->assertJsonPath('message', __('studio.marking_column_only'));
+
+        $serial = ['type' => 'barcode', 'symbology' => 'asl', 'source' => '@serial', 'prefix' => $codes[0], 'start' => 1, 'x' => 1, 'y' => 1, 'w' => 20, 'h' => 20];
+        $this->post(route('studio.print'), ['width_mm' => 30, 'height_mm' => 30, 'copies' => 1, 'elements' => [$serial]])->assertStatus(422);
+
+        // the renderer itself never draws a typed value as a real mark
+        $html = app(\App\Domain\Printing\Renderers\LayoutRenderer::class)->render(['width_mm' => 30, 'height_mm' => 30, 'elements' => [$typed]], [], 0, now());
+        $this->assertStringNotContainsString('data:image/png', $html);
+    }
+
+    public function test_marking_code_in_a_plain_datamatrix_is_refused(): void
+    {
+        $codes = $this->sampleCodes(2);
+        $plain = ['type' => 'barcode', 'symbology' => 'datamatrix', 'source' => 'Kod', 'text' => '', 'x' => 1, 'y' => 1, 'w' => 20, 'h' => 20];
+        $this->post(route('studio.print'), ['width_mm' => 30, 'height_mm' => 30, 'rows' => [['Kod' => $codes[0]]], 'elements' => [$plain]])
+            ->assertStatus(422)->assertJsonPath('message', __('studio.marking_use_asl'));
+    }
+
+    public function test_trial_counts_ipv6_networks_and_charges_round_up(): void
+    {
+        $this->assertSame(\App\Domain\Studio\MarkingTrial::visitorKey('2001:db8:1:2::5'), \App\Domain\Studio\MarkingTrial::visitorKey('2001:db8:1:2:ffff::9'), 'same /64');
+        $this->assertNotSame(\App\Domain\Studio\MarkingTrial::visitorKey('2001:db8:1:2::5'), \App\Domain\Studio\MarkingTrial::visitorKey('2001:db8:1:3::5'));
+        $this->assertSame(1.0, \App\Domain\Billing\Billing::amount(1, 9, 95), '0.45 so\'m rounds up, not to free');
+        $this->assertSame(0.0, \App\Domain\Billing\Billing::amount(1000, 9, 100), 'free stays free');
+        $this->assertSame(90.0, \App\Domain\Billing\Billing::amount(10, 9, 0));
+    }
+
+    public function test_failed_load_leaves_no_codes_behind(): void
+    {
+        $user = $this->client('301000009');
+        $product = Product::withoutGlobalScope('owner')->create(['gtin' => '04780000000888', 'is_active' => true]);
+        $batch = \App\Domain\Marking\Models\ImportBatch::withoutGlobalScope('owner')->create(['uuid' => (string) \Illuminate\Support\Str::uuid(), 'filename' => 'missing.csv', 'original_filename' => 'x.csv', 'uploaded_by' => $user->id, 'company_id' => $user->company_id, 'status' => 'processing']);
+        MarkingCode::withoutGlobalScope('owner')->create(['code' => '0104780000000888' . '21PARTIAL001', 'gtin' => $product->gtin, 'serial' => 'PARTIAL001', 'product_id' => $product->id, 'company_id' => $user->company_id, 'import_batch_id' => $batch->id, 'status' => 'imported']);
+
+        app()->call([new \App\Jobs\ProcessImportBatchJob($batch), 'handle']); // the file is missing → fails
+        $this->assertSame('failed', $batch->fresh()->status);
+        $this->assertSame(0, MarkingCode::withoutGlobalScope('owner')->where('import_batch_id', $batch->id)->count());
+    }
 }

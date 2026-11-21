@@ -31,8 +31,9 @@ class BalanceService
 
         $charged = DB::transaction(function () use ($batch) {
             $company = Company::lockForUpdate()->find($batch->company_id);
-            if ($batch->charged_at) {
-                return true;
+            $fresh = ImportBatch::withoutGlobalScope('owner')->whereKey($batch->id)->lockForUpdate()->first();
+            if ($fresh?->charged_at) {
+                return true; // already charged (checked on the locked row, not the copy in memory)
             }
             if ($company->balance < $batch->amount) {
                 $batch->update(['is_locked' => true]);

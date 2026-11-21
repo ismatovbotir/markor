@@ -80,7 +80,8 @@ class BillingTest extends TestCase
 
     public function test_new_company_gets_one_month_free_period(): void
     {
-        config(['billing.free_months' => 1]);
+        config(['billing.free_months' => 1, 'company.lookup_url' => 'https://lookup.test/{tin}', 'company.lookup_authorization' => 'Basic x']);
+        \Illuminate\Support\Facades\Http::fake(['lookup.test/*' => \Illuminate\Support\Facades\Http::response(['name' => 'Yangi MChJ', 'tin' => '309876543']), '*' => \Illuminate\Support\Facades\Http::response([], 404)]);
         $user = User::create(['name' => 'N', 'email' => 'n@t.uz', 'password' => 'secret123', 'role' => 'user', 'locale' => 'uz', 'is_active' => true]);
         $this->actingAs($user);
 

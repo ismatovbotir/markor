@@ -59,6 +59,10 @@ class LayoutRenderer
 
             if ($el['type'] === 'barcode') {
                 $type = $el['symbology'] ?? 'qr';
+                if ($type === \App\Domain\Studio\MarkingTrial::SYMBOLOGY) {
+                    // a real GS1 mark only from the uploaded table's column — never typed text, placeholders or generators
+                    $value = ($source !== '' && !str_starts_with($source, '@')) ? (string) ($row[$source] ?? '') : '';
+                }
                 if (trim($value) === '') {
                     continue;
                 }

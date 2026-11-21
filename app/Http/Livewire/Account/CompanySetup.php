@@ -81,7 +81,9 @@ class CompanySetup extends Component
             return;
         }
 
-        $company = Company::create($values + \App\Domain\Billing\Billing::freePeriod()
+        // the free month only for a real company (found by the tax-number lookup); a typed, unknown
+        // number gets it after the super admin approves (Company page → +1 oy)
+        $company = Company::create($values + ($this->lookupMessage === 'found' ? \App\Domain\Billing\Billing::freePeriod() : [])
             + ['tin' => $this->tin, 'source' => $this->lookupMessage === 'found' ? 'lookup' : 'manual', 'lookup_data' => $this->lookupData]);
         $user->update(['company_id' => $company->id, 'company_role' => 'owner']);
         app(\App\Domain\Telegram\Notifier::class)->companyRegistered($company, $user); // Telegram alert to the super admin

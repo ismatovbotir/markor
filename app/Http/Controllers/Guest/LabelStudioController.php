@@ -225,10 +225,22 @@ class LabelStudioController extends Controller
         // real Asl Belgisi marks: free trial only, the full workflow is in /aslbelgi
         $trial = \App\Domain\Studio\MarkingTrial::class;
         $markingElements = collect($data['elements'])->filter(fn ($e) => ($e['symbology'] ?? null) === $trial::SYMBOLOGY);
+        // a real mark only from a table column (the renderer enforces the same): typed text / generators are refused
+        abort_if($markingElements->contains(fn ($e) => blank($e['source'] ?? null) || str_starts_with((string) $e['source'], '@')), 422, __('studio.marking_column_only'));
+        // a marking code put into a plain DataMatrix / QR / Code 128 would skip the trial: refused
+        $parser = app($trial);
+        foreach (collect($data['elements'])->where('type', 'barcode')->reject(fn ($e) => ($e['symbology'] ?? null) === $trial::SYMBOLOGY) as $e) {
+            $values = filled($e['source'] ?? null) && !str_starts_with((string) $e['source'], '@')
+                ? collect($rows)->pluck($e['source'])->filter()->take(50)->all()
+                : [(string) ($e['text'] ?? '')];
+            foreach ($values as $v) {
+                abort_if($parser->isCode((string) $v), 422, __('studio.marking_use_asl'));
+            }
+        }
         if ($markingElements->isNotEmpty()) {
             $rows = array_slice(array_values($rows), 0, $trial::LIMIT); // only the first 10 codes
             $codes = collect($rows)->flatMap(fn ($row) => $markingElements->map(fn ($e) => (string) ($row[$e['source'] ?? ''] ?? '')))->filter()->unique()->values()->all();
-            abort_unless(app($trial)->allowToday($request->ip(), $codes), 422, __('studio.marking_daily', ['limit' => $trial::LIMIT]));
+            abort_unless(app($trial)->allowToday($trial::visitorKey($request->ip()), $codes), 422, __('studio.marking_daily', ['limit' => $trial::LIMIT]));
         }
 
         // heavy requests are refused before any work (public page: protect the server)

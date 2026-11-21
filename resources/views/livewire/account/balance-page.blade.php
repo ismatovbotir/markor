@@ -5,6 +5,7 @@
     @if(\App\Domain\Billing\Billing::isFree($company))
         <div class="flex items-center gap-2 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3">
             🎁 {{ __('free.balance_note', ['date' => $company->free_until->format('d.m.Y'), 'paid_from' => \App\Domain\Billing\Billing::paidFrom($company)->format('d.m.Y')]) }}
+            @if(($left = \App\Domain\Billing\Billing::freeCodesLeft($company)) !== null) {{ __('free.codes_left', ['left' => number_format($left, 0, '.', ' '), 'limit' => number_format(config('billing.free_codes_limit'), 0, '.', ' ')]) }}@endif
         </div>
     @endif
     <div class="grid sm:grid-cols-3 gap-4">

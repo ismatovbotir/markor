@@ -29,6 +29,10 @@ class SendBatchPdfToTelegram implements ShouldQueue
         $batch = ImportBatch::withoutGlobalScope('owner')->findOrFail($this->batchId);
         $template = LabelTemplate::findOrFail($this->templateId);
         $user = User::where('telegram_chat_id', $this->chatId)->first();
+        // re-checked when the job runs: unpaid batch, blocked company or another company's chat → nothing is sent
+        if ($batch->is_locked || $batch->status !== 'completed' || !$user || $user->company_id !== $batch->company_id || !$user->company?->is_active) {
+            return;
+        }
         $caption = fn ($pdf) => $bot->t($user, 'bot.pdf_ready', ['count' => $pdf->labels, 'template' => e($template->name)])
             . ($pdf->parts > 1 ? "\n" . $bot->t($user, 'bot.pdf_part', ['part' => $pdf->part, 'parts' => $pdf->parts, 'first' => $pdf->first_label, 'last' => $pdf->lastLabel()]) : '');
 

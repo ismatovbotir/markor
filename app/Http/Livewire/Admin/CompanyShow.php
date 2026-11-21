@@ -101,7 +101,8 @@ class CompanyShow extends Component
 
     private function setFree(?string $date): void
     {
-        $this->company->update(['free_until' => $date]);
+        // a newly granted free period starts a fresh free-codes allowance
+        $this->company->update(['free_until' => $date] + ($date && \Illuminate\Support\Carbon::parse($date)->endOfDay()->isFuture() && !\App\Domain\Billing\Billing::isFree($this->company) ? ['free_codes_used' => 0] : []));
         $this->company->refresh();
         $this->freeUntil = $this->company->free_until?->toDateString() ?? '';
         app(\App\Domain\Telegram\Notifier::class)->freePeriodChanged($this->company);

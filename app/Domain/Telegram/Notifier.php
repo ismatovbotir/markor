@@ -81,6 +81,10 @@ class Notifier
             'free' => $company->free_until?->format('d.m.Y') ?? '—', 'source' => $company->source === 'lookup' ? '✓' : '✎',
             'url' => route('admin.companies.show', $company),
         ]);
+        if (!$company->free_until) {
+            // not found by the lookup: no free month until the super admin checks it
+            $this->toAdmin('bot.admin_company_unverified', ['company' => e($company->name), 'tin' => e($company->tin), 'url' => route('admin.companies.show', $company)]);
+        }
     }
 
     /** A client ordered a new label template → super admin. */

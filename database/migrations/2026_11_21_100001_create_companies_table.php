@@ -31,6 +31,7 @@ return new class extends Migration
             // free period: loading codes costs nothing until this day (inclusive), payment is due from the next day.
             // Set at registration (config billing.free_months), the super admin can prolong it.
             $table->date('free_until')->nullable();
+            $table->unsignedInteger('free_codes_used')->default(0); // codes loaded free in the current free period (capped)
             $table->decimal('discount_percent', 5, 2)->nullable();
             $table->date('discount_until')->nullable();
             // prepaid balance in so'm = confirmed payments − charged batches (kept in sync with balance_entries)

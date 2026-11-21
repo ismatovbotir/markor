@@ -20,17 +20,33 @@ class MarkingTrial
      * The trial is per visitor and day, not per request: at most LIMIT different codes per IP per day
      * (printing the same codes again is free). Returns false when these codes would go over it.
      */
-    public function allowToday(string $ip, array $codes): bool
+    public function allowToday(string $visitor, array $codes): bool
     {
-        $key = 'marking-trial:' . sha1($ip) . ':' . now()->toDateString();
-        $used = \Illuminate\Support\Facades\Cache::get($key, []);
-        $all = array_values(array_unique([...$used, ...array_map('sha1', $codes)]));
-        if (count($all) > self::LIMIT) {
-            return false;
-        }
-        \Illuminate\Support\Facades\Cache::put($key, $all, now()->endOfDay());
+        $key = 'marking-trial:' . sha1($visitor) . ':' . now()->toDateString();
 
-        return true;
+        // locked: parallel requests can't each read "0 used" and print 10 more
+        return \Illuminate\Support\Facades\Cache::lock($key . ':lock', 10)->block(5, function () use ($key, $codes) {
+            $used = \Illuminate\Support\Facades\Cache::get($key, []);
+            $all = array_values(array_unique([...$used, ...array_map('sha1', $codes)]));
+            if (count($all) > self::LIMIT) {
+                return false;
+            }
+            \Illuminate\Support\Facades\Cache::put($key, $all, now()->endOfDay());
+
+            return true;
+        });
+    }
+
+    /** Who the daily trial counts: an IPv4 address, or a whole IPv6 /64 (one home / phone network). */
+    public static function visitorKey(string $ip): string
+    {
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            $bin = inet_pton($ip);
+
+            return 'v6:' . bin2hex(substr($bin, 0, 8));
+        }
+
+        return 'v4:' . $ip;
     }
 
     /** Pseudo symbology of the designer's "Asl Belgisi DataMatrix" element. */

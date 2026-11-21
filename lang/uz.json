@@ -319,7 +319,7 @@
     "billing.codes": "ta kod",
     "billing.discount": "Chegirma",
     "billing.to_pay": "To'lov",
-    "home.aslbelgi.price": "Birinchi oy bepul. Keyin — har bir yuklangan kod uchun 9 so'm, oldindan to'lov bilan.",
+    "home.aslbelgi.price": "Birinchi oy bepul (5 000 tagacha kod). Keyin — har bir yuklangan kod uchun 9 so'm, oldindan to'lov bilan.",
     "templates.catalog_hint": "Yorliq dizaynlari. PDF yaratishda shulardan birini tanlaysiz. Yangi dizayn kerak bo'lsa, bizga murojaat qiling.",
     "templates.preview_pdf": "PDF namunasi",
     "templates.per_row": "tadan qatorda",
@@ -782,7 +782,7 @@
     "home.faq.7.q": "Jadvalim va etiketka dizaynim saqlanadimi?",
     "home.faq.7.a": "Etiketka dizayni uchun yuklangan jadval serverda saqlanmaydi. Dizaynni rozilik berganingizdan keyin faqat brauzeringizda (Local Storage) saqlash mumkin, serverga hech narsa yuborilmaydi. Asl Belgisi kodlari fayli esa kodlar bazaga yuklangach serverdan o'chiriladi.",
     "home.faq.8.q": "Xizmat bepulmi, ro'yxatdan o'tish kerakmi?",
-    "home.faq.8.a": "Etiketka dizayni bepul va ro'yxatdan o'tishsiz ishlaydi. Asl Belgisi bo'limi kompaniyalar uchun, hisobga kirish bilan: birinchi oy bepul, keyin har bir kod uchun 9 so'm, oldindan to'lov asosida.",
+    "home.faq.8.a": "Etiketka dizayni bepul va ro'yxatdan o'tishsiz ishlaydi. Asl Belgisi bo'limi kompaniyalar uchun, hisobga kirish bilan: birinchi oy bepul (5 000 tagacha kod), keyin har bir kod uchun 9 so'm, oldindan to'lov asosida.",
     "bot.admin_new_user": "🆕 <b>Yangi foydalanuvchi ro'yxatdan o'tdi</b>\n:name\n:email · :phone · :locale\nKeyingi qadam — kompaniyani to'ldirish.\n:url",
     "bot.admin_new_company": "🏢 <b>Yangi kompaniya</b>\n:company\nSTIR: :tin :source · rahbar: :director\nTelefon: :phone · foydalanuvchi: :user\nBepul muddat: :free gacha\n:url",
     "import.upload_failed": "Faylni yuklab bo'lmadi. Qayta urinib ko'ring yoki biz bilan bog'laning.",
@@ -826,5 +826,10 @@
     "bot.template_request_done": "✅ Shablon so'rovingiz bajarildi: <b>:size</b>\n:note\nShablonlar: :url",
     "bot.template_request_rejected": "Shablon so'rovingiz bo'yicha javob: <b>:size</b>\n:note",
     "profile.password_hint": "Parol oyna orqali o'zgartiriladi — tasodifan o'zgartirib qo'ymaslik uchun.",
-    "profile.password_other_devices": "Saqlangach, boshqa qurilmalardagi seanslar yopiladi."
+    "profile.password_other_devices": "Saqlangach, boshqa qurilmalardagi seanslar yopiladi.",
+    "studio.marking_column_only": "Asl Belgisi DataMatrix faqat yuklangan fayldagi kod ustunidan olinadi (qo'lda yozilgan matn yoki generator emas).",
+    "studio.marking_use_asl": "Faylda Asl Belgisi kodlari bor: ular uchun \"Asl Belgisi DataMatrix (GS1)\" elementidan foydalaning. Oddiy DataMatrix/QR'ga markirovka kodini qo'yib bo'lmaydi.",
+    "free.codes_left": "Bepul kodlar qoldi: :left / :limit.",
+    "free.unverified": "STIR tekshiruvda topilmadi — bepul oy berilmagan. Kompaniyani tekshirib, \"+1 oy\" bilan bering.",
+    "bot.admin_company_unverified": "⚠️ <b>:company</b> (STIR :tin) tekshiruvda topilmadi — bepul oy berilmadi. Tekshirib, kerak bo'lsa \"+1 oy\" bering:\n:url"
 }

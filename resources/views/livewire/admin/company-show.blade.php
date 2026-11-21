@@ -37,10 +37,12 @@
                 @if($free)
                     <p class="text-sm text-emerald-700 mt-0.5">{{ __('free.active', ['date' => $company->free_until->format('d.m.Y'), 'days' => (int) now()->startOfDay()->diffInDays($company->free_until) + 1]) }}</p>
                     <p class="text-xs text-stone-500">{{ __('free.paid_from', ['date' => $paidFrom->format('d.m.Y')]) }}</p>
+                    @if(($left = \App\Domain\Billing\Billing::freeCodesLeft($company)) !== null)<p class="text-xs text-stone-500">{{ __('free.codes_left', ['left' => number_format($left, 0, '.', ' '), 'limit' => number_format(config('billing.free_codes_limit'), 0, '.', ' ')]) }}</p>@endif
                 @elseif($company->free_until)
                     <p class="text-sm text-stone-600 mt-0.5">{{ __('free.ended', ['date' => $company->free_until->format('d.m.Y')]) }}</p>
                 @else
                     <p class="text-sm text-stone-500 mt-0.5">{{ __('free.none') }}</p>
+                    @if($company->source !== 'lookup')<p class="text-xs text-amber-700 mt-0.5">{{ __('free.unverified') }}</p>@endif
                 @endif
             </div>
             <div class="flex items-center gap-2 flex-wrap">

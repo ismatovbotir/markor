@@ -1,6 +1,6 @@
 # Balans va to'lov
 
-Birinchi oy bepul. Keyin har bir yuklangan kod uchun 9 so'm olinadi, oldindan to'lov bilan: avval balans to'ldiriladi, keyin partiya narxi balansdan yechiladi.
+Birinchi oy bepul — 5 000 tagacha kod; bepul oy STIR tekshiruvda topilgan kompaniyaga beriladi (topilmasa, administrator tekshirib beradi). Keyin har bir yuklangan kod uchun 9 so'm olinadi, oldindan to'lov bilan: avval balans to'ldiriladi, keyin partiya narxi balansdan yechiladi.
 
 ## Partiya qachon yopiladi
 

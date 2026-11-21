@@ -31,18 +31,28 @@ class ProcessImportBatches extends Command
             while ($batch = $this->claimNext()) {
                 $worked = true;
                 $this->line("Loading batch #{$batch->id} {$batch->original_filename}");
-                app()->call([new ProcessImportBatchJob($batch), 'handle']);
-                $batch->refresh();
-                if (in_array($batch->status, ['checking', 'completed'], true) && $batch->processed_rows > 0) {
-                    app(\App\Domain\Billing\BalanceService::class)->chargeBatch($batch);
+                try {
+                    app()->call([new ProcessImportBatchJob($batch), 'handle']);
                     $batch->refresh();
+                    if (in_array($batch->status, ['checking', 'completed'], true) && $batch->processed_rows > 0) {
+                        app(\App\Domain\Billing\BalanceService::class)->chargeBatch($batch);
+                        $batch->refresh();
+                    }
+                } catch (\Throwable $e) {
+                    report($e); // this batch failed — the loop goes on with the others
+                    $this->error("  batch #{$batch->id} failed: " . $e->getMessage());
+                    continue;
                 }
 
                 if ($batch->status === 'checking') {
-                    $this->checkProducts($batch, $lookup);
+                    try {
+                        $this->checkProducts($batch, $lookup); // classifier names: nice to have, never blocks the batch
+                    } catch (\Throwable $e) {
+                        report($e);
+                    }
                     $batch->update(['status' => 'completed']);
                 }
-                app(\App\Domain\Telegram\BotHandler::class)->notifyBatchFinished($batch->fresh());
+                rescue(fn () => app(\App\Domain\Telegram\BotHandler::class)->notifyBatchFinished($batch->fresh()), report: true);
                 $this->line("  → {$batch->status}, {$batch->processed_rows} codes");
             }
 

@@ -101,14 +101,17 @@ class ProcessImportBatchJob implements ShouldQueue
                 array_unshift($errors, "{$duplicates} duplicate code(s) skipped (already in the system)");
             }
 
-            // Billing: what this batch costs, fixed at load time.
-            $unitPrice = Billing::unitPrice();
-            $discount  = Billing::discountFor($this->batch->company);
+            // Billing: what this batch costs, fixed at load time. In the free period only the first codes
+            // up to the cap are free (reserved under a lock, so parallel uploads can't share them).
+            $price = $this->batch->company_id
+                ? \Illuminate\Support\Facades\DB::transaction(fn () => Billing::priceBatch(
+                    \App\Domain\Companies\Company::lockForUpdate()->findOrFail($this->batch->company_id), $inserted))
+                : ['unit_price' => Billing::unitPrice(), 'discount_percent' => 0.0, 'amount' => Billing::amount($inserted, Billing::unitPrice(), 0)];
 
             $this->batch->update([
-                'unit_price'       => $unitPrice,
-                'discount_percent' => $discount,
-                'amount'           => Billing::amount($inserted, $unitPrice, $discount),
+                'unit_price'       => $price['unit_price'],
+                'discount_percent' => $price['discount_percent'],
+                'amount'           => $price['amount'],
                 // codes are in; next the scheduler checks the products (GTIN) — then `completed`
                 'status'         => $inserted > 0 ? 'checking' : 'completed',
                 'product_id'     => count($this->products) === 1 ? reset($this->products) : null,
@@ -137,6 +140,8 @@ class ProcessImportBatchJob implements ShouldQueue
         if ($e) {
             report($e); // the real error goes to the log, the client sees a plain message
         }
+        // codes inserted before the failure would be unprintable and block a re-upload: remove them
+        \App\Domain\Marking\Models\MarkingCode::withoutGlobalScope('owner')->where('import_batch_id', $this->batch->id)->delete();
         $this->batch->update([
             'status'       => 'failed',
             'error_log'    => [__('import.failed_generic')],

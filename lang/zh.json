@@ -319,7 +319,7 @@
     "billing.codes": "个码",
     "billing.discount": "折扣",
     "billing.to_pay": "应付",
-    "home.aslbelgi.price": "首月免费。之后每导入一个码 9 苏姆，预付费。",
+    "home.aslbelgi.price": "首月免费（最多 5 000 个码）。之后每导入一个码 9 苏姆，预付费。",
     "templates.catalog_hint": "标签设计。生成 PDF 时从中选择一个。如需新设计，请联系我们。",
     "templates.preview_pdf": "PDF 样张",
     "templates.per_row": "张/行",
@@ -782,7 +782,7 @@
     "home.faq.7.q": "我的表格和标签设计会被保存吗？",
     "home.faq.7.a": "用于标签设计的表格不会保存在服务器上。经您同意后，设计可仅保存在浏览器（Local Storage）中，不会发送到服务器。Asl Belgisi 标识码文件在导入数据库后即从服务器删除。",
     "home.faq.8.q": "服务是否免费，需要注册吗？",
-    "home.faq.8.a": "标签设计免费，无需注册。Asl Belgisi板块面向企业，需要登录：首月免费，之后每个码9苏姆，预付费。",
+    "home.faq.8.a": "标签设计免费，无需注册。Asl Belgisi板块面向企业，需要登录：首月免费（最多 5 000 个码），之后每个码9苏姆，预付费。",
     "bot.admin_new_user": "🆕 <b>新用户注册</b>\n:name\n:email · :phone · :locale\n下一步：填写公司信息。\n:url",
     "bot.admin_new_company": "🏢 <b>新公司</b>\n:company\n税号：:tin :source · 负责人：:director\n电话：:phone · 用户：:user\n免费期至：:free\n:url",
     "import.upload_failed": "文件上传失败。请重试或联系我们。",
@@ -826,5 +826,10 @@
     "bot.template_request_done": "✅ 您的模板申请已完成：<b>:size</b>\n:note\n模板：:url",
     "bot.template_request_rejected": "关于您的模板申请的回复：<b>:size</b>\n:note",
     "profile.password_hint": "在单独的窗口中修改密码，避免误改。",
-    "profile.password_other_devices": "保存后，其他设备上的会话将被关闭。"
+    "profile.password_other_devices": "保存后，其他设备上的会话将被关闭。",
+    "studio.marking_column_only": "Asl Belgisi DataMatrix 只能取自上传文件中的标识码列（不能是手动输入的文本或生成器）。",
+    "studio.marking_use_asl": "文件中有 Asl Belgisi 标识码：请使用“Asl Belgisi DataMatrix (GS1)”元素。标识码不能放入普通 DataMatrix/QR。",
+    "free.codes_left": "剩余免费码：:left / :limit。",
+    "free.unverified": "税号核查未找到——未发放免费月。请核实公司后用“+1 个月”发放。",
+    "bot.admin_company_unverified": "⚠️ <b>:company</b>（税号 :tin）核查未找到——未发放免费月。请核实，必要时发放“+1 个月”：\n:url"
 }

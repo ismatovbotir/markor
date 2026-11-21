@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [\App\Http\Middleware\SetLocale::class, \App\Http\Middleware\EnsureActiveAccount::class, \App\Http\Middleware\SecurityHeaders::class]);
         // Telegram posts updates without a CSRF token; the webhook is protected by its secret URL instead
         $middleware->preventRequestForgery(except: ['telegram/webhook/*']);
+        // the real visitor IP behind a web server on the same machine (nginx → php-fpm); nobody else can set the header
+        $middleware->trustProxies(at: ['127.0.0.1', '::1']);
         $middleware->alias([
             'client.only' => \App\Http\Middleware\ClientOnly::class,
             'company'     => \App\Http\Middleware\CompanyRequired::class,
