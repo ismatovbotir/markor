@@ -17,7 +17,7 @@
     "home.products.aslbelgi.text": "Operatordan olingan CSV faylni yuklaysiz, kodlar bazaga tushadi. Har bir partiyaning barcha etiketkalari bir tugma bilan PDF qilib tayyorlanadi.",
     "home.products.aslbelgi.point1": "Mahsulotlar GTIN bo'yicha avtomatik yaratiladi",
     "home.products.aslbelgi.point2": "To'g'ri GS1 DataMatrix: FNC1 va GS ajratgichlari",
-    "home.products.aslbelgi.point3": "Tayyor etiketka shabloni, standart 60×40 mm",
+    "home.products.aslbelgi.point3": "Tayyor etiketka shabloni, standart 20×20 mm",
     "home.products.aslbelgi.cta": "Kirish",
 
     "home.steps.title": "Uch qadamda tayyor etiketka",
@@ -87,7 +87,7 @@
     "home.products.aslbelgi.text": "Загружаете CSV от оператора, коды попадают в базу. PDF со всеми этикетками партии формируется одной кнопкой.",
     "home.products.aslbelgi.point1": "Товары создаются автоматически по GTIN",
     "home.products.aslbelgi.point2": "Корректный GS1 DataMatrix: FNC1 и разделители GS",
-    "home.products.aslbelgi.point3": "Готовый шаблон этикетки, по умолчанию 60×40 мм",
+    "home.products.aslbelgi.point3": "Готовый шаблон этикетки, по умолчанию 20×20 мм",
     "home.products.aslbelgi.cta": "Войти",
 
     "home.steps.title": "Готовая этикетка за три шага",
@@ -157,7 +157,7 @@
     "home.products.aslbelgi.text": "上传运营方提供的 CSV，标识码导入数据库。每个批次的全部标签一键生成 PDF。",
     "home.products.aslbelgi.point1": "按 GTIN 自动创建商品",
     "home.products.aslbelgi.point2": "规范的 GS1 DataMatrix：含 FNC1 和 GS 分隔符",
-    "home.products.aslbelgi.point3": "现成的标签模板，默认 60×40 毫米",
+    "home.products.aslbelgi.point3": "现成的标签模板，默认 20×20 毫米",
     "home.products.aslbelgi.cta": "登录",
 
     "home.steps.title": "三步得到标签",

@@ -18,7 +18,7 @@
         "etiketka dizayni",
         "raqamli markirovka etiketka",
         "Asl Belgisi CSV fayl",
-        "termoetiketka shablon 60x40",
+        "termoetiketka shablon 20x20",
         "etiketka PDF yuklab olish",
         "этикетка яратиш",
         "Асл Белгиси маркировка кодини чоп этиш"
@@ -34,7 +34,7 @@
         },
         {
           "q": "Asl Belgisi markirovka kodlarini etiketkaga qanday chiqarish mumkin?",
-          "a": "Hisobingizga kiring va operatordan olingan kodlar faylini (CSV) yuklang. Fayl navbatda qayta ishlanadi, mahsulotlar GTIN bo'yicha avtomatik yaratiladi va bir bosishda shablon asosida etiketkalar PDF fayli tayyor bo'ladi; standart shablon o'lchami 60×40 mm."
+          "a": "Hisobingizga kiring va operatordan olingan kodlar faylini (CSV) yuklang. Fayl navbatda qayta ishlanadi, mahsulotlar GTIN bo'yicha avtomatik yaratiladi va bir bosishda shablon asosida etiketkalar PDF fayli tayyor bo'ladi; standart shablon o'lchami 20×20 mm."
         },
         {
           "q": "Nega chop etilgan DataMatrix kodi skanerda markirovka kodi sifatida o'qilmaydi?",
@@ -67,7 +67,7 @@
         "этикетки для маркировки товаров Узбекистан",
         "GS1 DataMatrix этикетка",
         "коды маркировки из CSV в PDF",
-        "шаблон этикетки 60x40",
+        "шаблон этикетки 20x20",
         "этикетка EAN-13 онлайн",
         "цифровая маркировка Узбекистан этикетки",
         "Асл Белгиси печать кодов"
@@ -83,7 +83,7 @@
         },
         {
           "q": "Как распечатать коды маркировки Asl Belgisi на этикетках?",
-          "a": "Войдите в аккаунт и загрузите файл с кодами (CSV), полученный от оператора. Файл обрабатывается в очереди, товары создаются автоматически по GTIN, а PDF с этикетками по шаблону формируется в один клик; размер шаблона по умолчанию 60×40 мм."
+          "a": "Войдите в аккаунт и загрузите файл с кодами (CSV), полученный от оператора. Файл обрабатывается в очереди, товары создаются автоматически по GTIN, а PDF с этикетками по шаблону формируется в один клик; размер шаблона по умолчанию 20×20 мм."
         },
         {
           "q": "Почему напечатанный DataMatrix не читается сканером как код маркировки?",
@@ -117,7 +117,7 @@
         "条形码标签生成",
         "CSV标识码转PDF标签",
         "乌兹别克斯坦进口家电标识",
-        "60×40标签模板",
+        "20×20标签模板",
         "标签生成器 PDF"
       ],
       "faq": [
@@ -131,7 +131,7 @@
         },
         {
           "q": "如何把Asl Belgisi标识码打印成标签？",
-          "a": "登录账户后上传从运营方获得的标识码文件（CSV）。文件进入队列处理，系统按GTIN自动创建商品，一键即可按模板生成标签PDF，默认模板尺寸为60×40毫米。"
+          "a": "登录账户后上传从运营方获得的标识码文件（CSV）。文件进入队列处理，系统按GTIN自动创建商品，一键即可按模板生成标签PDF，默认模板尺寸为20×20毫米。"
         },
         {
           "q": "为什么打印出来的DataMatrix码不能被扫描枪识别为标识码？",
@@ -186,7 +186,7 @@
       "Give each language its own crawlable URL (for example /uz, /ru, /zh) with self-referencing canonical, reciprocal hreflang (uz, ru, zh-Hans, x-default) and locale-specific title/description/H1 from this file; do not switch language by session or cookie only.",
       "Keep server-rendered text on /label-design around the tool (what it does, supported files, element types, the FAQ) so the page has indexable content and is not just an app shell; mark it up with FAQPage and WebApplication JSON-LD. Do not put a price in the markup for the Asl Belgisi part.",
       "Register the site in Google Search Console and Yandex Webmaster and submit a sitemap.xml that lists every locale URL with hreflang alternates; Yandex is still widely used for Russian-language queries in Uzbekistan.",
-      "Publish a small set of problem-solving pages in uz and ru targeting long-tail queries: «DataMatrix не читается сканером (FNC1, GS1)», «как распечатать коды Asl Belgisi из CSV», «печать этикеток из Excel на термопринтере», «etiketka 58x40 / 60x40 shablon», each linking to the tool.",
+      "Publish a small set of problem-solving pages in uz and ru targeting long-tail queries: «DataMatrix не читается сканером (FNC1, GS1)», «как распечатать коды Asl Belgisi из CSV», «печать этикеток из Excel на термопринтере», «etiketka 58x40 / 20x20 shablon», each linking to the tool.",
       "Cross-link the tool with the equipment business: from label printer, scanner, label and ribbon pages to /label-design and the Asl Belgisi landing page, and from the tool pages back to compatible label sizes and printers.",
       "Use «etiketka» as the main Uzbek term in headings and add «yorliq» as a synonym in body text; mention the Cyrillic spellings (этикетка яратиш, Асл Белгиси) once in body copy or FAQ rather than creating a separate Cyrillic page.",
       "Add per-locale Open Graph image and og:locale tags so links shared in Telegram show a clear preview; Telegram is a major sharing channel in Uzbekistan and the planned bot should only be mentioned as coming soon."

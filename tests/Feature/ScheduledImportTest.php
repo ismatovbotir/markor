@@ -50,7 +50,7 @@ class ScheduledImportTest extends TestCase
         $this->assertFileDoesNotExist(storage_path("app/imports/{$batch->filename}"));
 
         $product = Product::withoutGlobalScope('owner')->where('gtin', '06906974316793')->firstOrFail();
-        $this->assertSame('Beltop, BT-EK-5510 оқ ранг', $product->name_uz);
+        $this->assertSame('Beltop, BT-EK-5510 oq rang', $product->name_uz);
         $this->assertSame('08516999043100011', $product->attributes['mxik']);
         $this->assertSame('found', $product->attributes['lookup']);
     }

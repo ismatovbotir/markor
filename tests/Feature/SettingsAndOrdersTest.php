@@ -56,7 +56,7 @@ class SettingsAndOrdersTest extends TestCase
         $this->postJson('/offer-request', ['offer_id' => $offer->id, 'name' => 'Bot', 'phone' => '+998901112233', 'website' => 'spam'])->assertUnprocessable();
 
         $this->assertSame(2, OfferRequest::count());
-        $this->assertSame('Etiketka 60×40 mm (Default 60×40)', OfferRequest::latest('id')->first()->item_title);
+        $this->assertSame('Etiketka 20×20 mm (Default 20×20)', OfferRequest::latest('id')->first()->item_title);
 
         $this->actingAs($this->admin())->get(route('admin.offer-requests'))->assertOk()->assertSee('Mobil printer, Bluetooth');
     }

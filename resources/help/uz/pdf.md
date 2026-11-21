@@ -6,7 +6,7 @@ Tayyor partiyadan yorliqlar uchun PDF fayl yaratish va uni yorliq printerida cho
 
 1. CSV import sahifasida holati **Tayyor** bo'lgan partiyani toping.
 2. **PDF yaratish** tugmasini bosing.
-3. Ro'yxatdan yorliq dizaynini tanlang. Standart dizayn 60×40 mm.
+3. Ro'yxatdan yorliq dizaynini tanlang. Standart dizayn 20×20 mm, faqat DataMatrix.
 
 {{img:pdf-1}}
 

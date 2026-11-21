@@ -14,42 +14,27 @@ class LabelTemplate extends Model implements Auditable
     /** Placeholders available in a template (HTML is escaped except {datamatrix}). */
     public const PLACEHOLDERS = ['{datamatrix}', '{gtin}', '{serial}', '{name}', '{sku}', '{code}', '{batch}', '{date}'];
 
+    /** Built-in default label size, mm: a 20×20 label carrying only the marking DataMatrix. */
+    public const DEFAULT_WIDTH = 20;
+    public const DEFAULT_HEIGHT = 20;
+
     /**
-     * Built-in 60×40 mm template. Uses only CSS that dompdf renders reliably
-     * (absolute positioning, no flex/grid).
+     * Built-in 20×20 mm template (HTML for dompdf): the DataMatrix only, 2 mm quiet margin
+     * (16×16 mm symbol — Asl Belgisi asks for at least 14×14 mm of contrasting area).
      */
     public const DEFAULT_TEMPLATE = <<<'HTML'
 <style>
-  .label   { position: relative; width: 60mm; height: 40mm; font-family: "DejaVu Sans", sans-serif; color: #000; }
-  .datamatrix { position: absolute; left: 3mm; top: 3mm; width: 27mm; height: 27mm; }
-  .info    { position: absolute; left: 33mm; top: 3mm; width: 25mm; font-size: 6.5pt; line-height: 1.35; }
-  .name    { font-weight: bold; font-size: 7pt; margin-bottom: 1.5mm; }
-  .muted   { color: #444; font-size: 5.5pt; }
-  .serial  { position: absolute; left: 3mm; bottom: 3mm; width: 54mm; font-size: 6.5pt; }
+  .label      { position: relative; width: 20mm; height: 20mm; }
+  .datamatrix { position: absolute; left: 2mm; top: 2mm; width: 16mm; height: 16mm; }
 </style>
 <div class="label">
   {datamatrix}
-  <div class="info">
-    <div class="name">{name}</div>
-    <div class="muted">GTIN</div>
-    <div><b>{gtin}</b></div>
-    <div class="muted" style="margin-top: 1.5mm;">{date}</div>
-  </div>
-  <div class="serial"><span class="muted">SN</span> <b>{serial}</b></div>
 </div>
 HTML;
 
-    /**
-     * Built-in 60×40 mm layout for the visual editor. Positions and sizes are in mm,
-     * font sizes in pt. Text may contain placeholders.
-     */
+    /** Built-in 20×20 mm layout for the visual editor (mm): only the marking DataMatrix. */
     public const DEFAULT_LAYOUT = [
-        ['type' => 'datamatrix', 'x' => 3, 'y' => 3, 'w' => 27, 'h' => 27],
-        ['type' => 'text', 'text' => '{name}', 'x' => 33, 'y' => 3, 'w' => 24, 'h' => 9, 'font_size' => 7, 'bold' => true, 'align' => 'left'],
-        ['type' => 'text', 'text' => 'GTIN', 'x' => 33, 'y' => 13, 'w' => 24, 'h' => 3, 'font_size' => 5.5, 'bold' => false, 'align' => 'left'],
-        ['type' => 'text', 'text' => '{gtin}', 'x' => 33, 'y' => 16, 'w' => 24, 'h' => 4, 'font_size' => 6.5, 'bold' => true, 'align' => 'left'],
-        ['type' => 'text', 'text' => '{date}', 'x' => 33, 'y' => 22, 'w' => 24, 'h' => 3.5, 'font_size' => 5.5, 'bold' => false, 'align' => 'left'],
-        ['type' => 'text', 'text' => 'SN {serial}', 'x' => 3, 'y' => 33, 'w' => 54, 'h' => 4, 'font_size' => 6.5, 'bold' => true, 'align' => 'left'],
+        ['type' => 'datamatrix', 'x' => 2, 'y' => 2, 'w' => 16, 'h' => 16],
     ];
 
     protected $fillable = [

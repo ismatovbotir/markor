@@ -9,13 +9,13 @@ class Offer extends Model
     protected $fillable = [
         'offer_category_id', 'image_path', 'url',
         'slug', 'category', 'icon', 'title_uz', 'title_ru', 'title_zh',
-        'description_uz', 'description_ru', 'description_zh', 'price', 'action',
+        'description_uz', 'description_ru', 'description_zh', 'faq', 'price', 'action',
         'sort_order', 'is_active',
     ];
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean'];
+        return ['is_active' => 'boolean', 'faq' => 'array'];
     }
 
     /** Active item in an active category. */
@@ -43,6 +43,17 @@ class Offer extends Model
     public static function publicUrl(?string $path): ?string
     {
         return $path ? '/storage/' . ltrim($path, '/') : null;
+    }
+
+    /** FAQ in the current language: [['q' => …, 'a' => …], …] (falls back to Uzbek). */
+    public function localizedFaq(): array
+    {
+        $l = app()->getLocale();
+
+        return collect($this->faq ?? [])
+            ->map(fn ($f) => ['q' => $f["q_$l"] ?? null ?: ($f['q_uz'] ?? ''), 'a' => $f["a_$l"] ?? null ?: ($f['a_uz'] ?? '')])
+            ->filter(fn ($f) => $f['q'] !== '' && $f['a'] !== '')
+            ->values()->all();
     }
 
     public function getTitleAttribute(): string

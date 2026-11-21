@@ -39,5 +39,6 @@
         <env name="TELEGRAM_ARCHIVE_CHAT_ID" value=""/>
         <env name="TELEGRAM_ARCHIVE_CHAT" value=""/>
         <env name="COMPANY_LOOKUP_AUTHORIZATION" value=""/>
+        <env name="ANTHROPIC_API_KEY" value=""/>
     </php>
 </phpunit>

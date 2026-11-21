@@ -25,6 +25,8 @@ return new class extends Migration
             $table->text('description_uz')->nullable();
             $table->text('description_ru')->nullable();
             $table->text('description_zh')->nullable();
+            // questions & answers shown under the item: [{q_uz, a_uz, q_ru, a_ru, q_zh, a_zh}, …] (can be written by Claude)
+            $table->json('faq')->nullable();
             $table->string('price', 60)->nullable();     // free text: "kelishiladi", "1 200 000 so'm"
             $table->string('url', 500)->nullable();      // the item on the marketplace
             $table->string('action', 10)->default('call'); // call / order

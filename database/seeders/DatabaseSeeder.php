@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 /**
  * Dev data for `php artisan migrate:fresh --seed`. Reference data the app needs in every
- * environment (the three product categories, the default 60×40 label template) is created by the
+ * environment (the three product categories, the default 20×20 DataMatrix label template) is created by the
  * migrations, not here.
  */
 class DatabaseSeeder extends Seeder

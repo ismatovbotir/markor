@@ -28,6 +28,8 @@ class OfferCategoryManager extends Component
     public ?int $editingId = null;
     public array $item = [];
     public $photo = null;
+    public string $aiNotes = '';
+    public ?string $aiMessage = null;
 
     public function mount(OfferCategory $category): void
     {
@@ -59,7 +61,8 @@ class OfferCategoryManager extends Component
         $this->reset(['editingId', 'photo']);
         $this->dispatch('offer-photo-cleared');
         $this->item = ['title_uz' => '', 'title_ru' => '', 'title_zh' => '', 'description_uz' => '', 'description_ru' => '', 'description_zh' => '',
-            'price' => '', 'url' => '', 'action' => 'order', 'is_active' => true, 'image_path' => null];
+            'price' => '', 'url' => '', 'action' => 'order', 'is_active' => true, 'image_path' => null, 'faq' => []];
+        $this->reset(['aiNotes', 'aiMessage']);
         $this->showForm = true;
     }
 
@@ -71,7 +74,53 @@ class OfferCategoryManager extends Component
         $this->dispatch('offer-photo-cleared');
         $this->editingId = $id;
         $this->item = $offer->only(['title_uz', 'title_ru', 'title_zh', 'description_uz', 'description_ru', 'description_zh', 'price', 'url', 'action', 'is_active', 'image_path']);
+        $this->item['faq'] = $offer->faq ?? [];
+        $this->reset(['aiNotes', 'aiMessage']);
         $this->showForm = true;
+    }
+
+    /** Fills names, descriptions and FAQ (uz/ru/zh) with Claude; the admin reviews and saves. */
+    public function generateContent(\App\Domain\Ai\OfferWriter $writer, \App\Domain\Ai\Claude $claude): void
+    {
+        $title = collect([$this->item['title_uz'] ?? '', $this->item['title_ru'] ?? '', $this->item['title_zh'] ?? ''])->first(fn ($t) => filled($t));
+        if (!$title) {
+            $this->addError('item.title_uz', __('ai.title_first'));
+            return;
+        }
+        if (!$claude->available()) {
+            $this->aiMessage = __('ai.unavailable.' . $claude->unavailableReason());
+            return;
+        }
+        set_time_limit(180);
+
+        $result = $writer->write([
+            'title' => $title, 'category' => $this->category->name_uz . ' / ' . $this->category->name_ru,
+            'price' => $this->item['price'] ?? null, 'url' => $this->item['url'] ?? null, 'notes' => $this->aiNotes,
+        ]);
+        if (!$result) {
+            $this->aiMessage = __('ai.failed') . ($claude->available() ? '' : ' ' . __('ai.unavailable.' . $claude->unavailableReason()));
+            return;
+        }
+        // a name the admin already typed stays; everything else is filled in
+        foreach (['uz', 'ru', 'zh'] as $l) {
+            if (blank($this->item["title_$l"] ?? null)) {
+                $this->item["title_$l"] = $result["title_$l"];
+            }
+            $this->item["description_$l"] = $result["description_$l"];
+        }
+        $this->item['faq'] = $result['faq'];
+        $this->aiMessage = '✓ ' . __('ai.generated');
+    }
+
+    public function addFaq(): void
+    {
+        $this->item['faq'][] = ['q_uz' => '', 'a_uz' => '', 'q_ru' => '', 'a_ru' => '', 'q_zh' => '', 'a_zh' => ''];
+    }
+
+    public function removeFaq(int $i): void
+    {
+        unset($this->item['faq'][$i]);
+        $this->item['faq'] = array_values($this->item['faq']);
     }
 
     public function saveItem(): void
@@ -87,9 +136,15 @@ class OfferCategoryManager extends Component
             'item.url'            => 'nullable|url:https,http|max:500',
             'item.action'         => 'required|in:call,order',
             'item.is_active'      => 'boolean',
+            'item.faq'            => 'nullable|array|max:8',
+            'item.faq.*.q_uz'     => 'nullable|string|max:200', 'item.faq.*.a_uz' => 'nullable|string|max:600',
+            'item.faq.*.q_ru'     => 'nullable|string|max:200', 'item.faq.*.a_ru' => 'nullable|string|max:600',
+            'item.faq.*.q_zh'     => 'nullable|string|max:200', 'item.faq.*.a_zh' => 'nullable|string|max:600',
             'photo'               => ['nullable', 'image', 'max:' . config('uploads.image.max_kb'), 'extensions:' . implode(',', config('uploads.image.extensions')), 'mimes:' . implode(',', config('uploads.image.extensions'))],
         ]);
         $values = collect($data['item'])->except('image_path')->all();
+        // keep only questions that have an answer in at least Uzbek
+        $values['faq'] = collect($values['faq'] ?? [])->filter(fn ($f) => filled($f['q_uz'] ?? null) && filled($f['a_uz'] ?? null))->values()->all() ?: null;
 
         if ($this->photo) {
             $values['image_path'] = $this->photo->store('offers', 'public');

@@ -79,6 +79,8 @@ class GtinLookup
             $values['name_uz'] = self::shortName($item['name']);
         }
         $product->update($values);
+        // clean name in Latin Uzbek + Russian (Claude, or transliteration when AI is unavailable)
+        \App\Jobs\NameProduct::dispatch($product->id)->afterCommit();
 
         return 'found';
     }

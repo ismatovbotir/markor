@@ -92,6 +92,22 @@
         <div class="fixed inset-0 bg-black/40 z-40 flex items-start justify-center overflow-y-auto py-8 px-4">
             <form wire:submit="saveItem" class="bg-white rounded-xl shadow-xl w-full max-w-3xl p-6 space-y-4">
                 <h2 class="text-lg font-semibold">{{ $editingId ? __('common.edit') : __('offers.add_item') }} — {{ $category->name_uz }}</h2>
+                {{-- Claude: fills names, descriptions and FAQ in 3 languages; the admin reviews and saves --}}
+                @php $ai = app(\App\Domain\Ai\Claude::class); @endphp
+                <div class="rounded-lg border border-violet-200 bg-violet-50/60 p-3 space-y-2">
+                    <div class="flex items-center justify-between gap-3 flex-wrap">
+                        <p class="text-sm font-medium text-violet-900 flex items-center gap-1.5">@svg('heroicon-o-sparkles', 'w-4 h-4') {{ __('ai.offer_title') }}</p>
+                        <button type="button" wire:click="generateContent" wire:loading.attr="disabled" wire:target="generateContent" @disabled(!$ai->available())
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 disabled:opacity-50">
+                            <span wire:loading.remove wire:target="generateContent">@svg('heroicon-o-sparkles', 'w-4 h-4')</span>
+                            <span wire:loading wire:target="generateContent">@svg('heroicon-o-arrow-path', 'w-4 h-4 animate-spin')</span>
+                            {{ __('ai.generate') }}
+                        </button>
+                    </div>
+                    <textarea wire:model="aiNotes" rows="2" maxlength="1500" placeholder="{{ __('ai.notes_placeholder') }}" class="{{ $field }} text-xs"></textarea>
+                    <p class="text-[11px] text-violet-800/80">{{ $ai->available() ? __('ai.offer_hint') : __('ai.unavailable.' . $ai->unavailableReason()) }}</p>
+                    @if($aiMessage)<p class="text-xs {{ str_starts_with($aiMessage, '✓') ? 'text-emerald-700' : 'text-rose-600' }}">{{ $aiMessage }}</p>@endif
+                </div>
                 <div class="grid sm:grid-cols-3 gap-3">
                     @foreach(['uz' => 'UZ', 'ru' => 'RU', 'zh' => '中文'] as $l => $lang)
                         <div class="space-y-2">
@@ -102,6 +118,24 @@
                             <label class="block text-xs font-medium text-stone-600">{{ __('offers.description') }} ({{ $lang }})
                                 <textarea wire:model="item.description_{{ $l }}" rows="3" class="{{ $field }} mt-1"></textarea>
                             </label>
+                        </div>
+                    @endforeach
+                </div>
+                {{-- FAQ (questions buyers ask about this item) --}}
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-medium text-stone-600">{{ __('ai.faq') }}</p>
+                        <button type="button" wire:click="addFaq" class="text-xs text-amber-700 hover:underline">+ {{ __('ai.faq_add') }}</button>
+                    </div>
+                    @foreach($item['faq'] ?? [] as $i => $f)
+                        <div class="border border-stone-200 rounded-lg p-2 grid sm:grid-cols-3 gap-2 relative" wire:key="faq-{{ $i }}">
+                            @foreach(['uz' => 'UZ', 'ru' => 'RU', 'zh' => '中文'] as $l => $lang)
+                                <div class="space-y-1">
+                                    <input wire:model="item.faq.{{ $i }}.q_{{ $l }}" type="text" placeholder="{{ __('ai.question') }} ({{ $lang }})" class="{{ $field }} text-xs font-medium">
+                                    <textarea wire:model="item.faq.{{ $i }}.a_{{ $l }}" rows="2" placeholder="{{ __('ai.answer') }} ({{ $lang }})" class="{{ $field }} text-xs"></textarea>
+                                </div>
+                            @endforeach
+                            <button type="button" wire:click="removeFaq({{ $i }})" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-white border border-stone-300 text-stone-500 hover:text-rose-600 text-xs leading-none">×</button>
                         </div>
                     @endforeach
                 </div>

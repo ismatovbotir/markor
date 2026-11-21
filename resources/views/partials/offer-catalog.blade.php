@@ -42,6 +42,16 @@
                             @endif
                             <h4 class="font-semibold text-sm text-stone-900 mt-3 leading-snug">{{ $item->title }}</h4>
                             <p class="text-xs text-stone-600 mt-1 leading-relaxed flex-1">{{ $item->description }}</p>
+                            @if($faq = $item->localizedFaq())
+                                <details class="mt-2 text-xs group">
+                                    <summary class="cursor-pointer text-amber-700 hover:text-amber-900 list-none flex items-center gap-1">@svg('heroicon-o-question-mark-circle', 'w-3.5 h-3.5') {{ __('ai.faq_public', ['n' => count($faq)]) }}</summary>
+                                    <dl class="mt-2 space-y-2">
+                                        @foreach($faq as $f)
+                                            <div><dt class="font-medium text-stone-800">{{ $f['q'] }}</dt><dd class="text-stone-600 mt-0.5">{{ $f['a'] }}</dd></div>
+                                        @endforeach
+                                    </dl>
+                                </details>
+                            @endif
                             <div class="flex items-center justify-between gap-2 mt-3">
                                 <span class="text-xs text-stone-500">{{ $item->price ?: __('offers.price_on_request') }}</span>
                                 @if($item->action === 'call' && $catTel)
