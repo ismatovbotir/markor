@@ -9,7 +9,7 @@ use App\Http\Middleware\SetLocale;
 class HomeController extends Controller
 {
     /** Public pages that search engines should index. */
-    private const PUBLIC_ROUTES = ['home', 'studio', 'china'];
+    private const PUBLIC_ROUTES = ['home', 'studio', 'china', 'contact'];
 
     public function index()
     {

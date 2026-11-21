@@ -164,7 +164,7 @@
         @if($extra->isNotEmpty())
             <div class="absolute bottom-4 inset-x-0 flex items-center justify-center gap-3 z-10">
                 <button type="button" x-on:click="go(i - 1)" class="w-8 h-8 rounded-full bg-white/80 border border-stone-200 text-stone-700 hover:bg-white" aria-label="‹">‹</button>
-                <template x-for="k in n" :key="k"><button type="button" x-on:click="go(k - 1)" class="w-2.5 h-2.5 rounded-full transition" :class="i === k - 1 ? 'bg-amber-700 w-6' : 'bg-stone-400/70'" :aria-label="k"></button></template>
+                <template x-for="k in n" :key="k"><button type="button" x-on:click="go(k - 1)" class="w-2.5 h-2.5 rounded-full transition" :class="i === k - 1 ? 'bg-stone-900 ring-2 ring-white w-6' : 'bg-white/80 ring-1 ring-stone-400/60'" :aria-label="k"></button></template>
                 <button type="button" x-on:click="go(i + 1)" class="w-8 h-8 rounded-full bg-white/80 border border-stone-200 text-stone-700 hover:bg-white" aria-label="›">›</button>
             </div>
         @endif
@@ -316,25 +316,7 @@
     </section>
 </main>
 
-<footer class="border-t border-stone-200">
-    <div class="max-w-6xl mx-auto px-4 py-10 flex flex-wrap items-start justify-between gap-8 text-sm">
-        <div class="max-w-sm">
-            <p><img src="/images/logo.png" alt="{{ config('app.name') }}" width="96" height="24" class="h-6 w-auto"></p>
-            <p class="text-stone-500 mt-2 leading-relaxed">{{ __('home.footer.about') }}</p>
-        </div>
-        <nav class="flex flex-col gap-2 text-stone-600">
-            <a href="{{ route('studio') }}" class="hover:text-amber-700">{{ __('nav.studio') }}</a>
-            <a href="{{ $loginUrl }}" class="hover:text-amber-700">Asl Belgisi</a>
-            <a href="#offers" class="hover:text-amber-700">{{ __('nav.offers') }}</a>
-            <a href="#faq" class="hover:text-amber-700">{{ __('home.nav.faq') }}</a>
-        </nav>
-        <div class="flex flex-col gap-2 text-stone-600">
-            @if($tel)<a href="{{ $tel }}" class="font-mono hover:text-amber-700">{{ $phone }}</a>@endif
-            @if(config('contact.telegram'))<a href="https://t.me/{{ config('contact.telegram') }}" rel="noopener" class="hover:text-amber-700">Telegram</a>@endif
-            @include('partials.locale-switcher')
-        </div>
-    </div>
-</footer>
+@include('partials.public-footer')
 
 @livewireScripts
 </body>

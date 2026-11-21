@@ -13,7 +13,8 @@
             <a href="{{ route('home') }}#offers" class="hover:text-amber-700">{{ __('nav.offers') }}</a>
             <a href="{{ route('home') }}#faq" class="hidden lg:inline hover:text-amber-700">{{ __('home.nav.faq') }}</a>
             @if(app()->getLocale() === 'zh')<a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('china', 'zh') }}" class="hover:text-amber-700 {{ request()->routeIs('china') ? 'text-amber-700 font-medium' : '' }}">{{ __('china.nav') }}</a>@endif
-            <a href="{{ route('guide') }}" class="hover:text-amber-700 {{ request()->routeIs('guide') ? 'text-amber-700 font-medium' : '' }}">{{ __('guide.title') }}</a>
+            <a href="{{ route('guide') }}" class="hidden xl:inline hover:text-amber-700 {{ request()->routeIs('guide') ? 'text-amber-700 font-medium' : '' }}">{{ __('guide.title') }}</a>
+            <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('contact', app()->getLocale()) }}" class="hover:text-amber-700 {{ request()->routeIs('contact') ? 'text-amber-700 font-medium' : '' }}">{{ __('contact.title') }}</a>
         </nav>
         <div class="flex items-center gap-3 text-sm">
             @include('partials.locale-switcher')

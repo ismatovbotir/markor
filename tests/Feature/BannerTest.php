@@ -17,6 +17,8 @@ class BannerTest extends TestCase
     {
         parent::setUp();
         $this->seed(\Database\Seeders\BannerSeeder::class);
+        $this->assertSame(['Zebra etiketka printerlari', 'Godex etiketka printerlari'], Banner::where('is_default', false)->orderBy('sort_order')->pluck('title_uz')->all(), 'brand banners seeded');
+        Banner::where('is_default', false)->delete(); // tests below start from the default banner only
         $this->actingAs(User::create(['name' => 'A', 'email' => 'a@t.uz', 'password' => 'secret123', 'role' => 'admin', 'locale' => 'uz', 'is_active' => true]));
     }
 

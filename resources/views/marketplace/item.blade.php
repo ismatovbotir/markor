@@ -107,9 +107,31 @@
             </div>
         </section>
     @endif
+
+    @if($others->isNotEmpty())
+        <section class="mt-14 border-t border-stone-200 pt-10">
+            <h2 class="font-display font-bold text-lg text-stone-900">{{ __('marketplace.other_categories') }}</h2>
+            <div class="mt-6 space-y-8">
+                @foreach($others as $cat)
+                    <div>
+                        <h3 class="flex items-center gap-2 text-sm font-semibold text-stone-700">@svg($cat->icon ?: 'heroicon-o-cube', 'w-4 h-4 text-amber-700') {{ $cat->name }}</h3>
+                        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 mt-3">
+                            @foreach($cat->offers as $item)
+                                <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace.item', app()->getLocale(), ['offer' => $item->slug]) }}" class="bg-white border border-stone-200 rounded-lg p-2 hover:border-amber-400 transition">
+                                    @if($item->image_url)<img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy" class="h-16 w-full object-contain">@else<div class="h-16 rounded bg-amber-50 text-amber-700 flex items-center justify-center">@svg($item->icon ?: $cat->icon ?: 'heroicon-o-cube', 'w-6 h-6')</div>@endif
+                                    <p class="text-xs font-medium text-stone-800 mt-2 leading-snug line-clamp-2">{{ $item->title }}</p>
+                                    <p class="text-[11px] text-stone-500 mt-0.5 truncate">{{ $item->price ?: __('offers.price_on_request') }}</p>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endif
 </main>
 
-<footer class="border-t border-stone-200 py-6 text-center text-xs text-stone-500">{{ config('app.name') }} · {{ __('app.tagline') }}</footer>
+@include('partials.public-footer')
 @include('partials.order-modal')
 @livewireScripts
 </body>

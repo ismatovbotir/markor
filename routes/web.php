@@ -36,6 +36,7 @@ Route::get('/llms-full.txt', [HomeController::class, 'llmsFull'])->name('llms.fu
 Route::get('/guide/{page?}', [HomeController::class, 'guide'])->name('guide');
 // landing page for Chinese manufacturers / exporters marking goods for Uzbekistan
 Route::view('/uzbekistan-marking', 'china')->name('china');
+Route::view('/contact', 'contact')->name('contact');
 // public page of a Marketplace item
 Route::get('/marketplace/{offer:slug}', [\App\Http\Controllers\Guest\MarketplaceController::class, 'show'])->name('marketplace.item');
 Route::get('/label-image/{w}x{h}.svg', [\App\Http\Controllers\Guest\LabelImageController::class, 'show'])->whereNumber(['w', 'h'])->name('label-image');

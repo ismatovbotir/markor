@@ -933,5 +933,16 @@
     "china.wechat_scan": "Или отсканируйте QR-код сканером в WeChat.",
     "china.wechat_show_qr": "Увеличить QR-код",
     "china.wechat_on_phone": "Открыть в WeChat на телефоне",
-    "common.close": "Закрыть"
+    "common.close": "Закрыть",
+    "marketplace.other_categories": "Другие разделы",
+    "contact.title": "Контакты",
+    "contact.seo_title": "Контакты — Markor: принтеры этикеток и коды Asl Belgisi",
+    "contact.seo_description": "Связаться с Markor: телефон, Telegram, email. Вопросы о принтерах этикеток, риббонах, сканерах и печати кодов Asl Belgisi.",
+    "contact.intro": "Если есть вопросы о принтерах этикеток, риббонах и этикетках, сканерах, печати кодов Asl Belgisi или заказе шаблона — свяжитесь с нами.",
+    "contact.phone": "Телефон",
+    "contact.email": "Email",
+    "contact.bot": "Telegram-бот (Asl Belgisi)",
+    "contact.offers_hint": "Принтеры, риббоны, этикетки и сервис",
+    "contact.register_hint": "Регистрация компании",
+    "contact.studio_hint": "Бесплатный конструктор этикеток"
 }

@@ -45,6 +45,7 @@ class LlmsText
         $out[] = '- ' . $t('home.aslbelgi.telegram');
         $out[] = '- ' . $t('home.aslbelgi.register') . ': ' . route('register');
         $out[] = '- ' . $t('china.nav') . ': ' . HomeController::localizedUrl('china', $l) . ' — ' . $t('seo.china.description');
+        $out[] = '- ' . $t('contact.title') . ': ' . HomeController::localizedUrl('contact', $l);
 
         $catalog = OfferCategory::catalog();
         if ($catalog->isNotEmpty()) {

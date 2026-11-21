@@ -20,6 +20,7 @@
             ->map(fn ($s) => ['@type' => 'HowToStep', 'text' => trim(strip_tags($s))])->values()->all(),
     ]],
 ])
+@livewireStyles
 </head>
 <body class="bg-stone-50 text-stone-800 font-body antialiased">
 @include('partials.public-header')
@@ -35,6 +36,7 @@
         <article class="help-article flex-1 min-w-0 max-w-3xl bg-white border border-stone-200 rounded-xl p-6 sm:p-8">{!! $html !!}</article>
     </div>
 </main>
-<footer class="border-t border-stone-200 py-6 text-center text-xs text-stone-500">{{ config('app.name') }} · {{ __('app.tagline') }}</footer>
+@include('partials.public-footer')
+@livewireScripts
 </body>
 </html>

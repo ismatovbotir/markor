@@ -933,5 +933,16 @@
     "china.wechat_scan": "Yoki QR kodni WeChat ichidagi skaner bilan skanerlang.",
     "china.wechat_show_qr": "QR kodni kattalashtirish",
     "china.wechat_on_phone": "Telefonda WeChat'da ochish",
-    "common.close": "Yopish"
+    "common.close": "Yopish",
+    "marketplace.other_categories": "Boshqa bo'limlar",
+    "contact.title": "Aloqa",
+    "contact.seo_title": "Aloqa — Markor: etiketka printerlari va Asl Belgisi kodlari",
+    "contact.seo_description": "Markor bilan bog'lanish: telefon, Telegram, email. Etiketka printerlari, ribbonlar, skanerlar va Asl Belgisi kodlarini chop etish bo'yicha savollar.",
+    "contact.intro": "Etiketka printerlari, ribbon va etiketkalar, skanerlar, Asl Belgisi kodlarini chop etish yoki shablon buyurtma qilish bo'yicha savollaringiz bo'lsa — bog'laning.",
+    "contact.phone": "Telefon",
+    "contact.email": "Email",
+    "contact.bot": "Telegram bot (Asl Belgisi)",
+    "contact.offers_hint": "Printerlar, ribbonlar, etiketkalar va xizmat",
+    "contact.register_hint": "Kompaniyani ro'yxatdan o'tkazish",
+    "contact.studio_hint": "Bepul etiketka dizayneri"
 }

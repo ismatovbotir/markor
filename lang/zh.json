@@ -933,5 +933,16 @@
     "china.wechat_scan": "或用微信“扫一扫”扫描二维码添加好友。",
     "china.wechat_show_qr": "放大二维码",
     "china.wechat_on_phone": "在手机微信中打开",
-    "common.close": "关闭"
+    "common.close": "关闭",
+    "marketplace.other_categories": "其他分类",
+    "contact.title": "联系我们",
+    "contact.seo_title": "联系我们 — Markor：标签打印机与 Asl Belgisi 标识码",
+    "contact.seo_description": "联系 Markor：微信、电话、Telegram、电子邮件。咨询标签打印机、碳带、扫描枪及 Asl Belgisi 标识码打印。",
+    "contact.intro": "如需咨询标签打印机、碳带和标签、扫描枪、Asl Belgisi 标识码打印或定制模板，请与我们联系。",
+    "contact.phone": "电话",
+    "contact.email": "电子邮件",
+    "contact.bot": "Telegram 机器人（Asl Belgisi）",
+    "contact.offers_hint": "打印机、碳带、标签和服务",
+    "contact.register_hint": "注册公司",
+    "contact.studio_hint": "免费标签设计器"
 }

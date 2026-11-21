@@ -262,7 +262,7 @@
     @endif
 </main>
 
-<footer class="border-t border-stone-200 py-6 text-center text-xs text-stone-500">{{ config('app.name') }} · {{ __('app.tagline') }}</footer>
+@include('partials.public-footer')
 
 @livewireScripts
 </body>

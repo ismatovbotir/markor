@@ -45,4 +45,18 @@ class MarketplaceItemPageTest extends TestCase
         $this->get(route('marketplace.item', $offer->slug))->assertNotFound();
         $this->get(route('marketplace.item', 'no-such-item'))->assertNotFound();
     }
+
+    public function test_other_categories_follow_in_small_cards(): void
+    {
+        $offer = $this->item();
+        $ribbons = OfferCategory::create(['slug' => 'ribbons-page', 'name_uz' => 'Ribbonlar', 'is_active' => true, 'sort_order' => 2]);
+        Offer::create(['offer_category_id' => $ribbons->id, 'slug' => 'wax-110', 'category' => 'ribbons-page', 'title_uz' => 'Wax ribbon 110x300', 'action' => 'order', 'is_active' => true]);
+        $empty = OfferCategory::create(['slug' => 'empty-page', 'name_uz' => 'Bo\'sh bo\'lim', 'is_active' => true, 'sort_order' => 3]);
+
+        $this->get(route('marketplace.item', $offer->slug))->assertOk()
+            ->assertSee(__('marketplace.other_categories'))
+            ->assertSee('Ribbonlar')->assertSee('Wax ribbon 110x300')
+            ->assertSee(route('marketplace.item', 'wax-110'), false)
+            ->assertDontSee("Bo&#039;sh bo&#039;lim", false);
+    }
 }
