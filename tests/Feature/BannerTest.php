@@ -17,8 +17,7 @@ class BannerTest extends TestCase
     {
         parent::setUp();
         $this->seed(\Database\Seeders\BannerSeeder::class);
-        $this->assertSame(4, Banner::where('is_default', false)->where('is_active', true)->count(), 'Zebra printer, Godex, DS2278, MC3300 published');
-        $this->assertSame(2, Banner::where('is_active', false)->count(), 'labels and ribbons seeded unpublished');
+        $this->assertSame(6, Banner::where('is_default', false)->where('is_active', true)->count(), 'printers, scanner, PDA, labels, ribbons published');
         foreach (Banner::where('is_default', false)->whereNotNull('image_path')->get() as $b) {
             $this->assertFileExists(public_path($b->image_path), 'seeded picture ships with the code');
             $this->assertSame('/' . $b->image_path, $b->imageUrl());

@@ -17,7 +17,7 @@ use App\Domain\Settings\Setting;
  */
 class Seo
 {
-    public const PAGES = ['home', 'studio'];
+    public const PAGES = ['home', 'studio', 'china', 'contact'];
     public const FIELDS = ['title' => 60, 'description' => 160]; // recommended max length
 
     public static function get(string $key): ?string

@@ -16,8 +16,8 @@
     ];
 @endphp
 @include('partials.public-head', [
-    'seoTitle' => __('contact.seo_title'),
-    'seoDescription' => __('contact.seo_description'),
+    'seoTitle' => \App\Support\Seo::text('contact', 'title'),
+    'seoDescription' => \App\Support\Seo::text('contact', 'description'),
     'seoRoute' => 'contact',
     'jsonLd' => $jsonLd,
 ])

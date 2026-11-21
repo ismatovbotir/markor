@@ -16,8 +16,8 @@
     }
 @endphp
 @include('partials.public-head', [
-    'seoTitle' => __('seo.china.title'),
-    'seoDescription' => __('seo.china.description'),
+    'seoTitle' => \App\Support\Seo::text('china', 'title'),
+    'seoDescription' => \App\Support\Seo::text('china', 'description'),
     'seoRoute' => 'china',
     'jsonLd' => $jsonLd,
 ])

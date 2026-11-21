@@ -945,5 +945,9 @@
     "contact.offers_hint": "Принтеры, риббоны, этикетки и сервис",
     "contact.register_hint": "Регистрация компании",
     "contact.studio_hint": "Бесплатный конструктор этикеток",
-    "banners.publish": "Опубликован"
+    "banners.publish": "Опубликован",
+    "seo.contact.title": "Контакты — Markor: принтеры этикеток и коды Asl Belgisi",
+    "seo.contact.description": "Связаться с Markor: телефон, Telegram, email. Вопросы о принтерах этикеток, риббонах, сканерах и печати кодов Asl Belgisi.",
+    "seo_admin.page.china": "Для компаний из Китая",
+    "seo_admin.page.contact": "Контакты"
 }

@@ -945,5 +945,9 @@
     "contact.offers_hint": "打印机、碳带、标签和服务",
     "contact.register_hint": "注册公司",
     "contact.studio_hint": "免费标签设计器",
-    "banners.publish": "发布"
+    "banners.publish": "发布",
+    "seo.contact.title": "联系我们 — Markor：标签打印机与 Asl Belgisi 标识码",
+    "seo.contact.description": "联系 Markor：微信、电话、Telegram、电子邮件。咨询标签打印机、碳带、扫描枪及 Asl Belgisi 标识码打印。",
+    "seo_admin.page.china": "中国企业",
+    "seo_admin.page.contact": "联系我们"
 }

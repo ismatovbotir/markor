@@ -81,11 +81,10 @@ class BannerSeeder extends Seeder
                 'button_ru' => 'Подобрать ТСД',
                 'button_zh' => '选择 PDA',
             ],
-            // consumables: created unpublished — the admin adds a picture and ticks "publish" in Admin → Bannerlar
+            // consumables
             [
                 'style'     => 'light',
-                'is_active' => false,
-                'image_path'=> null,
+                'image_path'=> 'images/banners/zebra-labels.jpg',
                 'title_uz'  => "Etiketkalar — har qanday o'lchamda",
                 'title_ru'  => 'Этикетки — любого размера',
                 'title_zh'  => '各种尺寸的标签',
@@ -98,8 +97,7 @@ class BannerSeeder extends Seeder
             ],
             [
                 'style'     => 'amber',
-                'is_active' => false,
-                'image_path'=> null,
+                'image_path'=> 'images/banners/zebra-ribbons.jpg',
                 'title_uz'  => 'Ribbonlar — wax, wax/resin, resin',
                 'title_ru'  => 'Риббоны — wax, wax/resin, resin',
                 'title_zh'  => '碳带：蜡基、混合基、树脂基',

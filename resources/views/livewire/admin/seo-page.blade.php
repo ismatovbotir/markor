@@ -26,7 +26,7 @@
 
             @foreach(\App\Support\Seo::PAGES as $page)
                 <div class="border border-stone-100 rounded-lg p-4 space-y-3" wire:key="seo-{{ $page }}-{{ $locale }}">
-                    <p class="text-sm font-medium">{{ __('seo_admin.page.' . $page) }} <span class="text-stone-400 font-mono text-xs">{{ route($page === 'home' ? 'home' : 'studio', [], false) }}</span></p>
+                    <p class="text-sm font-medium">{{ __('seo_admin.page.' . $page) }} <span class="text-stone-400 font-mono text-xs">{{ route($page, [], false) }}</span></p>
                     @foreach(\App\Support\Seo::FIELDS as $f => $max)
                         @php $default = __("seo.$page.$f", [], $locale); @endphp
                         <label class="block text-xs font-medium text-stone-600" x-data="{ v: @entangle("texts.$page.$f.$locale") }">
