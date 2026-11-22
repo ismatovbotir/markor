@@ -45,6 +45,10 @@
     </div>
 
     <div class="mt-6">
+        @livewire(\App\Http\Livewire\Admin\TelegramBotProfile::class)
+    </div>
+
+    <div class="mt-6">
         @livewire(\App\Http\Livewire\Admin\AiSettings::class)
     </div>
 

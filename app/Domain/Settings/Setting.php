@@ -42,6 +42,22 @@ class Setting extends Model
         \App\Support\PageCache::bump(); // contacts / SEO texts appear on the cached home page
     }
 
+    /** Stores one value as is (no trim, no page-cache bump): JSON drafts of admin tools. */
+    public static function putRaw(string $key, ?string $value): void
+    {
+        static::updateOrCreate(['key' => $key], ['value' => $value]);
+        Cache::forget('settings');
+    }
+
+    /** A JSON value stored with putRaw, decoded; [] when missing or broken. */
+    public static function json(string $key): array
+    {
+        $value = static::all_()[$key] ?? null;
+        $data = is_string($value) ? json_decode($value, true) : null;
+
+        return is_array($data) ? $data : [];
+    }
+
     public static function applyToConfig(): void
     {
         try {

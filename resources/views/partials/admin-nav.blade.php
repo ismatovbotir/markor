@@ -56,6 +56,7 @@
         ]],
         ['key' => 'system', 'label' => __('nav.group.system'), 'items' => [
             ['href' => route('admin.settings'), 'label' => __('nav.settings'), 'icon' => 'heroicon-o-cog-6-tooth', 'active' => request()->routeIs('admin.settings')],
+            ['href' => route('admin.system'), 'label' => __('system.title'), 'icon' => 'heroicon-o-heart', 'active' => request()->routeIs('admin.system'), 'todo' => app(\App\Domain\System\SystemStatus::class)->problems()],
         ]],
     ];
 

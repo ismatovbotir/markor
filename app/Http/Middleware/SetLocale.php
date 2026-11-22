@@ -25,6 +25,8 @@ class SetLocale
 
         if (isset(self::LOCALES[$locale])) {
             app()->setLocale($locale);
+            // dates like "5 daqiqa oldin": Uzbek in Latin script, like the rest of the site (Carbon's plain "uz" is Cyrillic)
+            \Illuminate\Support\Carbon::setLocale($locale === 'uz' ? 'uz_Latn' : $locale);
         }
 
         return $next($request);
