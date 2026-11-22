@@ -1,4 +1,4 @@
-<div wire:poll.15s>
+<div @if(!$d) wire:poll.15s @endif>
     <x-admin.page-header :crumb="__('nav.group.system')" :title="__('system.title')" :hint="__('system.hint')" />
 
     <div class="grid md:grid-cols-2 gap-4">
@@ -57,11 +57,40 @@
                             <p class="font-medium font-mono text-[13px]">{{ $f['job'] }} <span class="font-sans text-xs text-stone-500 font-normal">· {{ $f['failed_at']->format('d.m.Y H:i') }}</span></p>
                             <p class="text-xs text-stone-600 mt-0.5 break-words">{{ $f['error'] }}</p>
                         </div>
+                        <x-admin.button size="sm" variant="ghost" icon="magnifying-glass" wire:click="showDetail('{{ $f['uuid'] }}')">{{ __('system.details') }}</x-admin.button>
                         <x-admin.button size="sm" wire:click="retry('{{ $f['uuid'] }}')">{{ __('system.retry') }}</x-admin.button>
                         <x-admin.button size="sm" variant="ghost" wire:click="forget('{{ $f['uuid'] }}')" wire:confirm="{{ __('system.forget_confirm') }}">{{ __('common.delete') }}</x-admin.button>
                     </li>
                 @endforeach
             </ul>
+        </div>
+    @endif
+
+    @if($d)
+        <div class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-stone-900/50 sm:p-4" x-data x-on:keydown.escape.window="$wire.closeDetail()">
+            <div role="dialog" aria-modal="true" aria-labelledby="fj-title" class="w-full sm:max-w-3xl max-h-[90vh] flex flex-col bg-white rounded-t-2xl sm:rounded-xl shadow-xl">
+                <div class="flex items-start justify-between gap-3 px-5 py-4 border-b border-stone-200">
+                    <div class="min-w-0">
+                        <h2 id="fj-title" class="font-semibold text-stone-900 font-mono text-sm break-all">{{ $d['job'] }}</h2>
+                        <p class="text-xs text-stone-500 mt-1">{{ $d['failed_at']->format('d.m.Y H:i:s') }} · {{ $d['connection'] }}/{{ $d['queue'] }}
+                            @if($d['max_tries']) · {{ __('system.tries') }}: {{ $d['max_tries'] }}@endif @if($d['timeout']) · timeout {{ $d['timeout'] }} s @endif</p>
+                    </div>
+                    <button type="button" wire:click="closeDetail" class="admin-focus p-2 rounded-lg text-stone-500 hover:bg-stone-100" aria-label="{{ __('common.cancel') }}">@svg('heroicon-o-x-mark', 'w-5 h-5')</button>
+                </div>
+                <div class="px-5 py-4 overflow-auto" x-data="{ copied: false }">
+                    <div class="flex justify-end mb-2">
+                        <button type="button" class="text-xs text-amber-800 hover:underline" x-on:click="navigator.clipboard.writeText($refs.trace.innerText); copied = true; setTimeout(() => copied = false, 1500)">
+                            <span x-show="!copied">{{ __('system.copy') }}</span><span x-show="copied" x-cloak>✓</span>
+                        </button>
+                    </div>
+                    <pre x-ref="trace" class="text-[11px] leading-relaxed font-mono whitespace-pre-wrap break-words bg-stone-950 text-stone-100 rounded-lg p-4">{{ $d['error'] }}</pre>
+                    <p class="text-[11px] text-stone-500 mt-2">{{ __('system.masked') }}</p>
+                </div>
+                <div class="flex justify-end gap-2 px-5 py-3 border-t border-stone-200">
+                    <x-admin.button wire:click="closeDetail">{{ __('common.cancel') }}</x-admin.button>
+                    <x-admin.button variant="primary" icon="arrow-path" wire:click="retry('{{ $d['uuid'] }}'); $wire.closeDetail()">{{ __('system.retry') }}</x-admin.button>
+                </div>
+            </div>
         </div>
     @endif
 </div>

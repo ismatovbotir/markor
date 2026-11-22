@@ -113,7 +113,7 @@ class TelegramApi
         return filled($lang) ? $params + ['language_code' => $lang] : $params;
     }
 
-    private function hideToken(string $text): string
+    public function hideToken(string $text): string
     {
         $token = (string) config('telegram.token');
 
@@ -128,9 +128,14 @@ class TelegramApi
         ]));
     }
 
+    /** Why the last sendDocument failed (Telegram's own description, token masked), or null after a success. */
+    public ?string $lastError = null;
+
     public function sendDocument(string|int $chatId, string $contents, string $filename, ?string $caption = null): ?array
     {
+        $this->lastError = null;
         if (!$this->enabled()) {
+            $this->lastError = 'Bot token is not set';
             return null;
         }
 
@@ -139,11 +144,23 @@ class TelegramApi
                 ->attach('document', $contents, $filename)
                 ->post($this->url('sendDocument'), array_filter(['chat_id' => (string) $chatId, 'caption' => $caption, 'parse_mode' => 'HTML']));
         } catch (\Throwable $e) {
-            Log::warning('Telegram sendDocument failed', ['error' => $this->hideToken($e->getMessage())]);
+            $this->lastError = $this->hideToken($e->getMessage());
+            Log::warning('Telegram sendDocument failed', ['error' => $this->lastError]);
             return null;
         }
 
-        return $response->json('ok') ? $response->json('result') : null;
+        if (!$response->json('ok')) {
+            // e.g. "Bad Request: chat not found", "Forbidden: bot is not a member of the group chat",
+            // "Bad Request: group chat was upgraded to a supergroup chat" (+ the new chat id), "Request Entity Too Large"
+            $this->lastError = sprintf('Telegram %s: %s', $response->json('error_code') ?? $response->status(),
+                $this->hideToken((string) ($response->json('description') ?: mb_substr($response->body(), 0, 300))))
+                . ($response->json('parameters.migrate_to_chat_id') ? ' — new chat id: ' . $response->json('parameters.migrate_to_chat_id') : '')
+                . ($response->json('parameters.retry_after') ? ' — retry after ' . $response->json('parameters.retry_after') . ' s' : '');
+            Log::warning('Telegram sendDocument error', ['error' => $this->lastError]);
+            return null;
+        }
+
+        return $response->json('result');
     }
 
     /** Downloads a file the user sent to the bot. */

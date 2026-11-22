@@ -16,6 +16,10 @@ class QueueHeartbeat implements ShouldQueue
 
     public function handle(): void
     {
-        Cache::forever(\App\Domain\System\SystemStatus::QUEUE_KEY, now()->toIso8601String());
+        try {
+            Cache::forever(\App\Domain\System\SystemStatus::QUEUE_KEY, now()->toIso8601String());
+        } catch (\Throwable) {
+            // a busy database (e.g. SQLite locked) — the next minute's heartbeat tries again; never a "failed job"
+        }
     }
 }

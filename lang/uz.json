@@ -1535,5 +1535,9 @@
     "tg_profile.descpic_title": "Tavsif rasmi (bo'sh chatda tavsif ustida)",
     "tg_profile.descpic_hint": "Telegram aynan 640×360 o'lchamni talab qiladi (profil rasmi esa kvadrat — yuqoridagi 640×640).",
     "tg_profile.descpic_steps": "@BotFather → /setdescriptionpic → botni tanlang → rasmni yuboring",
-    "tg_profile.descpic_download": "Tavsif rasmini yuklab olish (640×360 PNG)"
+    "tg_profile.descpic_download": "Tavsif rasmini yuklab olish (640×360 PNG)",
+    "system.details": "Batafsil",
+    "system.tries": "urinishlar",
+    "system.copy": "Nusxalash",
+    "system.masked": "Bot tokeni va maxfiy kalitlar yashirilgan (***). Xatoning to'liq matni server logida: storage/logs/laravel.log"
 }

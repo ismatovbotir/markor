@@ -50,4 +50,13 @@ class StatsTest extends TestCase
         $this->actingAs(User::create(['name' => 'C', 'email' => 'c@t.uz', 'password' => 'secret123', 'role' => 'operator', 'locale' => 'uz', 'is_active' => true]));
         $this->get('/admin/stats')->assertForbidden();
     }
+
+    public function test_resources_tab_opens_even_with_a_broken_cached_database_figure(): void
+    {
+        // hosting can deny information_schema / pg views; the page must still open with "—"
+        \Illuminate\Support\Facades\Cache::forget('stats.database');
+        $this->actingAs(\App\Models\User::create(['name' => 'A', 'email' => 'res@t.uz', 'password' => 'secret123', 'role' => 'admin', 'locale' => 'uz', 'is_active' => true]));
+        \Illuminate\Support\Facades\Cache::put('stats.database', null, 600);   // a broken cached value
+        $this->get(route('admin.stats', ['tab' => 'resources']))->assertOk()->assertSee(__('stats.disk'));
+    }
 }

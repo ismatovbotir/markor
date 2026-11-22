@@ -61,4 +61,33 @@ class SystemStatusTest extends TestCase
         $this->actingAs(User::create(['name' => 'C', 'email' => 'c@t.uz', 'password' => 'secret123', 'role' => 'user', 'locale' => 'uz', 'is_active' => true]));
         $this->get(route('admin.system'))->assertForbidden();
     }
+
+    public function test_details_window_shows_the_full_error_with_tokens_masked(): void
+    {
+        config(['telegram.token' => '123456789:AAFakeTokenForTestsOnly_abcdefghijklmnop']);
+        $trace = "RuntimeException: Archiving PDF #1 to Telegram chat -5137212617 failed: Telegram 400: Bad Request: chat not found in /srv/app/Jobs/ArchiveLabelPdf.php:41\n"
+            . "#0 https://api.telegram.org/bot123456789:AAFakeTokenForTestsOnly_abcdefghijklmnop/sendDocument\n#1 {main}";
+        \Illuminate\Support\Facades\DB::table('failed_jobs')->insert(['uuid' => 'u-2', 'connection' => 'database', 'queue' => 'default',
+            'payload' => json_encode(['displayName' => 'App\\Jobs\\ArchiveLabelPdf', 'maxTries' => 3, 'timeout' => 180]), 'exception' => $trace, 'failed_at' => now()]);
+        $this->actingAs($this->admin());
+
+        \Livewire\Livewire::test(\App\Http\Livewire\Admin\SystemPage::class)
+            ->assertSee('Bad Request: chat not found')
+            ->call('showDetail', 'u-2')
+            ->assertSee('App\\Jobs\\ArchiveLabelPdf')->assertSee('#1 {main}')->assertSee('***:***')
+            ->assertDontSee('AAFakeTokenForTestsOnly')
+            ->call('closeDetail')->assertDontSee('#1 {main}');
+    }
+
+    public function test_archive_failure_keeps_telegrams_reason(): void
+    {
+        config(['telegram.token' => '123456789:AAFakeTokenForTestsOnly_abcdefghijklmnop']);
+        \Illuminate\Support\Facades\Http::fake(['api.telegram.org/*' => \Illuminate\Support\Facades\Http::response(
+            ['ok' => false, 'error_code' => 400, 'description' => 'Bad Request: group chat was upgraded to a supergroup chat', 'parameters' => ['migrate_to_chat_id' => -1001234567890]], 400)]);
+        $api = app(\App\Domain\Telegram\TelegramApi::class);
+        $this->assertNull($api->sendDocument('-5137212617', 'pdf', 'a.pdf'));
+        $this->assertStringContainsString('upgraded to a supergroup', $api->lastError);
+        $this->assertStringContainsString('-1001234567890', $api->lastError);
+        $this->assertStringNotContainsString('AAFakeToken', $api->lastError);
+    }
 }

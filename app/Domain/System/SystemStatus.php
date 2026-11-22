@@ -60,12 +60,42 @@ class SystemStatus
                 'id' => $f->id, 'uuid' => $f->uuid, 'failed_at' => Carbon::parse($f->failed_at),
                 'job' => class_basename((string) (json_decode($f->payload, true)['displayName'] ?? '?')),
                 // first line only — never dump payloads (they can hold chat ids / file ids)
-                'error' => \Illuminate\Support\Str::limit(preg_replace('# in /\S+$#', '', (string) strtok((string) $f->exception, "\n")), 180),
+                'error' => self::mask(\Illuminate\Support\Str::limit(preg_replace('# in /\S+$#', '', (string) strtok((string) $f->exception, "\n")), 240)),
             ])->all(),
         ];
     }
 
     /** Something needs attention (red badge in the admin menu). */
+    /** One failed job in full for the details window: whole error with the start of the trace, tokens masked. */
+    public function failedDetail(string $uuid): ?array
+    {
+        if (!Schema::hasTable('failed_jobs')) {
+            return null;
+        }
+        $f = DB::table('failed_jobs')->where('uuid', $uuid)->first();
+        if (!$f) {
+            return null;
+        }
+        $payload = json_decode((string) $f->payload, true) ?: [];
+        $lines = preg_split('/\R/', (string) $f->exception);
+
+        return [
+            'uuid' => $f->uuid, 'queue' => $f->queue, 'connection' => $f->connection, 'failed_at' => Carbon::parse($f->failed_at),
+            'job' => (string) ($payload['displayName'] ?? '?'), 'attempts' => $payload['attempts'] ?? null,
+            'max_tries' => $payload['maxTries'] ?? null, 'timeout' => $payload['timeout'] ?? null,
+            'error' => self::mask(implode("\n", array_slice($lines, 0, 60))) . (count($lines) > 60 ? "\n… (" . (count($lines) - 60) . ' more lines)' : ''),
+        ];
+    }
+
+    /** Never show a bot token (or the configured one) — failed-job traces can contain request URLs. */
+    public static function mask(string $text): string
+    {
+        $text = preg_replace('#\b\d{6,12}:[A-Za-z0-9_-]{30,}\b#', '***:***', $text);
+        $token = (string) config('telegram.token');
+
+        return $token !== '' ? str_replace($token, '***:***', $text) : $text;
+    }
+
     public function problems(): int
     {
         $s = $this->snapshot();

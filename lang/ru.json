@@ -1535,5 +1535,9 @@
     "tg_profile.descpic_title": "Картинка описания (над описанием в пустом чате)",
     "tg_profile.descpic_hint": "Telegram требует ровно 640×360 (фото профиля — квадрат, 640×640 выше).",
     "tg_profile.descpic_steps": "@BotFather → /setdescriptionpic → выберите бота → отправьте картинку",
-    "tg_profile.descpic_download": "Скачать картинку описания (640×360 PNG)"
+    "tg_profile.descpic_download": "Скачать картинку описания (640×360 PNG)",
+    "system.details": "Подробнее",
+    "system.tries": "попыток",
+    "system.copy": "Копировать",
+    "system.masked": "Токен бота и секретные ключи скрыты (***). Полный текст ошибки — в логе сервера: storage/logs/laravel.log"
 }

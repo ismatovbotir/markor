@@ -5,37 +5,59 @@ namespace App\Domain\Stats;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-/** Server and database figures for Admin → Statistika (heavy ones cached for 10 minutes). */
+/**
+ * Server and database figures for Admin → Statistika (heavy ones cached for 10 minutes).
+ * Every figure is read defensively: hosting often restricts /proc (open_basedir — even is_readable() warns),
+ * disk functions, sys_getloadavg or information_schema. A figure that cannot be read is null ("—"), never a 500.
+ */
 class ServerResources
 {
     public static function snapshot(): array
     {
         $base = base_path();
-        $total = @disk_total_space($base) ?: 0;
-        $free = @disk_free_space($base) ?: 0;
+        $total = self::safe(fn () => @disk_total_space($base) ?: 0, 0);
+        $free = self::safe(fn () => @disk_free_space($base) ?: 0, 0);
 
         return [
             'disk_total' => $total,
             'disk_free'  => $free,
             'disk_used_percent' => $total ? round(($total - $free) / $total * 100, 1) : null,
-            'folders'    => Cache::remember('stats.folders', 600, fn () => [
+            'folders'    => self::shape(self::safe(fn () => Cache::remember('stats.folders', 600, fn () => [
                 'storage/app'  => self::dirSize(storage_path('app')),
                 'storage/logs' => self::dirSize(storage_path('logs')),
                 'public'       => self::dirSize(public_path()),
-            ]),
-            'database'   => Cache::remember('stats.database', 600, fn () => self::database()),
+            ]), []), fn ($v) => is_array($v), []),
+            'database'   => self::shape(self::safe(fn () => Cache::remember('stats.database', 600, fn () => self::database())),
+                fn ($v) => is_array($v) && array_key_exists('size', $v) && is_array($v['tables'] ?? null), ['size' => null, 'tables' => []]),
             'queue'      => [
                 'jobs'   => self::count('jobs'),
                 'failed' => self::count('failed_jobs'),
                 'oldest' => self::oldestJob(),
             ],
-            'load'       => function_exists('sys_getloadavg') ? (sys_getloadavg() ?: null) : null,
-            'cpus'       => self::cpus(),
-            'memory'     => self::memory(),
+            'load'       => self::safe(fn () => function_exists('sys_getloadavg') ? (@sys_getloadavg() ?: null) : null),
+            'cpus'       => self::safe(fn () => self::cpus()),
+            'memory'     => self::safe(fn () => self::memory()),
             'php'        => PHP_VERSION,
             'laravel'    => app()->version(),
             'db_driver'  => DB::connection()->getDriverName(),
         ];
+    }
+
+    /** A cached value of the wrong shape (old format, null) falls back to $default instead of breaking the view. */
+    private static function shape(mixed $value, \Closure $valid, mixed $default): mixed
+    {
+        return $valid($value) ? $value : $default;
+    }
+
+    /** Run one probe; any error or PHP warning (turned into an exception by Laravel) gives $default. */
+    private static function safe(\Closure $probe, mixed $default = null): mixed
+    {
+        try {
+            return $probe();
+        } catch (\Throwable $e) {
+            report($e); // visible in the log, but the page still opens
+            return $default;
+        }
     }
 
     private static function count(string $table): ?int
@@ -63,11 +85,24 @@ class ServerResources
     {
         $driver = DB::connection()->getDriverName();
         if ($driver === 'mysql' || $driver === 'mariadb') {
-            $rows = DB::select('SELECT table_name AS name, table_rows AS `rows`, (data_length + index_length) AS size
-                FROM information_schema.tables WHERE table_schema = DATABASE() ORDER BY size DESC');
-            $tables = array_map(fn ($r) => ['name' => $r->name, 'rows' => (int) $r->rows, 'size' => (int) $r->size], $rows);
+            $rows = DB::select('SELECT table_name AS tname, table_rows AS trows, (data_length + index_length) AS tsize
+                FROM information_schema.tables WHERE table_schema = DATABASE() ORDER BY tsize DESC');
+            // property names can come back upper-cased on some MySQL setups — read them case-insensitively
+            $tables = array_map(function ($r) {
+                $r = array_change_key_case((array) $r, CASE_LOWER);
+
+                return ['name' => (string) ($r['tname'] ?? ''), 'rows' => (int) ($r['trows'] ?? 0), 'size' => (int) ($r['tsize'] ?? 0)];
+            }, $rows);
 
             return ['size' => array_sum(array_column($tables, 'size')), 'tables' => array_slice($tables, 0, 8)];
+        }
+        if ($driver === 'pgsql') {
+            $rows = DB::select("SELECT relname AS tname, n_live_tup AS trows, pg_total_relation_size(relid) AS tsize
+                FROM pg_stat_user_tables ORDER BY tsize DESC");
+            $tables = array_map(fn ($r) => ['name' => (string) $r->tname, 'rows' => (int) $r->trows, 'size' => (int) $r->tsize], $rows);
+            $size = (int) (DB::selectOne('SELECT pg_database_size(current_database()) AS b')->b ?? 0);
+
+            return ['size' => $size ?: array_sum(array_column($tables, 'size')), 'tables' => array_slice($tables, 0, 8)];
         }
         if ($driver === 'sqlite') {
             $file = DB::connection()->getConfig('database');
@@ -103,7 +138,7 @@ class ServerResources
 
     private static function cpus(): ?int
     {
-        if (is_readable('/proc/cpuinfo')) {
+        if (@is_readable('/proc/cpuinfo')) {
             return substr_count((string) @file_get_contents('/proc/cpuinfo'), 'processor') ?: null;
         }
 
@@ -113,7 +148,7 @@ class ServerResources
     /** @return array{total: int, available: int}|null  (Linux only) */
     private static function memory(): ?array
     {
-        if (!is_readable('/proc/meminfo')) {
+        if (!@is_readable('/proc/meminfo')) {
             return null;
         }
         $info = (string) @file_get_contents('/proc/meminfo');

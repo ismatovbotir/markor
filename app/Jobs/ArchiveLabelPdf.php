@@ -37,7 +37,8 @@ class ArchiveLabelPdf implements ShouldQueue
 
         $sent = $telegram->sendDocument($chat, Storage::disk('local')->get($pdf->local_path), $name, e($caption));
         if (!isset($sent['document']['file_id'])) {
-            throw new \RuntimeException("Archiving PDF #{$pdf->id} to Telegram failed");
+            // the reason Telegram gave (chat not found, bot not in the group, group upgraded, file too large…)
+            throw new \RuntimeException("Archiving PDF #{$pdf->id} to Telegram chat {$chat} failed: " . ($telegram->lastError ?? 'no answer'));
         }
 
         Storage::disk('local')->delete($pdf->local_path);

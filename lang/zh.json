@@ -1535,5 +1535,9 @@
     "tg_profile.descpic_title": "简介图片（空聊天中简介上方）",
     "tg_profile.descpic_hint": "Telegram 要求正好 640×360（头像为方形，见上方 640×640）。",
     "tg_profile.descpic_steps": "@BotFather → /setdescriptionpic → 选择机器人 → 发送图片",
-    "tg_profile.descpic_download": "下载简介图片（640×360 PNG）"
+    "tg_profile.descpic_download": "下载简介图片（640×360 PNG）",
+    "system.details": "详情",
+    "system.tries": "尝试次数",
+    "system.copy": "复制",
+    "system.masked": "机器人令牌和密钥已隐藏（***）。完整错误见服务器日志：storage/logs/laravel.log"
 }
