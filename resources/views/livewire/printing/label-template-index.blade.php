@@ -96,6 +96,7 @@
                         <button type="button" x-on:click="rotateLabel()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 border border-stone-300 rounded-lg text-xs hover:bg-stone-100 whitespace-nowrap">
                             @svg('heroicon-o-arrow-path', 'w-3.5 h-3.5') {{ __('templates.rotate_label') }}
                         </button>
+                        <span class="inline-flex items-center gap-2 flex-wrap pb-1.5">@include('partials.label-watermark-toggle')</span>
                     </div>
                 </section>
 
@@ -109,6 +110,8 @@
                         <button type="button" x-on:click="add('barcode', '', 'qr', 'code')" class="{{ $chip }}">QR</button>
                         <button type="button" x-on:click="add('barcode', '', 'code128', 'gtin')" class="{{ $chip }}">Code 128</button>
                         <button type="button" x-on:click="add('barcode', '', 'ean13', 'gtin')" class="{{ $chip }}">EAN-13</button>
+                        <button type="button" x-on:click="add('logo')" class="{{ $chip }} inline-flex items-center gap-1">@svg('heroicon-o-photo', 'w-3.5 h-3.5') {{ __('templates.logo') }}</button>
+                        <button type="button" x-on:click="add('mark', 'aslbelgi')" class="{{ $chip }} inline-flex items-center gap-1" title="{{ __('labels.mark_hint') }}"><img src="/images/marks/aslbelgi.png" alt="" class="w-3.5 h-3.5"> {{ __('labels.mark_aslbelgi') }}</button>
                         <span class="w-px h-4 bg-stone-300 mx-1"></span>
                         <button type="button" x-on:click="add('text', '', 'qr', '@date')" class="{{ $chip }}">{{ __('studio.source_date') }}</button>
                         <button type="button" x-on:click="add('text', '', 'qr', '@serial')" class="{{ $chip }}">{{ __('studio.source_serial') }}</button>

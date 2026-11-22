@@ -5,11 +5,13 @@
     $url = \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace.item', app()->getLocale(), ['offer' => $offer->slug]);
     $phone = config('contact.phone');
     $tel = $phone ? 'tel:' . preg_replace('/[^\d+]/', '', $phone) : null;
+    // ItemPage, not Product: Google's Product snippets require a price offer, reviews or a rating, and marketplace
+    // items have none (no prices by the owner's decision) — a Product without them is reported as an error in Search Console.
     $product = [
-        '@context' => 'https://schema.org', '@type' => 'Product',
-        'name' => $offer->title, 'description' => $offer->description ?: $category->description,
-        'category' => $category->name, 'url' => $url,
-    ] + ($offer->image_url ? ['image' => url($offer->image_url)] : []);
+        '@context' => 'https://schema.org', '@type' => 'ItemPage',
+        'name' => $offer->title, 'description' => $offer->description ?: $category->description, 'url' => $url,
+        'about' => ['@type' => 'Thing', 'name' => $offer->title, 'description' => $category->name],
+    ] + ($offer->image_url ? ['primaryImageOfPage' => ['@type' => 'ImageObject', 'url' => url($offer->image_url)]] : []);
     $jsonLd = [$product, [
         '@context' => 'https://schema.org', '@type' => 'BreadcrumbList',
         'itemListElement' => [

@@ -44,6 +44,7 @@
           'upload' => \App\Support\Uploads::forJs('studio'),
           'markingLimit' => \App\Domain\Studio\MarkingTrial::LIMIT,
           'tooManyError' => __('studio.too_many'),
+          'imageUpload' => \App\Support\Uploads::forJs('studio_image'),
       ]))"
       x-on:pointermove.window="move($event)" x-on:pointerup.window="stop()">
 
@@ -134,6 +135,7 @@
                 <input x-model.number="columns" type="number" min="1" max="10" class="{{ $input }} w-16">
                 <span class="ml-3">{{ __('templates.gap') }}</span>
                 <input x-model.number="gap" type="number" min="0" max="30" step="0.5" class="{{ $input }} w-16">
+                <span class="ml-3 inline-flex items-center gap-2 flex-wrap">@include('partials.label-watermark-toggle')</span>
             </div>
         </div>
 
@@ -144,6 +146,9 @@
             <button type="button" x-on:click="add('barcode', '123456', 'datamatrix', headers[0] || '')" class="{{ $chip }}">DataMatrix</button>
             <button type="button" x-on:click="add('barcode', '123456', 'code128', headers[0] || '')" class="{{ $chip }}">Code 128</button>
             <button type="button" x-on:click="add('barcode', '4780000000007', 'ean13', headers[0] || '')" class="{{ $chip }}">EAN-13</button>
+            <button type="button" x-on:click="pickImage()" class="{{ $chip }} inline-flex items-center gap-1">@svg('heroicon-o-photo', 'w-3.5 h-3.5') {{ __('studio.image_add') }}</button>
+            <button type="button" x-on:click="add('mark', 'aslbelgi')" class="{{ $chip }} inline-flex items-center gap-1" title="{{ __('labels.mark_hint') }}"><img src="/images/marks/aslbelgi.png" alt="" class="w-3.5 h-3.5"> {{ __('labels.mark_aslbelgi') }}</button>
+            <input x-ref="imageInput" type="file" accept=".png,.jpg,.jpeg,image/png,image/jpeg" class="hidden" x-on:change="imageChosen($event)">
             <span class="w-px h-4 bg-stone-300 mx-1"></span>
             <button type="button" x-on:click="add('text', '', 'qr', '@date')" class="{{ $chip }}">{{ __('studio.source_date') }}</button>
             <button type="button" x-on:click="add('text', '', 'qr', '@serial')" class="{{ $chip }}">{{ __('studio.source_serial') }}</button>
@@ -155,6 +160,8 @@
             </template>
         </div>
 
+        <p x-show="imageError" x-cloak x-text="imageError" class="mb-3 text-xs text-rose-600"></p>
+        <p x-show="imageNotSaved" x-cloak class="mb-3 text-xs text-amber-700">{{ __('studio.image_not_saved') }}</p>
         @include('partials.label-editor-body')
     </section>
 

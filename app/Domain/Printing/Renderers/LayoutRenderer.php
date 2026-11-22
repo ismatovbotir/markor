@@ -15,6 +15,9 @@ use Illuminate\Support\Carbon;
  *   text        — fixed text (may contain {key} placeholders) or a bound `source`
  *   barcode     — qr / datamatrix / code128 / ean13 of fixed text or a bound `source`
  *   datamatrix  — the Asl Belgisi marking code itself, GS1 encoded (needs a MarkingCode)
+ *   logo        — the company logo (set with withLogo(); none → nothing is drawn)
+ *   image       — the public studio's own image, already validated and converted (`_img`)
+ * $label['watermark'] adds the small "markor.uz" mark in the bottom-right corner (big enough labels only).
  * Sources: a key of $row (a spreadsheet column or an Asl Belgisi field), "@date" or "@serial".
  */
 class LayoutRenderer
@@ -22,7 +25,17 @@ class LayoutRenderer
     /** @var array<string, string> base64 PNGs, keyed by symbology|value */
     private array $cache = [];
 
+    /** Company logo for `logo` elements: ['uri', 'w', 'h'] or null. */
+    private ?array $logo = null;
+
     public function __construct(private BarcodeImage $barcodes, private DataMatrixRenderer $marking) {}
+
+    public function withLogo(?array $logo): static
+    {
+        $this->logo = $logo;
+
+        return $this;
+    }
 
     /**
      * @param array{width_mm:int|float, height_mm:int|float, elements:array} $label
@@ -38,6 +51,21 @@ class LayoutRenderer
 
         foreach ($label['elements'] as $el) {
             [$w, $h] = LabelTemplate::innerSize($el);
+
+            if ($el['type'] === 'mark') {
+                if ($image = self::mark((string) ($el['mark'] ?? ''))) {
+                    $html .= LabelTemplate::elementBox($el, '', self::fittedImage($image, $w, $h));
+                }
+                continue;
+            }
+
+            if ($el['type'] === 'logo' || $el['type'] === 'image') {
+                $image = $el['type'] === 'logo' ? $this->logo : ($el['_img'] ?? null);
+                if ($image) {
+                    $html .= LabelTemplate::elementBox($el, '', self::fittedImage($image, $w, $h));
+                }
+                continue;
+            }
 
             if ($el['type'] === 'datamatrix') {
                 if ($code) {
@@ -91,7 +119,57 @@ class LayoutRenderer
             $html .= LabelTemplate::elementBox($el, LabelTemplate::textCss($el), nl2br(e($value), false));
         }
 
+        if (!empty($label['watermark']) && LabelTemplate::watermarkFits($label['width_mm'], $label['height_mm'])) {
+            $html .= self::watermark($label['width_mm'], $label['height_mm']);
+        }
+
         return $html . '</div>';
+    }
+
+    /** The image fitted inside a w×h mm box (contain, centred) — dompdf has no object-fit. */
+    /** Standard signs a label can carry (public/images/marks/{key}.png, black and white). */
+    public const MARKS = ['aslbelgi'];
+
+    /** One sign as ['uri', 'w', 'h'], read once per process (thousands of labels share it). */
+    public static function mark(string $key): ?array
+    {
+        static $cache = [];
+        if (!in_array($key, self::MARKS, true)) {
+            return null;
+        }
+        if (!array_key_exists($key, $cache)) {
+            $path = public_path("images/marks/$key.png");
+            $info = is_file($path) ? @getimagesize($path) : false;
+            $cache[$key] = $info ? ['uri' => 'data:image/png;base64,' . base64_encode(file_get_contents($path)), 'w' => $info[0], 'h' => $info[1]] : null;
+        }
+
+        return $cache[$key];
+    }
+
+    public static function fittedImage(array $image, float $w, float $h): string
+    {
+        $ratio = max(0.0001, $image['w']) / max(0.0001, $image['h']);
+        [$iw, $ih] = $w / max(0.0001, $h) > $ratio ? [$h * $ratio, $h] : [$w, $w / $ratio];
+
+        return sprintf(
+            '<img src="%s" style="display:block;position:absolute;left:%smm;top:%smm;width:%smm;height:%smm;">',
+            $image['uri'], LabelTemplate::mm(($w - $iw) / 2), LabelTemplate::mm(($h - $ih) / 2), LabelTemplate::mm($iw), LabelTemplate::mm($ih)
+        );
+    }
+
+    /** "markor.uz", black 4 pt, right-aligned in the bottom-right box, on top of everything. */
+    public static function watermark(float $widthMm, float $heightMm): string
+    {
+        $m = LabelTemplate::WATERMARK_MARGIN;
+
+        return sprintf(
+            '<div style="position:absolute;left:%smm;top:%smm;width:%smm;height:%smm;overflow:visible;z-index:10;'
+            . 'font-family:\'DejaVu Sans\',sans-serif;font-size:%dpt;line-height:%smm;font-weight:normal;color:#000;text-align:right;white-space:nowrap;">%s</div>',
+            LabelTemplate::mm($widthMm - $m - LabelTemplate::WATERMARK_W), LabelTemplate::mm($heightMm - $m - LabelTemplate::WATERMARK_H),
+            LabelTemplate::mm(LabelTemplate::WATERMARK_W), LabelTemplate::mm(LabelTemplate::WATERMARK_H),
+            // line-height 1.4 mm puts the baseline ≈0.55 mm above the label edge in dompdf (measured)
+            LabelTemplate::WATERMARK_PT, '1.4', LabelTemplate::WATERMARK_TEXT
+        );
     }
 
     /** Same tokens as the editor preview: YYYY YY MM DD HH mm ss; everything else is printed as is. */

@@ -13,8 +13,8 @@ class ImportBatch extends Model
         'uuid', 'filename', 'original_filename', 'uploaded_by', 'company_id',
         'type', 'product_id', 'status',
         'total_rows', 'processed_rows', 'failed_rows',
-        'unit_price', 'discount_percent', 'amount', 'source', 'is_locked', 'charged_at',
-        'error_log', 'processed_at',
+        'unit_price', 'discount_percent', 'amount', 'source', 'origin', 'is_locked', 'charged_at', 'charge_cancelled_at',
+        'error_log', 'processed_at', 'aslbelgi_revision',
     ];
 
     protected function casts(): array
@@ -26,7 +26,9 @@ class ImportBatch extends Model
             'discount_percent' => 'float',
             'amount'           => 'float',
             'is_locked'        => 'boolean',
+            'charge_cancelled_at' => 'datetime',
             'charged_at'       => 'datetime',
+            'aslbelgi_revision' => 'integer',
         ];
     }
 
@@ -64,6 +66,11 @@ class ImportBatch extends Model
         });
     }
 
+    public function labelPdfs()
+    {
+        return $this->hasMany(\App\Domain\Printing\Models\LabelPdf::class);
+    }
+
     public function uploader()
     {
         return $this->belongsTo(User::class, 'uploaded_by');
@@ -82,6 +89,17 @@ class ImportBatch extends Model
     public function markingCodes()
     {
         return $this->hasMany(MarkingCode::class);
+    }
+
+    /** Codes that may be printed: not blocked by the Asl Belgisi check (print page, PDF, Telegram PDF). */
+    public function printableCodes()
+    {
+        return MarkingCode::withoutGlobalScope('owner')->where('import_batch_id', $this->id)->whereNull('aslbelgi_problem');
+    }
+
+    public function aslbelgiChecks()
+    {
+        return $this->hasMany(\App\Domain\Aslbelgi\AslbelgiCheck::class);
     }
 
     public function scopePending($query)     { return $query->where('status', 'pending'); }

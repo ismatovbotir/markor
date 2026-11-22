@@ -13,5 +13,9 @@ return [
     'studio' => ['max_kb' => (int) env('UPLOAD_STUDIO_MAX_KB', 2048), 'extensions' => ['xlsx', 'ods', 'csv', 'txt']],
 
     // Marketplace product photos
+    // company logo (company page, owner) and the studio's own image (PNG/JPG only, checked in LabelImage)
+    'logo' => ['max_kb' => 1024, 'extensions' => ['png', 'jpg', 'jpeg', 'svg']],
+    'studio_image' => ['max_kb' => 1024, 'extensions' => ['png', 'jpg', 'jpeg']],
+
     'image' => ['max_kb' => (int) env('UPLOAD_IMAGE_MAX_KB', 2048), 'extensions' => ['jpg', 'jpeg', 'png', 'webp']],
 ];

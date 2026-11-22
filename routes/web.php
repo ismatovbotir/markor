@@ -124,6 +124,8 @@ Route::middleware(['auth', 'can:admin'])->prefix('admin')->group(function () {
     Route::redirect('/', '/admin/companies')->name('admin');
     Route::get('/companies', \App\Http\Livewire\Admin\CompanyIndex::class)->name('admin.clients');
     Route::get('/companies/{company}', \App\Http\Livewire\Admin\CompanyShow::class)->name('admin.companies.show');
+    Route::get('/batches', \App\Http\Livewire\Admin\BatchIndex::class)->name('admin.batches');
+    Route::get('/storage', \App\Http\Livewire\Admin\StorageIndex::class)->name('admin.storage');
     Route::get('/offers/{category:slug}', \App\Http\Livewire\Admin\OfferCategoryManager::class)->name('admin.offers');
     Route::get('/offers/{category:slug}/items/create', \App\Http\Livewire\Admin\OfferForm::class)->name('admin.offers.create');
     Route::get('/offers/{category:slug}/items/{offer}/edit', \App\Http\Livewire\Admin\OfferForm::class)->name('admin.offers.edit');

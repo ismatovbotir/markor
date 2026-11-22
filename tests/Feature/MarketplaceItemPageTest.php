@@ -27,7 +27,8 @@ class MarketplaceItemPageTest extends TestCase
             ->assertSee('<h1', false)->assertSee('Xprinter XP-365B')
             ->assertSee('<link rel="canonical" href="' . route('marketplace.item', 'xprinter-xp-365b') . '">', false)
             ->assertSee('Qaysi etiketkalar mos?')->getContent();
-        $this->assertStringContainsString('"@type":"Product"', $html);
+        $this->assertStringContainsString('"@type":"ItemPage"', $html);         // not Product: no price/reviews, so Product snippets would be invalid
+        $this->assertStringNotContainsString('"@type":"Product"', $html);
         $this->assertStringNotContainsString('"price"', $html);                 // products have no price
         $this->assertStringNotContainsString("Narxi so'rov bo'yicha", $html);  // no "price on request" label either
         $this->assertStringContainsString('"@type":"BreadcrumbList"', $html);

@@ -24,6 +24,9 @@ class ImportBatchIndex extends Component
     public ?int $namingBatchId = null;
     public array $naming = ['name_uz' => '', 'name_ru' => '', 'sku' => ''];
 
+    /** batch whose "Asl Belgisi tekshiruvi" confirm dialog is open */
+    public ?int $checkBatchId = null;
+
     protected function rules(): array
     {
         return [
@@ -147,14 +150,62 @@ class ImportBatchIndex extends Component
         }
     }
 
+    public function openCheck(int $batchId): void
+    {
+        $this->checkBatchId = ImportBatch::findOrFail($batchId)->id; // the owner scope hides other companies' batches
+    }
+
+    /** Confirm in the dialog: charge (10 so'm/code, no discount) and queue the check. */
+    public function orderCheck(\App\Domain\Aslbelgi\AslbelgiCheckService $service): void
+    {
+        $batch = ImportBatch::findOrFail($this->checkBatchId);
+        try {
+            $service->order($batch, auth()->user());
+        } catch (\App\Domain\Aslbelgi\InsufficientBalance $e) {
+            $this->dispatch('notify', type: 'error', message: __('aslbelgi_check.insufficient', ['need' => \App\Domain\Billing\Billing::money($e->shortfall)]));
+            return;
+        } catch (\DomainException $e) {
+            $this->dispatch('notify', type: 'error', message: __($e->getMessage()));
+            return;
+        }
+        $this->checkBatchId = null;
+        $this->dispatch('notify', type: 'success', message: __('aslbelgi_check.started'));
+    }
+
+    /** Data of the confirm dialog. */
+    private function checkDialog(\App\Domain\Aslbelgi\AslbelgiCheckService $service): ?array
+    {
+        $batch = $this->checkBatchId ? ImportBatch::with('company')->find($this->checkBatchId) : null;
+        if (!$batch) {
+            return null;
+        }
+        $codes = $service::codesOf($batch);
+        $price = $service::unitPrice();
+        $amount = \App\Domain\Billing\Billing::amount($codes, $price, 0);
+        $balance = (float) ($batch->company?->fresh()->balance ?? 0);
+        $last = \App\Domain\Aslbelgi\AslbelgiCheck::where('import_batch_id', $batch->id)->whereIn('status', ['done', 'partial'])->latest('id')->first();
+
+        return [
+            'batch' => $batch, 'codes' => $codes, 'price' => $price, 'amount' => $amount, 'balance' => $balance,
+            'shortfall' => max(0, $amount - $balance), 'last' => $last, 'blocker' => $service->blocker($batch, auth()->user()),
+        ];
+    }
+
     public function toggleErrors(int $id): void
     {
         $this->errorsFor = $this->errorsFor === $id ? null : $id;
     }
 
-    public function render(ImportBatchService $service)
+    public function render(ImportBatchService $service, \App\Domain\Aslbelgi\AslbelgiCheckService $checks)
     {
         $batches = $service->paginate();
+        $ids = $batches->pluck('id');
+        // Asl Belgisi check: latest order per batch and the problem codes (blocked from printing) per reason
+        $batchChecks = \App\Domain\Aslbelgi\AslbelgiCheck::whereIn('import_batch_id', $ids)->latest('id')->get()->groupBy('import_batch_id');
+        $problems = \App\Domain\Marking\Models\MarkingCode::withoutGlobalScope('owner')->whereIn('import_batch_id', $ids)->whereNotNull('aslbelgi_problem')
+            ->selectRaw('import_batch_id, aslbelgi_problem, count(*) as n')->groupBy('import_batch_id', 'aslbelgi_problem')->get()
+            ->groupBy('import_batch_id')->map(fn ($rows) => $rows->pluck('n', 'aslbelgi_problem')->map(fn ($n) => (int) $n)->sortDesc());
+        $user = auth()->user();
 
         $monthStart = now()->startOfMonth();
         $month = \App\Domain\Marking\Models\ImportBatch::where('status', 'completed')->where('processed_at', '>=', $monthStart)
@@ -170,7 +221,13 @@ class ImportBatchIndex extends Component
             'discount'  => \App\Domain\Billing\Billing::discountFor(auth()->user()->company),
             'discountUntil' => \App\Domain\Billing\Billing::discountUntil(auth()->user()->company),
             // Refresh the list while something is still queued, loading or being checked.
-            'polling'   => $batches->contains(fn ($b) => in_array($b->status, ['uploaded', 'pending', 'processing', 'checking'], true)),
+            'polling'   => $batches->contains(fn ($b) => in_array($b->status, ['uploaded', 'pending', 'processing', 'checking'], true))
+                || $batchChecks->flatten()->contains(fn ($c) => $c->isActive()),
+            'batchChecks' => $batchChecks,
+            'problems'  => $problems,
+            // the check is offered to users of a company whose owner saved an API key (never to the super admin)
+            'canCheck'  => !$user->isAdmin() && $user->company?->hasAslbelgiKey(),
+            'checkDialog' => $this->checkDialog($checks),
             'items'     => $this->itemsOf($batches->pluck('id')),
             'offers'    => \App\Domain\Offers\Models\Offer::active()->orderBy('sort_order')->get(),
             'templates' => $templates = LabelTemplate::forCompany(auth()->user()->company)->get(), // the company's "my templates" (all while none chosen)

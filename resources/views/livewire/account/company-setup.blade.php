@@ -60,5 +60,6 @@
     @endif
     @if(auth()->user()->isCompanyOwner() && auth()->user()->company)
         @livewire(\App\Http\Livewire\Account\AslbelgiApiKey::class)
+        @livewire(\App\Http\Livewire\Account\CompanyLogo::class)
     @endif
 </div>

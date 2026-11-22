@@ -28,19 +28,19 @@ class LabelPdfStore
      */
     public function parts(ImportBatch $batch, LabelTemplate $template): array
     {
-        $total = MarkingCode::withoutGlobalScope('owner')->where('import_batch_id', $batch->id)->count();
+        $total = $batch->printableCodes()->count(); // codes blocked by the Asl Belgisi check are never printed
         $size = $template->partSize();
         $count = max(1, (int) ceil($total / $size));
         $stored = LabelPdf::with('template')->where('import_batch_id', $batch->id)->where('label_template_id', $template->id)->get()->keyBy('part');
 
-        return collect(range(1, $count))->map(function ($part) use ($total, $size, $count, $stored) {
+        return collect(range(1, $count))->map(function ($part) use ($total, $size, $count, $stored, $batch) {
             $first = ($part - 1) * $size + 1;
             $pdf = $stored[$part] ?? null;
 
             return [
                 'part' => $part, 'parts' => $count, 'first' => $first, 'last' => min($total, $part * $size),
-                'labels' => min($size, $total - $first + 1),
-                'ready' => $pdf && !$pdf->isStale() && $pdf->parts === $count && ($pdf->telegram_file_id || $pdf->local_path),
+                'labels' => max(0, min($size, $total - $first + 1)),
+                'ready' => $pdf && !$pdf->isStaleFor($batch) && $pdf->parts === $count && ($pdf->telegram_file_id || $pdf->local_path),
             ];
         })->all();
     }
@@ -52,7 +52,7 @@ class LabelPdfStore
         $part = max(1, min($part, count($parts)));
         $pdf = LabelPdf::with('template')->where('import_batch_id', $batch->id)->where('label_template_id', $template->id)->where('part', $part)->first();
 
-        if ($pdf && !$pdf->isStale() && $pdf->parts === count($parts) && ($contents = $this->contents($pdf)) !== null) {
+        if ($pdf && !$pdf->isStaleFor($batch) && $pdf->parts === count($parts) && ($contents = $this->contents($pdf)) !== null) {
             return [$pdf, $contents];
         }
 
@@ -71,10 +71,10 @@ class LabelPdfStore
         return null;
     }
 
-    /** Codes of one part (same split as the PDF parts), with their products. */
+    /** Codes of one part (same split as the PDF parts), with their products; problem codes are left out. */
     public function partCodes(ImportBatch $batch, array $part)
     {
-        return MarkingCode::withoutGlobalScope('owner')->with('product')->where('import_batch_id', $batch->id)
+        return $batch->printableCodes()->with('product')
             ->orderBy('id')->offset($part['first'] - 1)->limit($part['labels'])->get();
     }
 
@@ -95,7 +95,8 @@ class LabelPdfStore
     private function render(ImportBatch $batch, LabelTemplate $template, ?User $user, ?LabelPdf $existing, array $part): array
     {
         $codes = $this->partCodes($batch, $part);
-        $contents = $this->renderer->pdf($template, $codes, pathinfo($batch->original_filename, PATHINFO_FILENAME));
+        $company = $batch->company;
+        $contents = $this->renderer->pdf($template, $codes, pathinfo($batch->original_filename, PATHINFO_FILENAME), app(LabelImage::class)->companyLogo($company));
         $this->markPrinted($codes);
 
         $path = 'pdfs/' . $batch->id . '-' . $template->id . '-p' . $part['part'] . '-' . Str::random(8) . '.pdf';
@@ -111,6 +112,8 @@ class LabelPdfStore
                 'company_id' => $batch->company_id, 'created_by' => $user?->id ?? $batch->uploaded_by,
                 'labels' => $codes->count(), 'size_bytes' => strlen($contents), 'local_path' => $path,
                 'telegram_file_id' => null, 'telegram_file_unique_id' => null, 'telegram_chat_id' => null, 'archived_at' => null,
+                'aslbelgi_revision' => (int) $batch->aslbelgi_revision,
+                'logo_version' => (int) ($company?->logo_version ?? 0),
             ]
         );
         $pdf->touch();

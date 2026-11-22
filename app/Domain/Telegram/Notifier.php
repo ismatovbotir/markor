@@ -105,6 +105,26 @@ class Notifier
         ]);
     }
 
+    /**
+     * The company's Asl Belgisi API key expires soon / has expired → the company owner(s), in their language.
+     * Returns true when at least one message was delivered.
+     */
+    public function aslbelgiKeyReminder(\App\Domain\Companies\Company $company, string $threshold, int $days): bool
+    {
+        if (!$this->api->enabled()) {
+            return false;
+        }
+        $key = $threshold === 'expired' ? 'bot.aslbelgi_key_expired' : 'bot.aslbelgi_key_expires';
+        $values = ['days' => $days, 'date' => $company->aslbelgi_api_key_expires_at?->format('d.m.Y'), 'url' => route('company.setup')];
+        $sent = false;
+        User::where('company_id', $company->id)->where('company_role', 'owner')->whereNotNull('telegram_chat_id')->where('is_active', true)->get()
+            ->each(function (User $u) use ($key, $values, &$sent) {
+                $sent = $this->api->sendMessage($u->telegram_chat_id, __($key, $values, $u->locale ?: config('app.locale'))) !== null || $sent;
+            });
+
+        return $sent;
+    }
+
     /** An alert to the super admin's chat, in the super admin's language; never throws. */
     private function toAdmin(string $key, array $replace): void
     {

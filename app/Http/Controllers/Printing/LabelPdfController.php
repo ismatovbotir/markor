@@ -16,7 +16,7 @@ class LabelPdfController extends Controller
     /** All labels of one import batch as a single PDF, one label per page. */
     public function batch(Request $request, ImportBatch $batch, LabelPdfService $service)
     {
-        Gate::authorize('view', $batch);
+        Gate::authorize('viewCodes', $batch); // the super admin never sees code values
 
         $template = $request->filled('template')
             ? LabelTemplate::findOrFail($request->integer('template'))
@@ -24,6 +24,7 @@ class LabelPdfController extends Controller
 
         abort_unless($batch->status === 'completed' && $batch->processed_rows > 0, 404);
         abort_if($batch->is_locked, 402, __('balance.locked_batch'));
+        abort_unless($batch->printableCodes()->exists(), 409, __('aslbelgi_check.nothing_printable'));
 
         set_time_limit(0);
         ini_set('memory_limit', '1G');
@@ -42,9 +43,10 @@ class LabelPdfController extends Controller
      */
     public function print(Request $request, ImportBatch $batch, LabelPdfService $service)
     {
-        Gate::authorize('view', $batch);
+        Gate::authorize('viewCodes', $batch); // the super admin never sees code values
         abort_unless($batch->status === 'completed' && $batch->processed_rows > 0, 404);
         abort_if($batch->is_locked, 402, __('balance.locked_batch'));
+        abort_unless($batch->printableCodes()->exists(), 409, __('aslbelgi_check.nothing_printable'));
         $template = $request->filled('template') ? LabelTemplate::findOrFail($request->integer('template')) : LabelTemplate::default();
 
         set_time_limit(0);
@@ -53,7 +55,8 @@ class LabelPdfController extends Controller
         $parts = $store->parts($batch, $template);
         $part = $parts[max(1, min($request->integer('part', 1), count($parts))) - 1];
         $codes = $store->partCodes($batch, $part);
-        [$css, $labels] = $service->labelsHtml($template, $codes, pathinfo($batch->original_filename, PATHINFO_FILENAME));
+        [$css, $labels] = $service->labelsHtml($template, $codes, pathinfo($batch->original_filename, PATHINFO_FILENAME),
+            app(\App\Domain\Printing\Services\LabelImage::class)->companyLogo($batch->company)); // that batch's company logo
         $store->markPrinted($codes);
 
         $columns = max(1, (int) $template->columns);
@@ -75,7 +78,7 @@ class LabelPdfController extends Controller
     /** How a batch is split into PDF parts for a design (for the download dialog). */
     public function parts(Request $request, ImportBatch $batch)
     {
-        Gate::authorize('view', $batch);
+        Gate::authorize('viewCodes', $batch); // the super admin never sees code values
         abort_if($batch->is_locked, 402, __('balance.locked_batch'));
         $template = $request->filled('template') ? LabelTemplate::findOrFail($request->integer('template')) : LabelTemplate::default();
 
@@ -85,7 +88,7 @@ class LabelPdfController extends Controller
     /** One sample label, to check a template before printing a whole batch. */
     public function preview(LabelTemplate $template, LabelPdfService $service)
     {
-        return $this->inline($service->pdf($template, [$service->demoCode()], 'preview'), 'preview-' . $template->id);
+        return $this->inline($service->pdf($template, [$service->demoCode()], 'preview', \App\Domain\Printing\Services\LabelImage::sample()), 'preview-' . $template->id);
     }
 
     private function inline(string $pdf, string $name)

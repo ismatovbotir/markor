@@ -23,6 +23,42 @@ window.labelEditor = (initial, sampleDm, sample) => ({
     fields: initial.fields || [],
     // The Asl Belgisi marking DataMatrix is available as an element kind (admin templates).
     allowMarking: initial.allowMarking || false,
+    // Company logo element (admin templates): the editor shows a neutral sample logo.
+    allowLogo: initial.allowLogo || false,
+    sampleLogo: initial.sampleLogo || '',
+    // The small "markor.uz" mark in the bottom-right corner (same numbers as LabelTemplate::WATERMARK_*).
+    watermark: initial.watermark ?? false,
+    get watermarkFits() {
+        return Number(this.width) >= 20 && Number(this.height) >= 10;
+    },
+    get watermarkShown() {
+        return !!this.watermark && this.watermarkFits;
+    },
+    get watermarkBox() {
+        const w = 7.4, h = 1.5, m = 0.5;
+        return { x: Number(this.width) - m - w, y: Number(this.height) - m - h, w, h };
+    },
+    watermarkStyle() {
+        const b = this.watermarkBox;
+        return `left:${this.px(b.x)};top:${this.px(b.y)};width:${this.px(b.w)};height:${this.px(b.h)};`
+            + `font-size:${4 * 0.3528 * this.scale}px;line-height:${this.px(1.4)};`;
+    },
+    // Barcodes under the mark would not scan: they are listed in a warning.
+    get watermarkOverlap() {
+        if (!this.watermarkShown) return false;
+        const b = this.watermarkBox;
+        return this.elements.some((el) => (el.type === 'barcode' || el.type === 'datamatrix')
+            && el.x < b.x + b.w && b.x < el.x + el.w && el.y < b.y + b.h && b.y < el.y + el.h);
+    },
+    // Logo / own image: shown fitted in the box; black-and-white like on the printed label.
+    imageSrc(el) {
+        if (el.type === 'mark') return `/images/marks/${el.mark || 'aslbelgi'}.png`;
+        return el.type === 'logo' ? this.sampleLogo : (el.src || '');
+    },
+    imageFilter(el) {
+        if (el.type !== 'image') return '';
+        return el.bw === false ? 'filter:grayscale(1);' : 'filter:grayscale(1) contrast(100);';
+    },
     get sourceOptions() {
         return this.fields.length ? this.fields : this.headers.map((h) => ({ value: h, label: h }));
     },
@@ -78,6 +114,7 @@ window.labelEditor = (initial, sampleDm, sample) => ({
     // The data binding (column or typed value), position and rotation are kept.
     kindOf(el) {
         if (el.type === 'datamatrix') return 'marking';
+        if (el.type === 'logo' || el.type === 'image' || el.type === 'mark') return el.type;
         return el.type === 'barcode' ? el.symbology : el.type;
     },
     setKind(el, kind) {
@@ -254,6 +291,12 @@ window.labelEditor = (initial, sampleDm, sample) => ({
         let el;
         if (type === 'datamatrix') {
             el = { type, x: 2, y: 2, w: 20, h: 20 };
+        } else if (type === 'mark') {
+            // a standard sign (Asl Belgisi…): square, 8 mm by default (6 mm is the smallest that prints clearly at 203 dpi)
+            const size = Math.max(6, Math.min(8, this.width - 4, this.height - 4));
+            el = { type, mark: text || 'aslbelgi', x: 2, y: 2, w: size, h: size };
+        } else if (type === 'logo') {
+            el = { type, x: 2, y: 2, w: Math.min(16, this.width - 4), h: Math.min(8, this.height - 4) };
         } else if (type === 'barcode') {
             const square = ['datamatrix', 'qr', 'asl'].includes(symbology);
             el = { type, symbology, text, x: 2, y: 2, w: square ? 18 : 34, h: square ? 18 : 10 };
@@ -261,7 +304,7 @@ window.labelEditor = (initial, sampleDm, sample) => ({
         } else {
             el = { type: 'text', text, x: 2, y: 2, w: Math.min(30, this.width - 2), h: 4, font_size: 7, bold: false, align: 'left' };
         }
-        if (this.useSources) {
+        if (this.useSources && type !== 'logo' && type !== 'mark') {
             el.source = source;
             if (type === 'text') el.caption = false;
             this.sourceChanged(el);
@@ -287,6 +330,7 @@ window.labelEditor = (initial, sampleDm, sample) => ({
                 columns: Number(this.columns) || 1,
                 gap_mm: Number(this.gap) || 0,
                 labels_per_pdf: Number(this.labelsPerPdf) || 2000,
+                watermark: !!this.watermark,
                 elements: this.elements.map(({ id, ...el }) => el),
             });
         } finally {
@@ -443,6 +487,69 @@ window.labelStudio = (config) => {
         },
         markingModal: false,
 
+        // "markor.uz" mark: on by default in the public studio (the visitor can turn it off)
+        watermark: true,
+
+        // The visitor's own image (logo): PNG / JPG, downscaled in the browser to a data URI that
+        // lives in the design only (never stored on the server). Too big for localStorage → memory only.
+        imageError: '',
+        imageNotSaved: false,
+        imageTarget: null, // element whose image is being replaced
+        pickImage(el = null) {
+            this.imageTarget = el;
+            this.imageError = '';
+            this.$refs.imageInput.value = '';
+            this.$refs.imageInput.click();
+        },
+        async imageChosen(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            this.imageError = window.checkUpload(file, config.imageUpload);
+            if (this.imageError) return;
+            try {
+                const image = await this.readImage(file);
+                if (this.imageTarget) {
+                    this.imageTarget.src = image.src;
+                    this.imageTarget.h = this.round(Math.max(2, this.imageTarget.w * image.h / image.w));
+                    this.clamp(this.imageTarget);
+                } else {
+                    const w = Math.max(4, Math.min(20, Number(this.width) - 4));
+                    const el = { id: this.nextId++, type: 'image', src: image.src, bw: true, x: 2, y: 2, w, h: this.round(Math.max(2, Math.min(w * image.h / image.w, Number(this.height) - 4))) };
+                    this.clamp(el);
+                    this.elements.push(el);
+                    this.selectedId = el.id;
+                }
+            } catch (e) {
+                this.imageError = config.imageUpload.typeError;
+            }
+            this.imageTarget = null;
+        },
+        readImage(file) {
+            return new Promise((resolve, reject) => {
+                const url = URL.createObjectURL(file);
+                const img = new Image();
+                img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image')); };
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    const k = Math.min(1, 600 / Math.max(img.naturalWidth, img.naturalHeight));
+                    const w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
+                    const canvas = Object.assign(document.createElement('canvas'), { width: w, height: h });
+                    const ctx = canvas.getContext('2d');
+                    const draw = (background) => {
+                        ctx.clearRect(0, 0, w, h);
+                        if (background) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); }
+                        ctx.drawImage(img, 0, 0, w, h);
+                    };
+                    let src = '';
+                    if (file.type === 'image/png') { draw(false); src = canvas.toDataURL('image/png'); }
+                    // photos and big PNGs: JPEG on white (the label is white anyway), well under 1 MB
+                    if (!src || src.length > 1300000) { draw(true); src = canvas.toDataURL('image/jpeg', 0.9); }
+                    resolve({ src, w, h });
+                };
+                img.src = url;
+            });
+        },
+
         // The design (not the table) can be kept in this browser's Local Storage — only after the
         // visitor agrees (consent window on entering the page). Nothing goes to the server.
         consentKey: 'markor.studio.consent', // 'yes' / 'no' — remembers the answer only
@@ -456,7 +563,7 @@ window.labelStudio = (config) => {
             try { this.consent = localStorage.getItem(this.consentKey); } catch (e) { this.consent = null; }
             if (this.consent === 'yes') this.restore();
             else if (this.consent !== 'no') this.consentModal = true;  // first visit: ask before saving anything
-            ['elements', 'width', 'height', 'columns', 'gap', 'copies', 'headers', 'hasHeader']
+            ['elements', 'width', 'height', 'columns', 'gap', 'copies', 'headers', 'hasHeader', 'watermark']
                 .forEach((prop) => this.$watch(prop, () => this.persist()));
         },
         acceptStorage() {
@@ -488,6 +595,7 @@ window.labelStudio = (config) => {
                 this.columns = saved.columns || 1;
                 this.gap = saved.gap || 0;
                 this.copies = saved.copies || 1;
+                this.watermark = saved.watermark !== false;
                 // design only: no table is restored (upload the file again); column names are kept so the
                 // elements reconnect to the same columns
                 this.headers = saved.headers || [];
@@ -507,7 +615,7 @@ window.labelStudio = (config) => {
             clearTimeout(this.saveTimer);
             this.saveTimer = setTimeout(() => {
                 const state = {
-                    width: this.width, height: this.height, columns: this.columns, gap: this.gap, copies: this.copies,
+                    width: this.width, height: this.height, columns: this.columns, gap: this.gap, copies: this.copies, watermark: this.watermark,
                     hasHeader: this.hasHeader, fileName: this.fileName, total: this.total, headers: this.headers,
                     elements: this.elements.map(({ id, ...el }) => el),
                 };
@@ -515,9 +623,20 @@ window.labelStudio = (config) => {
                 // elements reconnect when the same file is uploaded again); Asl Belgisi codes — not even those
                 state.rows = []; state.fileName = ''; state.total = 0;
                 if (this.marking) state.headers = [];
+                // own images make the design big: over ~1.5 MB (or if the browser refuses) they are kept
+                // in memory only, and the visitor is told to add them again after a reload
+                const withoutImages = () => ({ ...state, elements: state.elements.map((el) => (el.type === 'image' ? { ...el, src: '' } : el)) });
+                let json = JSON.stringify(state);
+                this.imageNotSaved = false;
+                if (json.length > 1500000) { json = JSON.stringify(withoutImages()); this.imageNotSaved = true; }
                 try {
-                    localStorage.setItem(this.storageKey, JSON.stringify(state));
-                } catch (e) { /* private mode / storage blocked: nothing saved */ }
+                    localStorage.setItem(this.storageKey, json);
+                } catch (e) {
+                    try {
+                        localStorage.setItem(this.storageKey, JSON.stringify(withoutImages()));
+                        this.imageNotSaved = state.elements.some((el) => el.type === 'image');
+                    } catch (e2) { /* private mode / storage blocked: nothing saved */ }
+                }
             }, 300);
         },
         startOver() {
@@ -638,6 +757,7 @@ window.labelStudio = (config) => {
                 columns: Number(this.columns) || 1,
                 gap_mm: Number(this.gap) || 0,
                 copies: this.usesMarking ? Math.min(Number(this.copies) || 1, config.markingLimit) : Number(this.copies) || 1,
+                watermark: !!this.watermark,
                 elements: this.elements.map(({ id, ...el }) => el),
                 rows: this.usesMarking ? this.rows.slice(0, config.markingLimit) : this.rows,
                 ...extra,

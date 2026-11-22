@@ -131,6 +131,7 @@ class CompanyShow extends Component
     public function render()
     {
         return view('livewire.admin.company-show', [
+            'storage' => app(\App\Domain\Reporting\CodeStorage::class)->perCompany()[$this->company->id] ?? null,
             'users'   => $this->company->users()->orderByRaw("company_role = 'owner' desc")->orderBy('name')->get(),
             'batches' => ImportBatch::withoutGlobalScope('owner')->with('uploader:id,name')->where('company_id', $this->company->id)->latest('id')->limit(20)->get(),
             'defaultDiscount' => (float) config('billing.discount_percent'),

@@ -188,7 +188,12 @@ class LabelStudioController extends Controller
             'gap_mm'               => 'nullable|numeric|min:0|max:30',
             'copies'               => 'nullable|integer|min:1|max:' . self::MAX_LABELS,
             'elements'             => 'required|array|min:1|max:40',
-            'elements.*.type'      => 'required|in:text,barcode',
+            'watermark'            => 'nullable|boolean',             // the small "markor.uz" mark (on unless unchecked)
+            'elements.*.type'      => 'required|in:text,barcode,image,mark',
+            'elements.*.mark'      => 'nullable|required_if:elements.*.type,mark|in:' . implode(',', \App\Domain\Printing\Renderers\LayoutRenderer::MARKS),
+            // the visitor's own image: a PNG / JPEG data URI made in the browser (≤ 1 MB decoded, checked below)
+            'elements.*.src'       => 'nullable|string|max:' . (int) ceil(\App\Domain\Printing\Services\LabelImage::MAX_KB * 1024 * 4 / 3 + 64),
+            'elements.*.bw'        => 'nullable|boolean',             // image printed black-and-white (default) or grayscale
             'elements.*.x'         => 'required|numeric|min:0|max:300',
             'elements.*.y'         => 'required|numeric|min:0|max:300',
             'elements.*.w'         => 'required|numeric|min:1|max:300',
@@ -216,6 +221,9 @@ class LabelStudioController extends Controller
             'rows.*.*'             => 'nullable|string|max:500',
         ]);
 
+
+        $data['watermark'] = $request->has('watermark') ? $request->boolean('watermark') : true;
+        $data['elements'] = $this->studioImages($data['elements']);
 
         $rows = $data['rows'] ?? [];
         if (!$rows) {
@@ -251,5 +259,34 @@ class LabelStudioController extends Controller
 
 
         return [$data, $rows];
+    }
+
+    /** At most this many own images per design (each up to 1 MB). */
+    public const MAX_IMAGES = 3;
+
+    /**
+     * Own images: validated, re-encoded and (unless unchecked) made black-and-white in memory only —
+     * never written to disk or logged. An image element without an image draws nothing.
+     */
+    private function studioImages(array $elements): array
+    {
+        $images = collect($elements)->where('type', 'image');
+        if ($images->count() > self::MAX_IMAGES) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['elements' => __('studio.image_too_many', ['max' => self::MAX_IMAGES])]);
+        }
+        foreach ($elements as $i => $el) {
+            unset($elements[$i]['_img']);
+            if ($el['type'] !== 'image' || blank($el['src'] ?? null)) {
+                continue;
+            }
+            $image = \App\Domain\Printing\Services\LabelImage::fromStudio($el['src'], array_key_exists('bw', $el) && $el['bw'] !== null && !filter_var($el['bw'], FILTER_VALIDATE_BOOLEAN));
+            if (!$image) {
+                throw \Illuminate\Validation\ValidationException::withMessages(["elements.$i.src" => __('studio.image_invalid')]);
+            }
+            unset($elements[$i]['src']);
+            $elements[$i]['_img'] = $image;
+        }
+
+        return $elements;
     }
 }

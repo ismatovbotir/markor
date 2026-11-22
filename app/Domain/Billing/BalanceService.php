@@ -118,6 +118,59 @@ class BalanceService
         }
     }
 
+    /**
+     * Places an Asl Belgisi check order and charges it at once (price fixed on the order). Unlike a CSV
+     * batch it is never locked: if the balance does not cover it, nothing is created.
+     * @throws \App\Domain\Aslbelgi\InsufficientBalance
+     */
+    public function orderAslbelgiCheck(ImportBatch $batch, User $user, int $codes, float $unitPrice): \App\Domain\Aslbelgi\AslbelgiCheck
+    {
+        return DB::transaction(function () use ($batch, $user, $codes, $unitPrice) {
+            $company = Company::lockForUpdate()->find($batch->company_id);
+            $active = \App\Domain\Aslbelgi\AslbelgiCheck::withoutGlobalScope('owner')->where('import_batch_id', $batch->id)
+                ->whereIn('status', \App\Domain\Aslbelgi\AslbelgiCheck::ACTIVE)->exists();
+            if ($active) {
+                throw new \DomainException('aslbelgi_check.already_running');
+            }
+            $amount = Billing::amount($codes, $unitPrice, 0); // no discount, no free period for services
+            if ((float) $company->balance < $amount) {
+                throw new \App\Domain\Aslbelgi\InsufficientBalance(round($amount - (float) $company->balance, 2));
+            }
+            $check = \App\Domain\Aslbelgi\AslbelgiCheck::create([
+                'import_batch_id' => $batch->id, 'company_id' => $company->id, 'requested_by' => $user->id,
+                'codes' => $codes, 'unit_price' => $unitPrice, 'amount' => $amount, 'status' => 'queued',
+            ]);
+            if ($amount > 0) {
+                $this->entry($company, 'aslbelgi_check', -$amount, ['import_batch_id' => $batch->id, 'created_by' => $user->id]);
+            }
+
+            return $check;
+        });
+    }
+
+    /**
+     * Final amount of a finished check: only the codes actually checked are paid; the rest of what was
+     * charged at the order goes back to the balance. Returns false when the check was already settled.
+     */
+    public function settleAslbelgiCheck(\App\Domain\Aslbelgi\AslbelgiCheck $check, array $attributes, int $checkedCodes): bool
+    {
+        return DB::transaction(function () use ($check, $attributes, $checkedCodes) {
+            $locked = \App\Domain\Aslbelgi\AslbelgiCheck::withoutGlobalScope('owner')->whereKey($check->id)->lockForUpdate()->first();
+            if (!$locked || $locked->status !== 'running') {
+                return false;
+            }
+            $final = min($locked->amount, Billing::amount(max(0, $checkedCodes), $locked->unit_price, 0));
+            $refund = round($locked->amount - $final, 2);
+            if ($refund > 0) {
+                $company = Company::lockForUpdate()->find($locked->company_id);
+                $this->entry($company, 'aslbelgi_refund', $refund, ['import_batch_id' => $locked->import_batch_id]);
+            }
+            $locked->update($attributes + ['amount' => $final, 'finished_at' => now()]);
+
+            return true;
+        });
+    }
+
     /** Sum the company still has to pay to open all its locked batches. */
     public static function shortfall(Company $company): float
     {

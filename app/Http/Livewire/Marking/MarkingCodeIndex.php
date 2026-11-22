@@ -23,6 +23,7 @@ class MarkingCodeIndex extends Component
 
     public function render(MarkingCodeService $service)
     {
+        abort_if(auth()->user()->isAdmin(), 403); // the super admin never sees code values (batches only)
         return view('livewire.marking.marking-code-index', [
             'codes'    => $service->paginate([
                 'search'     => $this->search,

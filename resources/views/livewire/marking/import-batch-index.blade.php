@@ -117,6 +117,37 @@
                                     {{ $batch->failed_rows > 0 ? __('import.skipped', ['count' => $batch->failed_rows]) : __('common.error') }}
                                 </button>
                             @endif
+                            {{-- Asl Belgisi check: running / checked / problem codes (blocked from printing) --}}
+                            @php
+                                $check = $batchChecks->get($batch->id)?->first();
+                                $lastChecked = $batchChecks->get($batch->id)?->first(fn ($c) => in_array($c->status, ['done', 'partial'], true));
+                                $batchProblems = $problems[$batch->id] ?? collect();
+                                $problemTotal = $batchProblems->sum();
+                            @endphp
+                            @if($check?->isActive())
+                                <span class="mt-1 flex items-center gap-1 text-xs text-sky-700">
+                                    <svg class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                                    {{ __('aslbelgi_check.running') }}@if($check->status === 'running' && $check->codes) · {{ min(100, (int) floor($check->checked * 100 / $check->codes)) }}%@endif
+                                </span>
+                            @elseif($problemTotal > 0)
+                                <span class="relative mt-1 block" x-data="{ open: false }">
+                                    <button type="button" x-on:click="open = !open" x-on:click.outside="open = false" class="inline-flex items-center gap-1 text-xs font-medium text-amber-800 hover:underline">
+                                        @svg('heroicon-s-exclamation-triangle', 'w-3.5 h-3.5') {{ __('aslbelgi_check.problems', ['count' => number_format($problemTotal, 0, '.', ' ')]) }}
+                                    </button>
+                                    <span x-show="open" x-cloak class="absolute left-0 top-full z-20 mt-1 w-64 rounded-lg border border-stone-200 bg-white p-3 text-xs text-stone-700 shadow-lg">
+                                        <span class="block font-medium text-stone-800 mb-1">{{ __('aslbelgi_check.problems_title') }}</span>
+                                        @foreach($batchProblems as $reason => $n)
+                                            <span class="flex justify-between gap-3 py-0.5"><span>{{ \Illuminate\Support\Facades\Lang::has('aslbelgi_check.reason.' . $reason) ? __('aslbelgi_check.reason.' . $reason) : $reason }}</span><span class="tabular-nums font-medium">{{ number_format($n, 0, '.', ' ') }}</span></span>
+                                        @endforeach
+                                        <span class="block text-stone-500 mt-2">{{ __('aslbelgi_check.problems_hint') }}</span>
+                                        @if($lastChecked)<span class="block text-stone-400 mt-1">{{ __('aslbelgi_check.checked_on', ['date' => $lastChecked->finished_at?->format('d.m.Y H:i')]) }}</span>@endif
+                                    </span>
+                                </span>
+                            @elseif($check?->status === 'failed')
+                                <span class="mt-1 block text-xs text-rose-600" title="{{ __('aslbelgi_check.refunded') }}">{{ __('aslbelgi_check.failed') }}: {{ __('aslbelgi_check.error.' . ($check->error ?: 'internal')) }}</span>
+                            @elseif($lastChecked)
+                                <span class="mt-1 block text-xs text-emerald-700" title="{{ $lastChecked->finished_at?->format('d.m.Y H:i') }}">✓ {{ __('aslbelgi_check.checked') }} · {{ $lastChecked->finished_at?->format('d.m') }}@if($lastChecked->status === 'partial') <span class="text-amber-700">({{ __('aslbelgi_check.partial') }})</span>@endif</span>
+                            @endif
                         </td>
                         <td class="px-4 py-3 text-stone-500">{{ $batch->created_at->format('d.m.Y H:i') }}</td>
                         <td class="px-4 py-3 text-right">
@@ -125,8 +156,18 @@
                                     @svg('heroicon-o-lock-closed', 'w-4 h-4') {{ __('balance.pay_to_open') }}
                                 </a>
                             @elseif($batch->status === 'completed' && $batch->marking_codes_count > 0)
-@php $dl = ['url' => route('import-batches.labels', $batch), 'partsUrl' => route('import-batches.parts', $batch), 'printUrl' => route('import-batches.print', $batch), 'name' => pathinfo($batch->original_filename, PATHINFO_FILENAME), 'count' => $batch->marking_codes_count]; @endphp
+@php $dl = ['url' => route('import-batches.labels', $batch), 'partsUrl' => route('import-batches.parts', $batch), 'printUrl' => route('import-batches.print', $batch), 'name' => pathinfo($batch->original_filename, PATHINFO_FILENAME), 'count' => max(0, $batch->marking_codes_count - $problemTotal), 'blocked' => $problemTotal]; @endphp
                                 <span class="inline-flex items-center gap-2 whitespace-nowrap">
+                                    @if($canCheck)
+                                        <button type="button" wire:click="openCheck({{ $batch->id }})" @disabled($check?->isActive())
+                                                class="inline-flex items-center justify-center w-8 h-8 border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-100 hover:text-amber-800 transition disabled:opacity-40"
+                                                title="{{ __('aslbelgi_check.action') }}" aria-label="{{ __('aslbelgi_check.action') }}">
+                                            @svg('heroicon-o-shield-check', 'w-4 h-4')
+                                        </button>
+                                    @endif
+                                    @if($dl['count'] === 0)
+                                        <span class="text-xs text-amber-800">{{ __('aslbelgi_check.nothing_printable') }}</span>
+                                    @else
                                     <button type="button" x-on:click="open(@js($dl), 'print')"
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-700 text-white rounded-lg text-xs font-medium hover:bg-amber-800 transition">
                                         @svg('heroicon-o-printer', 'w-4 h-4') {{ __('import.print') }}
@@ -135,6 +176,7 @@
                                             class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-amber-700 text-amber-700 rounded-lg text-xs font-medium hover:bg-amber-50 transition">
                                         @svg('heroicon-o-document-arrow-down', 'w-4 h-4') {{ __('import.labels_pdf') }}
                                     </button>
+                                    @endif
                                 </span>
                             @endif
                         </td>
@@ -220,12 +262,53 @@
         </div>
     @endif
 
+    @if($checkDialog)
+        @php $d = $checkDialog; @endphp
+        <div class="fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4" x-on:keydown.escape.window="$wire.set('checkBatchId', null)">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold flex items-center gap-2">@svg('heroicon-o-shield-check', 'w-5 h-5 text-amber-700') {{ __('aslbelgi_check.action') }}</h2>
+                    <p class="text-sm text-stone-500 mt-1">{{ $d['batch']->original_filename }}</p>
+                </div>
+                <p class="text-sm text-stone-600">{{ __('aslbelgi_check.explain') }}</p>
+                <dl class="text-sm border border-stone-200 rounded-lg divide-y divide-stone-100">
+                    <div class="flex justify-between gap-3 px-3 py-2"><dt class="text-stone-500">{{ __('aslbelgi_check.cost') }}</dt>
+                        <dd class="tabular-nums">{{ number_format($d['codes'], 0, '.', ' ') }} × {{ $money($d['price']) }} = <span class="font-semibold">{{ $money($d['amount']) }}</span></dd></div>
+                    <div class="flex justify-between gap-3 px-3 py-2"><dt class="text-stone-500">{{ __('aslbelgi_check.balance') }}</dt><dd class="tabular-nums">{{ $money($d['balance']) }}</dd></div>
+                </dl>
+                <p class="text-[11px] text-stone-500">{{ __('aslbelgi_check.no_discount') }}</p>
+                @if($d['last'])
+                    <p class="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{{ __('aslbelgi_check.already_checked', ['date' => $d['last']->finished_at?->format('d.m.Y H:i')]) }}</p>
+                @endif
+                @if($d['blocker'])
+                    <p class="text-sm text-rose-600">{{ __($d['blocker']) }}
+                        @if(in_array($d['blocker'], ['aslbelgi_check.key_expired', 'aslbelgi_check.no_key'], true) && auth()->user()->isCompanyOwner())
+                            <a href="{{ route('company.setup') }}" class="underline">{{ __('aslbelgi_check.open_company') }}</a>
+                        @endif
+                    </p>
+                @elseif($d['shortfall'] > 0)
+                    <div class="flex items-center justify-between gap-3 text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                        <span>{{ __('aslbelgi_check.insufficient', ['need' => $money($d['shortfall'])]) }}</span>
+                        <a href="{{ route('balance') }}" class="shrink-0 px-3 py-1.5 bg-amber-700 text-white rounded-lg text-xs font-medium hover:bg-amber-800">{{ __('balance.top_up') }}</a>
+                    </div>
+                @endif
+                <div class="flex justify-end gap-3 pt-1">
+                    <button type="button" wire:click="$set('checkBatchId', null)" class="px-4 py-2 text-sm text-stone-600 hover:text-stone-800">{{ __('common.cancel') }}</button>
+                    @if(!$d['blocker'] && $d['shortfall'] <= 0)
+                        <button type="button" wire:click="orderCheck" wire:loading.attr="disabled" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-50">{{ __('aslbelgi_check.confirm', ['amount' => $money($d['amount'])]) }}</button>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- Generate & download labels PDF --}}
     <div x-show="batch" x-cloak class="fixed inset-0 bg-black/40 z-40 flex items-center justify-center" x-on:keydown.escape.window="close()">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-6" x-on:click.outside="close()">
             <div x-show="state === 'working' || state === 'done'">@include('partials.promo-offer')</div>
             <h2 class="text-lg font-semibold" x-text="batch?.name"></h2>
-            <p class="text-sm text-stone-500 mb-4"><span x-text="batch?.count"></span> {{ __('import.labels_unit') }}</p>
+            <p class="text-sm text-stone-500" :class="batch?.blocked ? 'mb-1' : 'mb-4'"><span x-text="batch?.count"></span> {{ __('import.labels_unit') }}</p>
+            <p x-show="batch?.blocked" x-cloak class="mb-4 flex items-center gap-1 text-xs text-amber-800">@svg('heroicon-s-exclamation-triangle', 'w-3.5 h-3.5 shrink-0') <span x-text="@js(__('aslbelgi_check.not_printed', ['count' => '__N__'])).replace('__N__', batch?.blocked)"></span></p>
 
             <div x-show="state === 'choose'">
                 <p class="text-xs font-medium text-stone-600 mb-2">{{ __('import.choose_design') }}</p>

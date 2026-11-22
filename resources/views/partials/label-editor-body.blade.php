@@ -3,6 +3,9 @@
 <p x-show="overlapping.size" x-cloak class="mb-3 flex items-center gap-2 text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
     @svg('heroicon-o-exclamation-triangle', 'w-4 h-4 shrink-0') {{ __('templates.overlap_warning') }}
 </p>
+<p x-show="watermarkOverlap" x-cloak class="mb-3 flex items-center gap-2 text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+    @svg('heroicon-o-exclamation-triangle', 'w-4 h-4 shrink-0') {{ __('templates.watermark_overlap') }}
+</p>
 <div class="flex gap-6 items-start flex-col lg:flex-row">
     <div class="flex-1 w-full bg-stone-100 rounded-lg p-6 flex items-center justify-center min-h-[460px] overflow-auto">
         <div class="flex items-start shrink-0" :style="`gap:${px(gapMm)}`">
@@ -21,6 +24,12 @@
                     <template x-if="el.type === 'datamatrix'">
                         <div :style="innerStyle(el)"><img :src="sampleDm" class="w-full h-full pointer-events-none" style="image-rendering: pixelated" draggable="false" alt=""></div>
                     </template>
+                    <template x-if="el.type === 'logo' || el.type === 'image' || el.type === 'mark'">
+                        <div class="pointer-events-none flex items-center justify-center overflow-hidden" :style="innerStyle(el)">
+                            <img x-show="imageSrc(el)" :src="imageSrc(el)" class="w-full h-full object-contain" :style="imageFilter(el)" draggable="false" alt="">
+                            <span x-show="!imageSrc(el)" class="text-[10px] text-stone-400 text-center leading-tight">{{ __('studio.image_readd') }}</span>
+                        </div>
+                    </template>
                     <template x-if="el.type === 'barcode'">
                         <div class="pointer-events-none flex items-center justify-center bg-stone-50 text-[10px] text-stone-400 overflow-hidden" :style="innerStyle(el)">
                             <img x-show="barcodeUrl(el)" :src="barcodeUrl(el)" class="w-full h-full" style="image-rendering: pixelated" draggable="false" alt=""
@@ -35,6 +44,8 @@
                           class="absolute -right-1.5 -bottom-1.5 w-3 h-3 bg-amber-600 border border-white rounded-sm cursor-nwse-resize"></span>
                 </div>
             </template>
+            {{-- "markor.uz" mark at its real size and place (keep this corner free) --}}
+            <div x-show="watermarkShown" x-cloak class="absolute z-20 pointer-events-none text-black text-right whitespace-nowrap" :style="watermarkStyle()">markor.uz</div>
         </div>
 
         {{-- The rest of the row: read-only copies of the label --}}
@@ -46,6 +57,9 @@
                         <template x-if="el.type === 'datamatrix'">
                             <div :style="innerStyle(el)"><img :src="sampleDm" class="w-full h-full" style="image-rendering: pixelated" alt=""></div>
                         </template>
+                        <template x-if="(el.type === 'logo' || el.type === 'image' || el.type === 'mark') && imageSrc(el)">
+                            <div :style="innerStyle(el)"><img :src="imageSrc(el)" class="w-full h-full object-contain" :style="imageFilter(el)" alt=""></div>
+                        </template>
                         <template x-if="el.type === 'barcode'">
                             <div :style="innerStyle(el)"><img x-show="barcodeUrl(el, ghostSample(n), n)" :src="barcodeUrl(el, ghostSample(n), n)" class="w-full h-full" style="image-rendering: pixelated" alt=""></div>
                         </template>
@@ -54,6 +68,7 @@
                         </template>
                     </div>
                 </template>
+                <div x-show="watermarkShown" class="absolute text-black text-right whitespace-nowrap" :style="watermarkStyle()">markor.uz</div>
             </div>
         </template>
         </div>
@@ -65,7 +80,22 @@
         </template>
         <template x-if="selected">
             <div class="space-y-3">
-                <template x-if="useSources">
+                <template x-if="selected.type === 'logo'">
+                    <p class="text-xs text-stone-500 leading-relaxed">@svg('heroicon-o-photo', 'w-4 h-4 inline -mt-0.5 text-amber-700') {{ __('templates.logo_hint') }}</p>
+                </template>
+                <template x-if="selected.type === 'image'">
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" :checked="selected.bw !== false" x-on:change="selected.bw = $event.target.checked" class="rounded border-stone-300 text-amber-600">
+                            <span>{{ __('studio.image_bw') }}</span>
+                        </label>
+                        <p class="text-[11px] text-stone-500">{{ __('studio.image_bw_hint') }}</p>
+                        <button type="button" x-on:click="pickImage(selected)" class="inline-flex items-center gap-1.5 px-2.5 py-1 border border-stone-300 rounded-md text-xs hover:bg-stone-100">
+                            @svg('heroicon-o-arrow-up-tray', 'w-3.5 h-3.5') {{ __('studio.image_replace') }}
+                        </button>
+                    </div>
+                </template>
+                <template x-if="useSources && selected.type !== 'logo' && selected.type !== 'image' && selected.type !== 'mark'">
                     <div>
                         <label class="block text-xs font-medium text-stone-600 mb-1">{{ __('studio.kind') }}</label>
                         <select x-on:change="setKind(selected, $event.target.value)" class="{{ $input }}">

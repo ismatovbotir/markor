@@ -16,4 +16,11 @@ return [
     'free_months'      => (int) env('BILLING_FREE_MONTHS', 1),
     // free period cap: at most this many codes are free; the rest of the period is charged normally (0 = no cap)
     'free_codes_limit' => (int) env('BILLING_FREE_CODES_LIMIT', 5000),
+
+    // Asl Belgisi services, so'm per code. No discount and no free period apply to these
+    // (those are only for price_per_code above). Fixed on each order when it is placed.
+    // "Asl Belgisi tekshiruvi" for a CSV batch: status + owner of each code (services A + B)
+    'aslbelgi_check_unit_price'  => (float) env('BILLING_ASLBELGI_CHECK_PRICE', 10),
+    // wave 2 (not built yet): codes imported from Asl Belgisi instead of a CSV
+    'aslbelgi_import_unit_price' => (float) env('BILLING_ASLBELGI_IMPORT_PRICE', 19),
 ];

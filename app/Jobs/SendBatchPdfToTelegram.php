@@ -33,6 +33,10 @@ class SendBatchPdfToTelegram implements ShouldQueue
         if ($batch->is_locked || $batch->status !== 'completed' || !$user || $user->company_id !== $batch->company_id || !$user->company?->is_active) {
             return;
         }
+        if (!$batch->printableCodes()->exists()) {
+            $api->sendMessage($this->chatId, $bot->t($user, 'bot.pdf_nothing_printable')); // every code is blocked by the Asl Belgisi check
+            return;
+        }
         $caption = fn ($pdf) => $bot->t($user, 'bot.pdf_ready', ['count' => $pdf->labels, 'template' => e($template->name)])
             . ($pdf->parts > 1 ? "\n" . $bot->t($user, 'bot.pdf_part', ['part' => $pdf->part, 'parts' => $pdf->parts, 'first' => $pdf->first_label, 'last' => $pdf->lastLabel()]) : '');
 

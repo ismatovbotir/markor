@@ -51,6 +51,9 @@ class LabelTemplateIndex extends Component
         $this->editor = [
             'useSources'   => true,
             'allowMarking' => true,
+            'allowLogo'    => true, // company logo element: drawn with the batch company's logo
+            'sampleLogo'   => \App\Domain\Printing\Services\LabelImage::sample()['uri'],
+            'watermark'    => (bool) $source->watermark,
             'fields'       => collect(LayoutRenderer::markingFields())->map(fn ($label, $value) => ['value' => $value, 'label' => $label])->values()->all(),
             'name'      => $name,
             'width_mm'  => $source->width_mm,
@@ -100,7 +103,9 @@ class LabelTemplateIndex extends Component
             'gap_mm'               => 'required|numeric|min:0|max:30',
             'labels_per_pdf'       => 'nullable|integer|min:100|max:10000',
             'elements'             => 'required|array|min:1|max:40',
-            'elements.*.type'      => 'required|in:datamatrix,text,barcode',
+            'watermark'            => 'nullable|boolean',
+            'elements.*.type'      => 'required|in:datamatrix,text,barcode,logo,mark',
+            'elements.*.mark'      => 'nullable|required_if:elements.*.type,mark|in:' . implode(',', \App\Domain\Printing\Renderers\LayoutRenderer::MARKS),
             'elements.*.symbology' => 'nullable|in:qr,datamatrix,code128,ean13',
             'elements.*.source'    => 'nullable|string|max:20',
             'elements.*.caption'   => 'nullable|boolean',
@@ -142,6 +147,7 @@ class LabelTemplateIndex extends Component
             'columns'   => (int) $data['columns'],
             'gap_mm'    => (float) $data['gap_mm'],
             'labels_per_pdf' => (int) ($data['labels_per_pdf'] ?? 2000),
+            'watermark' => (bool) ($data['watermark'] ?? false),
             'layout'    => array_values($data['elements']),
         ];
 

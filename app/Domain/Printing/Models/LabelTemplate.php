@@ -40,8 +40,38 @@ HTML;
     protected $fillable = [
         'name', 'product_group_id', 'printer_type',
         'width_mm', 'height_mm', 'columns', 'gap_mm', 'labels_per_pdf', 'dpi',
-        'template', 'layout', 'is_default',
+        'template', 'layout', 'is_default', 'watermark',
     ];
+
+    /**
+     * The "markor.uz" mark: black 4 pt DejaVu Sans in the bottom-right corner, 0.5 mm inside the
+     * edge, drawn on top. Never on labels narrower than 20 mm or lower than 10 mm. The box (mm) is
+     * what the editor keeps free and checks barcodes against: 4 pt "markor.uz" ≈ 7.2 mm wide.
+     */
+    public const WATERMARK_TEXT = 'markor.uz';
+    public const WATERMARK_PT = 4;
+    public const WATERMARK_MARGIN = 0.5;
+    public const WATERMARK_W = 7.4;
+    public const WATERMARK_H = 1.5;
+    public const WATERMARK_MIN_W = 20;
+    public const WATERMARK_MIN_H = 10;
+
+    public static function watermarkFits(int|float $widthMm, int|float $heightMm): bool
+    {
+        return $widthMm >= self::WATERMARK_MIN_W && $heightMm >= self::WATERMARK_MIN_H;
+    }
+
+    /** The template has a company logo element (its PDFs depend on the batch company's logo). */
+    public function usesLogo(): bool
+    {
+        return collect($this->layout ?: [])->contains('type', 'logo');
+    }
+
+    /** Label definition for LayoutRenderer::render(). */
+    public function labelDefinition(): array
+    {
+        return ['width_mm' => $this->width_mm, 'height_mm' => $this->height_mm, 'elements' => $this->layout ?: [], 'watermark' => (bool) $this->watermark];
+    }
 
     /**
      * Templates offered to a company for PDF / printing: the ones it chose ("my templates"),
@@ -67,6 +97,7 @@ HTML;
     {
         return [
             'is_default' => 'boolean',
+            'watermark'  => 'boolean',
             'layout'     => 'array',
             'gap_mm'     => 'float',
         ];
@@ -112,10 +143,19 @@ HTML;
         return ((int) ($el['rotation'] ?? 0)) % 180 === 0 ? [$el['w'], $el['h']] : [$el['h'], $el['w']];
     }
 
+    /**
+     * Text line spacing: 1.2 in the editor and on the browser print page. dompdf adds the font's own height
+     * (DejaVu ≈ 1.16 em) on top of it, so PDFs use PDF_LINE_HEIGHT instead (measured against a 1.2 grid);
+     * otherwise a box sized for two lines in the editor shows only the first line in the PDF.
+     */
+    public const LINE_HEIGHT_CSS = 'line-height:1.2;';
+    public const PDF_LINE_HEIGHT_CSS = 'line-height:0.93;';
+
     public static function textCss(array $el): string
     {
+        // word-wrap: long words without spaces break inside the box, like in the editor (break-words)
         return sprintf(
-            'overflow:hidden;font-size:%spt;line-height:1.2;font-weight:%s;text-align:%s;',
+            'overflow:hidden;font-size:%spt;' . self::LINE_HEIGHT_CSS . 'word-wrap:break-word;overflow-wrap:break-word;font-weight:%s;text-align:%s;',
             self::mm($el['font_size'] ?? 7),
             !empty($el['bold']) ? 'bold' : 'normal',
             in_array($el['align'] ?? 'left', ['left', 'center', 'right'], true) ? ($el['align'] ?? 'left') : 'left'

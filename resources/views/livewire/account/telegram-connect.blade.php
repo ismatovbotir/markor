@@ -1,9 +1,12 @@
-<div class="bg-white border border-stone-200 rounded-xl p-5 flex items-center justify-between gap-4 flex-wrap">
+<div class="bg-white border border-stone-200 rounded-xl p-5 flex items-center justify-between gap-4 flex-wrap" x-data="{ howto: false }">
     <div class="flex items-center gap-3">
         <span class="flex items-center justify-center w-10 h-10 rounded-xl bg-sky-100 text-sky-700">@svg('heroicon-o-paper-airplane', 'w-5 h-5')</span>
         <div>
             <p class="font-medium">{{ __('telegram.title') }}</p>
             <p class="text-xs text-stone-500">{{ $linked ? __('telegram.linked_hint') : __('telegram.hint') }}</p>
+            @unless($linked)
+                <button type="button" x-on:click="howto = !howto" class="text-xs text-sky-700 hover:underline mt-0.5" :aria-expanded="howto">{{ __('telegram.howto') }}</button>
+            @endunless
         </div>
     </div>
     @if($linked)
@@ -17,6 +20,13 @@
         <span class="text-xs text-stone-400">{{ __('telegram.not_configured') }}</span>
     @endif
 
+    @unless($linked)
+        <div x-show="howto" x-cloak x-collapse class="basis-full">
+            <p class="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">{{ __('telegram.howto_phone') }}</p>
+            <img src="/images/telegram-connect-uz.gif" alt="{{ __('telegram.howto_alt') }}" width="720" height="417" loading="lazy" class="w-full max-w-3xl rounded-lg border border-stone-200">
+        </div>
+    @endunless
+
     @if($open && $link)
         <div class="fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4" @if(in_array($link->status, ['pending', 'started', 'phone_ok'])) wire:poll.2s @endif>
             <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 text-center">
@@ -29,6 +39,7 @@
                         <li>{{ __('telegram.step_phone') }}</li>
                         <li>{{ __('telegram.step_code') }}</li>
                     </ol>
+                    <p class="text-xs text-stone-500 mt-2">{{ __('telegram.howto_phone') }}</p>
                     <img src="{{ $qr }}" alt="QR" class="w-52 h-52 mx-auto my-4" style="image-rendering: pixelated">
                     <a href="{{ $url }}" target="_blank" rel="noopener" class="text-sm text-sky-700 hover:underline">t.me/{{ $bot }}</a>
                     <p class="text-xs text-stone-500 mt-2">

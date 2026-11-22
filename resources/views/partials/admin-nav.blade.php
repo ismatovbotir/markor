@@ -27,14 +27,15 @@
         ]],
         ['key' => 'clients', 'label' => __('nav.group.clients'), 'items' => [
             ['href' => route('admin.clients'), 'label' => __('nav.companies'), 'icon' => 'heroicon-o-building-office-2', 'active' => request()->routeIs('admin.clients', 'admin.companies.*')],
+            ['href' => route('admin.storage'), 'label' => __('storage.title'), 'icon' => 'heroicon-o-circle-stack', 'active' => request()->routeIs('admin.storage')],
             ['href' => route('admin.payments'), 'label' => __('nav.payments'), 'icon' => 'heroicon-o-banknotes', 'active' => request()->routeIs('admin.payments'),
                 'todo' => \App\Domain\Billing\Payment::where('status', 'pending')->count()],
             ['href' => route('admin.telegram'), 'label' => 'Telegram', 'icon' => 'heroicon-o-paper-airplane', 'active' => request()->routeIs('admin.telegram'),
                 'todo' => \App\Domain\Telegram\TelegramLink::where('status', 'phone_mismatch')->where('updated_at', '>=', now()->subDays(7))->count()],
         ]],
         ['key' => 'aslbelgi', 'label' => 'Asl Belgisi', 'items' => [
+            ['href' => route('admin.batches'), 'label' => __('batches.title'), 'icon' => 'heroicon-o-inbox-stack', 'active' => request()->routeIs('admin.batches')],
             ['href' => route('products.index'), 'label' => __('nav.products'), 'icon' => 'heroicon-o-tag', 'active' => request()->routeIs('products.*')],
-            ['href' => route('marking-codes.index'), 'label' => __('nav.codes'), 'icon' => 'heroicon-o-qr-code', 'active' => request()->routeIs('marking-codes.*')],
             ['href' => route('product-groups.index'), 'label' => __('nav.product_groups'), 'icon' => 'heroicon-o-rectangle-group', 'active' => request()->routeIs('product-groups.*')],
         ]],
         ['key' => 'content', 'label' => __('nav.group.content'), 'note' => __('nav.group.content_note'), 'accent' => true, 'items' => [

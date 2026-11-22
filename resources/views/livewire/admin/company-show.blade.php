@@ -87,7 +87,21 @@
 
     <div class="bg-white border border-stone-200 rounded-xl p-5 space-y-3">
         <div class="flex items-center justify-between gap-4 flex-wrap">
-            <div>
+            @if($storage)
+            <div class="bg-white border border-stone-200 rounded-xl p-5 mb-4">
+                <div class="flex items-center justify-between gap-3">
+                    <p class="font-semibold text-sm flex items-center gap-2">@svg('heroicon-o-circle-stack', 'w-4 h-4 text-amber-700') {{ __('storage.company_block') }}</p>
+                    <a href="{{ route('admin.storage') }}" class="text-xs text-amber-700 hover:underline">{{ __('storage.title') }} →</a>
+                </div>
+                <dl class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 text-sm">
+                    <div><dt class="text-xs text-stone-500">{{ __('storage.col.total') }}</dt><dd class="font-semibold tabular-nums">{{ number_format($storage['total'], 0, '.', ' ') }}</dd></div>
+                    <div><dt class="text-xs text-stone-500">{{ __('storage.col.printed') }}</dt><dd class="tabular-nums">{{ number_format($storage['printed'], 0, '.', ' ') }}</dd></div>
+                    <div><dt class="text-xs text-stone-500">{{ __('storage.col.db') }}</dt><dd class="tabular-nums">≈ {{ \App\Domain\Reporting\CodeStorage::bytes($storage['db_bytes']) }}</dd></div>
+                    <div><dt class="text-xs text-stone-500">{{ __('storage.col.pdf') }}</dt><dd class="tabular-nums">{{ \App\Domain\Reporting\CodeStorage::bytes($storage['pdf_bytes']) }}</dd></div>
+                </dl>
+            </div>
+        @endif
+        <div>
                 <p class="font-semibold text-sm">{{ __('nav.balance') }}</p>
                 <p class="text-2xl font-semibold tabular-nums {{ $company->balance < 0 ? 'text-rose-600' : '' }}">{{ $money($company->balance) }}</p>
                 @if($shortfall > 0)<p class="text-xs text-amber-800">{{ __('balance.need') }}: {{ $money($shortfall) }}</p>@endif

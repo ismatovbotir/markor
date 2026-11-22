@@ -19,16 +19,17 @@ class LabelPdfService
 
     /**
      * @param iterable<MarkingCode> $codes
+     * @param array|null $logo image for `logo` elements (LabelImage: the batch company's print logo, or the sample)
      */
-    public function pdf(LabelTemplate $template, iterable $codes, ?string $batchName = null): string
+    public function pdf(LabelTemplate $template, iterable $codes, ?string $batchName = null, ?array $logo = null): string
     {
         $columns = $template->columns ?: 1;
         $gap     = (float) $template->gap_mm;
 
         // Templates made in the editor are drawn straight from their layout.
         if ($template->layout) {
-            $renderer = app(LayoutRenderer::class);
-            $label    = ['width_mm' => $template->width_mm, 'height_mm' => $template->height_mm, 'elements' => $template->layout];
+            $renderer = app(LayoutRenderer::class)->withLogo($logo);
+            $label    = $template->labelDefinition();
             $captions = LayoutRenderer::markingFields();
             $now      = now();
             $pages    = collect($codes)->values()->map(fn (MarkingCode $code, int $i) => fn () => $renderer->render($label, LayoutRenderer::markingRow($code, $batchName), $i, $now, $code, $captions));
@@ -47,11 +48,11 @@ class LabelPdfService
      * The same labels as pdf(), as HTML for the browser print page: [css, [label html, ...]].
      * @param iterable<MarkingCode> $codes
      */
-    public function labelsHtml(LabelTemplate $template, iterable $codes, ?string $batchName = null): array
+    public function labelsHtml(LabelTemplate $template, iterable $codes, ?string $batchName = null, ?array $logo = null): array
     {
         if ($template->layout) {
-            $renderer = app(LayoutRenderer::class);
-            $label    = ['width_mm' => $template->width_mm, 'height_mm' => $template->height_mm, 'elements' => $template->layout];
+            $renderer = app(LayoutRenderer::class)->withLogo($logo);
+            $label    = $template->labelDefinition();
             $captions = LayoutRenderer::markingFields();
             $now      = now();
 
@@ -110,6 +111,8 @@ class LabelPdfService
             }
             $body .= '</div>';
         }
+        // same line spacing as the editor (see LabelTemplate::PDF_LINE_HEIGHT_CSS)
+        $body = str_replace(\App\Domain\Printing\Models\LabelTemplate::LINE_HEIGHT_CSS, \App\Domain\Printing\Models\LabelTemplate::PDF_LINE_HEIGHT_CSS, $body);
 
         $html = <<<HTML
 <!DOCTYPE html>
@@ -145,8 +148,9 @@ HTML;
     {
         if ($template->layout) {
             $css = '';
-            $label = app(LayoutRenderer::class)->render(
-                ['width_mm' => $template->width_mm, 'height_mm' => $template->height_mm, 'elements' => $template->layout],
+            // previews never show a client's logo: a neutral sample instead
+            $label = app(LayoutRenderer::class)->withLogo(LabelImage::sample())->render(
+                $template->labelDefinition(),
                 LayoutRenderer::markingRow($this->demoCode(), 'partiya_01'), 0, now(), $this->demoCode(), LayoutRenderer::markingFields()
             );
         } else {

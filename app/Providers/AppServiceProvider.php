@@ -25,6 +25,9 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // company logo data URIs are cached per request / queue job (scoped), not re-read for every label
+        $this->app->scoped(\App\Domain\Printing\Services\LabelImage::class);
+
         // Markor's own icon set (resources/svg/markor): @svg('markor-home'), same 24px outline grammar as Heroicons
         if (is_dir(resource_path('svg/markor'))) {
             $this->callAfterResolving(\BladeUI\Icons\Factory::class, fn (\BladeUI\Icons\Factory $icons) => $icons->add('markor', [
