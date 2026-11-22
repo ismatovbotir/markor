@@ -684,7 +684,7 @@
     "ai.offer_title": "AI bilan yozish (nom, tavsif, savol-javob — 3 tilda)",
     "ai.generate": "AI bilan yozish",
     "ai.notes_placeholder": "Ixtiyoriy: model, o'lcham, mos keladigan etiketka/ribbon, kafolat — faqat aniq faktlar",
-    "ai.offer_hint": "Claude formani to'ldiradi, siz tekshirib saqlaysiz. Siz yozgan nomlar o'zgarmaydi.",
+    "ai.offer_hint": "Claude o'zbekcha nom asosida nom, tavsif va savol-javoblarni 3 tilda yozadi. Bo'sh maydonlar darhol to'ldiriladi; siz yozgan matn (nom ham) faqat roziligingiz bilan almashtiriladi. Tekshirib, saqlang.",
     "ai.title_first": "Avval mahsulot nomini yozing.",
     "ai.failed": "AI javob bermadi — matnni qo'lda kiriting.",
     "ai.generated": "Tayyor. Tekshirib, \"Saqlash\"ni bosing.",
@@ -1300,5 +1300,6 @@
     "templates.delete_title": "Shablon o'chirilsinmi?",
     "templates.delete_text": "Shablon mijozlar ro'yxatidan ham yo'qoladi. Bu amalni qaytarib bo'lmaydi.",
     "templates.empty_admin": "Hali shablon yo'q.",
-    "templates.empty_admin_text": "«Yangi shablon» tugmasi bilan birinchi shablonni yarating."
+    "templates.empty_admin_text": "«Yangi shablon» tugmasi bilan birinchi shablonni yarating.",
+    "ai.from_name": "Nom (UZ)"
 }

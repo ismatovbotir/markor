@@ -152,16 +152,37 @@ class AdminContentFormsTest extends TestCase
             'faq' => [$this->faqRow(['q_uz' => 'AI savol?', 'a_uz' => 'AI javob.', 'q_ru' => 'AI вопрос?', 'a_ru' => 'AI ответ.'])]];
         $this->fakeWriter($ai);
 
-        // nothing typed except the name: everything empty is filled straight away, no question
+        // no Uzbek name: the AI does not run (the button is disabled in the browser, the server checks too)
+        Livewire::test(OfferForm::class, ['category' => $this->printers])
+            ->set('item.title_ru', 'Только русское')
+            ->call('generateContent')
+            ->assertSet('aiMessage', __('ai.title_first'))->assertSet('pendingFill', null)->assertSet('item.description_uz', '');
+
+        // only the name typed and the AI keeps it: everything empty is filled straight away, no question
+        $this->fakeWriter(['title_uz' => 'Mening printerim'] + $ai);
         Livewire::test(OfferForm::class, ['category' => $this->printers])
             ->set('item.title_uz', 'Mening printerim')
             ->call('generateContent')
             ->assertSet('fillConflicts', [])->assertSet('pendingFill', null)
-            ->assertSet('item.title_uz', 'Mening printerim')           // a typed name always stays
+            ->assertSet('item.title_uz', 'Mening printerim')
             ->assertSet('item.title_ru', 'AI название')
             ->assertSet('item.description_uz', 'AI tavsif')
             ->assertSet('item.faq.0.q_uz', 'AI savol?')
             ->assertDispatched('form-changed');
+
+        // the AI suggests another name: the form asks; "overwrite" puts the new name in, "empty only" keeps it
+        $this->fakeWriter($ai);
+        Livewire::test(OfferForm::class, ['category' => $this->printers])
+            ->set('item.title_uz', 'Mening printerim')
+            ->call('generateContent')
+            ->assertSet('fillConflicts', [__('common.name') . ' · UZ'])
+            ->assertSet('item.title_uz', 'Mening printerim')
+            ->call('applyFill', true)
+            ->assertSet('item.title_uz', 'AI nomi')->assertSet('item.slug', 'ai-nomi');   // new product: the address follows the name
+        Livewire::test(OfferForm::class, ['category' => $this->printers])
+            ->set('item.title_uz', 'Mening printerim')
+            ->call('generateContent')->call('applyFill', false)
+            ->assertSet('item.title_uz', 'Mening printerim')->assertSet('item.title_ru', 'AI название');
 
         // a description and a FAQ are already written: the form asks first and changes nothing
         $typed = [$this->faqRow(['q_uz' => 'Mening savolim?', 'a_uz' => 'Mening javobim.'])];
@@ -170,7 +191,7 @@ class AdminContentFormsTest extends TestCase
             ->set('item.description_uz', 'Mening tavsifim')
             ->set('item.faq', $typed)
             ->call('generateContent')
-            ->assertSet('fillConflicts', [__('offers.description') . ' · UZ', __('ai.faq') . ' · 1'])
+            ->assertSet('fillConflicts', [__('common.name') . ' · UZ', __('offers.description') . ' · UZ', __('ai.faq') . ' · 1'])
             ->assertSet('item.description_uz', 'Mening tavsifim')
             ->assertSet('item.description_ru', '')
             ->assertSet('item.faq', $typed)
@@ -189,11 +210,11 @@ class AdminContentFormsTest extends TestCase
             ->call('generateContent')->call('cancelFill')
             ->assertSet('item.description_uz', 'Mening tavsifim')->assertSet('item.description_ru', '')->assertSet('pendingFill', null);
 
-        // "overwrite": descriptions and the FAQ are replaced, the typed name still stays
+        // "overwrite": names, descriptions and the FAQ are replaced
         Livewire::test(OfferForm::class, ['category' => $this->printers])
             ->set('item.title_uz', 'Mening printerim')->set('item.description_uz', 'Mening tavsifim')->set('item.faq', $typed)
             ->call('generateContent')->call('applyFill', true)
-            ->assertSet('item.title_uz', 'Mening printerim')
+            ->assertSet('item.title_uz', 'AI nomi')
             ->assertSet('item.description_uz', 'AI tavsif')
             ->assertSet('item.faq.0.q_uz', 'AI savol?');
     }

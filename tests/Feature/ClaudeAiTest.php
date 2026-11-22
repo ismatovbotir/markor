@@ -174,6 +174,8 @@ class ClaudeAiTest extends TestCase
         Livewire::test(\App\Http\Livewire\Admin\OfferForm::class, ['category' => $category])
             ->set('item.title_uz', 'Xprinter XP-365B')->set('aiNotes', '58 mm, USB')
             ->call('generateContent')
+            ->assertSet('fillConflicts', [__('common.name') . ' · UZ'])   // another name suggested: the form asks first
+            ->call('applyFill', false)                                     // "fill empty only"
             ->assertSet('item.title_uz', 'Xprinter XP-365B')            // typed name kept
             ->assertSet('item.title_ru', 'Принтер Xprinter XP-365B')
             ->assertSet('item.description_zh', '热敏标签打印机。')

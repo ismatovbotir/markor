@@ -128,14 +128,15 @@ class OfferForm extends Component
     }
 
     /**
-     * Writes names, descriptions and FAQ (uz/ru/zh) with Claude. Only empty fields are filled; when a description or
-     * the FAQ already has text, the result waits (pendingFill) and the form asks what to do. A typed name is never replaced.
+     * Writes names, descriptions and FAQ (uz/ru/zh) with Claude, starting from the Uzbek name. Only empty fields are
+     * filled straight away; when a name, description or the FAQ already has different text, the result waits
+     * (pendingFill) and the form asks: fill empty only / overwrite (names too) / cancel.
      */
     public function generateContent(\App\Domain\Ai\OfferWriter $writer, \App\Domain\Ai\Claude $claude): void
     {
         $this->cancelFill();
-        $title = collect(AdminI18n::locales())->map(fn ($l) => $this->item["title_$l"] ?? '')->first(fn ($t) => filled($t));
-        if (!$title) {
+        $title = trim((string) ($this->item['title_uz'] ?? ''));   // the AI always starts from the Uzbek name field
+        if ($title === '') {
             $this->aiMessage = __('ai.title_first');
 
             return;
@@ -164,10 +165,17 @@ class OfferForm extends Component
         }
     }
 
-    /** Filled fields the AI texts would replace: ["Tavsif · RU", "Savol-javob (FAQ) · 3"]. */
+    /** Filled fields the AI texts would replace: ["Nomi · UZ", "Tavsif · RU", "Savol-javob (FAQ) · 3"]. */
     private function conflicts(array $result): array
     {
         $labels = [];
+        foreach (AdminI18n::locales() as $l) {
+            $now = trim((string) ($this->item["title_$l"] ?? ''));
+            $new = trim((string) ($result["title_$l"] ?? ''));
+            if ($now !== '' && $new !== '' && $now !== $new) {
+                $labels[] = __('common.name') . ' · ' . strtoupper($l);
+            }
+        }
         foreach (AdminI18n::locales() as $l) {
             $now = trim((string) ($this->item["description_$l"] ?? ''));
             $new = trim((string) ($result["description_$l"] ?? ''));
@@ -187,7 +195,7 @@ class OfferForm extends Component
         return collect($this->item['faq'])->contains(fn ($row) => collect($row)->contains(fn ($v) => filled($v)));
     }
 
-    /** Puts the waiting AI texts into the form: empty fields only, or ($overwrite) also over descriptions and the FAQ. */
+    /** Puts the waiting AI texts into the form: empty fields only, or ($overwrite) also over names, descriptions and the FAQ. */
     public function applyFill(bool $overwrite = false): void
     {
         $result = $this->pendingFill;
@@ -196,8 +204,7 @@ class OfferForm extends Component
             return;
         }
         foreach (AdminI18n::locales() as $l) {
-            // a name the admin typed always stays
-            if (blank($this->item["title_$l"] ?? null) && filled($result["title_$l"] ?? null)) {
+            if (filled($result["title_$l"] ?? null) && ($overwrite || blank($this->item["title_$l"] ?? null))) {
                 $this->item["title_$l"] = $result["title_$l"];
             }
             if (filled($result["description_$l"] ?? null) && ($overwrite || blank($this->item["description_$l"] ?? null))) {

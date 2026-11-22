@@ -14,10 +14,18 @@
             <x-slot:actions>
                 {{-- AI fill: only empty fields; anything already typed is replaced only after a confirmation --}}
                 <div class="relative" x-data="{ open: false }" x-on:keydown.escape="open = false" data-no-dirty data-ai-fill>
-                    <x-admin.button size="sm" icon="sparkles" x-on:click="open = !open" x-bind:aria-expanded="open">{{ __('ai.generate') }}</x-admin.button>
+                    {{-- enabled only when the Uzbek name is filled; the AI writes from that name --}}
+                    <span x-data="{ get name() { return String($wire.item?.title_uz ?? '').trim() } }"
+                          x-bind:title="name ? '' : {{ Js::from(__('ai.title_first')) }}">
+                        <x-admin.button size="sm" icon="sparkles" x-on:click="if (name) open = !open" x-bind:disabled="!name" x-bind:aria-expanded="open">{{ __('ai.generate') }}</x-admin.button>
+                    </span>
                     <div x-show="open" x-cloak x-on:click.outside="open = false"
                          class="absolute right-0 top-full z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-stone-200 bg-white shadow-xl p-3 space-y-2">
                         <label for="ai-notes" class="block text-[13px] font-medium text-stone-700">{{ __('ai.offer_title') }}</label>
+                        <p class="text-xs text-stone-600 rounded-lg bg-stone-50 border border-stone-200 px-2.5 py-1.5">
+                            <span class="text-stone-500">{{ __('ai.from_name') }}:</span>
+                            <span class="font-medium text-stone-800 break-words" x-text="String($wire.item?.title_uz ?? '').trim()">{{ $item['title_uz'] }}</span>
+                        </p>
                         <textarea id="ai-notes" wire:model="aiNotes" rows="3" maxlength="1500" placeholder="{{ __('ai.notes_placeholder') }}" class="admin-input text-xs"></textarea>
                         <p class="text-xs text-stone-500">{{ $ai->available() ? __('ai.offer_hint') : __('ai.unavailable.' . $ai->unavailableReason()) }}</p>
                         @if($aiMessage)<p role="status" class="text-xs {{ str_starts_with($aiMessage, '✓') ? 'text-emerald-700' : 'text-rose-700' }}">{{ $aiMessage }}</p>@endif

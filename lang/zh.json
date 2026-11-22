@@ -684,7 +684,7 @@
     "ai.offer_title": "用 AI 撰写（名称、描述、问答——3 种语言）",
     "ai.generate": "用 AI 撰写",
     "ai.notes_placeholder": "可选：型号、尺寸、适用标签/碳带、保修——仅填写确切事实",
-    "ai.offer_hint": "Claude 填写表单，您检查后保存。已填写的名称不会被修改。",
+    "ai.offer_hint": "Claude 根据乌兹别克语名称用 3 种语言撰写名称、说明和问答。空字段会立即填写；已填写的内容（包括名称）只有经您确认才会替换。请检查后保存。",
     "ai.title_first": "请先填写商品名称。",
     "ai.failed": "AI 未响应——请手动填写。",
     "ai.generated": "完成。请检查后点击“保存”。",
@@ -1300,5 +1300,6 @@
     "templates.delete_title": "删除该模板？",
     "templates.delete_text": "该模板也会从客户的列表中消失，且无法恢复。",
     "templates.empty_admin": "暂无模板。",
-    "templates.empty_admin_text": "点击“新建模板”创建第一个模板。"
+    "templates.empty_admin_text": "点击“新建模板”创建第一个模板。",
+    "ai.from_name": "名称（UZ）"
 }
