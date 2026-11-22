@@ -1453,7 +1453,7 @@
     "system.scheduler.fix": "Проверьте, что на сервере добавлен cron:",
     "system.worker.title": "Обработчик очереди (queue worker)",
     "system.worker.what": "Отправляет PDF в Telegram, ведёт архив PDF и выполняет проверки Asl Belgisi.",
-    "system.worker.fix": "Запустите обработчик на сервере (постоянно, через supervisor или systemd):",
+    "system.worker.fix": "Работает и при одном cron: планировщик сам запускает обработчик каждую минуту. Если он остановлен — сначала проверьте планировщик (cron). Можно и постоянный обработчик:",
     "system.driver": "Тип очереди",
     "system.pending": "Задач в очереди",
     "system.oldest": "самая старая",

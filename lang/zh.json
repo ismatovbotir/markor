@@ -1453,7 +1453,7 @@
     "system.scheduler.fix": "请确认服务器已添加 cron：",
     "system.worker.title": "队列处理器（queue worker）",
     "system.worker.what": "发送 PDF 到 Telegram、PDF 归档以及执行 Asl Belgisi 检查。",
-    "system.worker.fix": "请在服务器上启动处理器（通过 supervisor 或 systemd 常驻）：",
+    "system.worker.fix": "仅有 cron 时也能运行：调度器每分钟自动启动处理器。如果已停止，请先检查调度器（cron）。也可以使用常驻处理器：",
     "system.driver": "队列类型",
     "system.pending": "排队中的任务",
     "system.oldest": "最早",

@@ -1453,7 +1453,7 @@
     "system.scheduler.fix": "Serverda cron qo'shilganini tekshiring:",
     "system.worker.title": "Navbat ishchisi (queue worker)",
     "system.worker.what": "Telegramga PDF yuborish, PDF arxivi va Asl Belgisi tekshiruvlarini bajaradi.",
-    "system.worker.fix": "Serverda ishchini ishga tushiring (supervisor yoki systemd orqali doimiy):",
+    "system.worker.fix": "Serverda faqat cron bo'lsa ham ishlaydi: rejalashtiruvchi har daqiqada ishchini o'zi ishga tushiradi. To'xtagan bo'lsa — avval rejalashtiruvchini (cron) tekshiring. Doimiy ishchi ham mumkin:",
     "system.driver": "Navbat turi",
     "system.pending": "Navbatda kutayotgan vazifalar",
     "system.oldest": "eng eskisi",

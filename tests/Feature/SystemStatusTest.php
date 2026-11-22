@@ -40,6 +40,15 @@ class SystemStatusTest extends TestCase
         $this->assertFalse($status->snapshot()['worker']['ok'], 'no heartbeat for minutes = stopped');
     }
 
+    public function test_cron_only_servers_get_a_queue_worker_from_the_scheduler(): void
+    {
+        $events = collect(app(\Illuminate\Console\Scheduling\Schedule::class)->events());
+        $worker = $events->first(fn ($e) => str_contains((string) $e->command, 'queue:work') && str_contains((string) $e->command, '--stop-when-empty'));
+        $this->assertNotNull($worker, 'the scheduler starts a queue worker');
+        $this->assertSame('* * * * *', $worker->expression);
+        $this->assertTrue($events->contains(fn ($e) => $e->description === 'system:heartbeat'));
+    }
+
     public function test_admin_sees_the_page_and_failed_jobs_clients_do_not(): void
     {
         \Illuminate\Support\Facades\DB::table('failed_jobs')->insert(['uuid' => 'u-1', 'connection' => 'database', 'queue' => 'default',

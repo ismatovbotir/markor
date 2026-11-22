@@ -10,6 +10,11 @@ Artisan::command('inspire', function () {
 // Heartbeats for the admin "Tizim holati" page: scheduler alive + a tiny job to prove a queue worker runs.
 \Illuminate\Support\Facades\Schedule::call(fn () => \App\Domain\System\SystemStatus::tick())->name('system:heartbeat')->everyMinute();
 
+// Cron-only servers: the scheduler itself runs the queue worker every minute until the queue is empty
+// (PDFs to Telegram, PDF archive, Asl Belgisi checks, product names). Harmless next to a permanent worker.
+\Illuminate\Support\Facades\Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3 --timeout=600')
+    ->name('queue:cron-worker')->everyMinute()->withoutOverlapping(15)->runInBackground();
+
 // Every minute: load queued CSV batches and check their products; keeps polling ~55 s so uploads start within seconds.
 \Illuminate\Support\Facades\Schedule::command('batches:process --for=55')->everyMinute()->withoutOverlapping(5);
 
