@@ -1531,5 +1531,9 @@
     "tg_profile.suggest.description": "Markor — Asl Belgisi markirovka kodlari uchun etiketka chop etish xizmati.\n\n📤 Operatordan olgan CSV faylni shu chatga yuboring — kodlar kabinetingizga yuklanadi.\n📄 Etiketka dizaynini tanlang va tayyor PDF ni shu yerda oling.\n🔔 /status — oxirgi partiyalar holati.\n\nBoshlash uchun saytdagi kabinetingizda botni ulang: Profil → Telegram bot → Ulash.",
     "tg_profile.suggest.short": "CSV yuboring — etiketkalar PDF ini oling. Asl Belgisi kodlari uchun Markor xizmati.",
     "tg_profile.suggest.cmd_start": "Bot nima qila olishini ko'rsatish",
-    "tg_profile.suggest.cmd_status": "Oxirgi partiyalar holati"
+    "tg_profile.suggest.cmd_status": "Oxirgi partiyalar holati",
+    "tg_profile.descpic_title": "Tavsif rasmi (bo'sh chatda tavsif ustida)",
+    "tg_profile.descpic_hint": "Telegram aynan 640×360 o'lchamni talab qiladi (profil rasmi esa kvadrat — yuqoridagi 640×640).",
+    "tg_profile.descpic_steps": "@BotFather → /setdescriptionpic → botni tanlang → rasmni yuboring",
+    "tg_profile.descpic_download": "Tavsif rasmini yuklab olish (640×360 PNG)"
 }

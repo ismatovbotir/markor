@@ -91,5 +91,14 @@ class SettingsSeeder extends Seeder
             Setting::put($fill);
         }
         $this->command?->info('Settings filled: ' . ($fill ? implode(', ', array_keys($fill)) : 'nothing'));
+
+        // Telegram bot profile draft (name, descriptions, /start and /status) in default/uz/ru/zh, matching what the
+        // bot does. Only when no draft exists yet; it is NOT sent to Telegram — the super admin checks it in
+        // Sozlamalar → Bot profili → Ko'rish and sends it with "Telegramga yuborish".
+        $key = \App\Http\Livewire\Admin\TelegramBotProfile::DRAFT_KEY;
+        if (blank($current[$key] ?? null)) {
+            Setting::putRaw($key, json_encode(\App\Http\Livewire\Admin\TelegramBotProfile::suggestion(), JSON_UNESCAPED_UNICODE));
+            $this->command?->info('Telegram bot profile draft seeded (default/uz/ru/zh)');
+        }
     }
 }

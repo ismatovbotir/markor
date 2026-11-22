@@ -235,6 +235,16 @@
             <p class="mt-2"><a href="{{ asset('images/bot-avatar-640.png') }}" download="markor-bot-avatar-640.png" class="admin-focus rounded inline-flex items-center gap-1 text-amber-800 font-medium hover:underline">@svg('heroicon-o-arrow-down-tray', 'w-4 h-4') {{ __('tg_profile.avatar_download') }}</a></p>
         </div>
     </div>
+    {{-- description picture: the wide image above the description in an empty chat, exactly 640×360 --}}
+    <div class="px-4 sm:px-5 py-4 border-t border-stone-200 flex items-start gap-4 flex-wrap sm:flex-nowrap">
+        <img src="{{ asset('images/bot-description-640x360.png') }}" alt="" width="128" height="72" class="w-32 h-[72px] rounded-md ring-1 ring-stone-200 shrink-0 object-cover">
+        <div class="min-w-0 text-sm">
+            <p class="font-medium text-stone-800">{{ __('tg_profile.descpic_title') }}</p>
+            <p class="text-xs text-stone-500 mt-0.5">{{ __('tg_profile.descpic_hint') }}</p>
+            <p class="mt-1.5 font-mono text-xs text-stone-700 bg-stone-50 border border-stone-200 rounded-md px-2 py-1 inline-block">{{ __('tg_profile.descpic_steps') }}</p>
+            <p class="mt-2"><a href="{{ asset('images/bot-description-640x360.png') }}" download="markor-bot-description-640x360.png" class="admin-focus rounded inline-flex items-center gap-1 text-amber-800 font-medium hover:underline">@svg('heroicon-o-arrow-down-tray', 'w-4 h-4') {{ __('tg_profile.descpic_download') }}</a></p>
+        </div>
+    </div>
 
     {{-- confirm: load from Telegram over unsent edits --}}
     @if($confirmLoad)

@@ -1531,5 +1531,9 @@
     "tg_profile.suggest.description": "Markor — Asl Belgisi 标识码标签打印服务。\n\n📤 将运营商提供的 CSV 文件发送到此聊天，标识码会导入您的账户。\n📄 选择标签设计，在这里获取生成的 PDF。\n🔔 /status — 最近批次的状态。\n\n开始使用：在网站个人中心连接机器人：个人资料 → Telegram 机器人 → 连接。",
     "tg_profile.suggest.short": "发送 CSV，获取标签 PDF。Markor：Asl Belgisi 标识码服务。",
     "tg_profile.suggest.cmd_start": "查看机器人功能",
-    "tg_profile.suggest.cmd_status": "最近批次的状态"
+    "tg_profile.suggest.cmd_status": "最近批次的状态",
+    "tg_profile.descpic_title": "简介图片（空聊天中简介上方）",
+    "tg_profile.descpic_hint": "Telegram 要求正好 640×360（头像为方形，见上方 640×640）。",
+    "tg_profile.descpic_steps": "@BotFather → /setdescriptionpic → 选择机器人 → 发送图片",
+    "tg_profile.descpic_download": "下载简介图片（640×360 PNG）"
 }

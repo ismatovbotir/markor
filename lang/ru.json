@@ -1531,5 +1531,9 @@
     "tg_profile.suggest.description": "Markor — сервис печати этикеток для кодов маркировки Asl Belgisi.\n\n📤 Отправьте в этот чат CSV-файл от оператора — коды загрузятся в ваш кабинет.\n📄 Выберите дизайн этикетки и получите готовый PDF здесь.\n🔔 /status — статус последних партий.\n\nЧтобы начать, подключите бота в кабинете на сайте: Профиль → Telegram-бот → Подключить.",
     "tg_profile.suggest.short": "Отправьте CSV — получите PDF с этикетками. Сервис Markor для кодов Asl Belgisi.",
     "tg_profile.suggest.cmd_start": "Что умеет бот",
-    "tg_profile.suggest.cmd_status": "Статус последних партий"
+    "tg_profile.suggest.cmd_status": "Статус последних партий",
+    "tg_profile.descpic_title": "Картинка описания (над описанием в пустом чате)",
+    "tg_profile.descpic_hint": "Telegram требует ровно 640×360 (фото профиля — квадрат, 640×640 выше).",
+    "tg_profile.descpic_steps": "@BotFather → /setdescriptionpic → выберите бота → отправьте картинку",
+    "tg_profile.descpic_download": "Скачать картинку описания (640×360 PNG)"
 }
