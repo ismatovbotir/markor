@@ -89,10 +89,10 @@
                     </div>
                 </div>
                 @error('photo')<p role="alert" class="text-xs text-rose-700 flex items-start gap-1"><span class="shrink-0 mt-px">@svg('heroicon-o-exclamation-triangle', 'w-3.5 h-3.5')</span><span>{{ $message }}</span></p>@enderror
-                <p class="text-xs text-stone-500">{{ __('banners.image_hint') }}</p>
+                <p class="text-xs text-stone-500">{{ __('banners.image_hint', ['mb' => round(config('uploads.image.max_kb') / 1024, 1)]) }}</p>
             @else
                 <x-admin.image-upload model="photo" :image="$previewImage" :note="$imageSource ? __('banners.source_' . $imageSource) : null"
-                                      :remove="in_array($imageSource, ['upload', 'own'], true) ? 'dropImage' : null" :hint="__('banners.image_hint')" />
+                                      :remove="in_array($imageSource, ['upload', 'own'], true) ? 'dropImage' : null" :hint="__('banners.image_hint', ['mb' => round(config('uploads.image.max_kb') / 1024, 1)])" />
             @endif
             <x-admin.prompt-box :title="__('banners.prompt_title')" :hint="__('banners.prompt_hint')" :text="Banner::imagePrompt($offer?->title_uz)" />
         </x-admin.section>

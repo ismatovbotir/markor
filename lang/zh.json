@@ -853,7 +853,7 @@
     "banners.starts": "开始日期",
     "banners.ends": "结束日期",
     "banners.image": "图片（品牌标志或产品）",
-    "banners.image_hint": "PNG/JPG/WebP，最大 3 MB。最佳：1600×1200（4:3），白色背景，商品居中，四周留白。",
+    "banners.image_hint": "PNG/JPG/WebP，最大 :mb MB。最佳：1600×1200（4:3），白色背景，商品居中，四周留白。",
     "banners.sponsored": "赞助/广告横幅",
     "banners.sponsored_hint": "品牌或合作伙伴（如碳带/标签经销商）的广告：横幅上显示“广告”标记，链接标记为赞助链接（rel=sponsored）。",
     "banners.ad": "广告",

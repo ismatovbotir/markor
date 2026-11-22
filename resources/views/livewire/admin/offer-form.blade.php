@@ -58,7 +58,7 @@
 
         <x-admin.section :title="__('offers.sec_photo')" shared>
             <x-admin.image-upload model="photo" :image="$image" :note="$imageSource ? __('banners.source_' . $imageSource) : null" remove="dropImage"
-                                  :icon="$category->icon ?: 'heroicon-o-photo'" :hint="__('banners.image_hint')" :label="__('offers.sec_photo')" />
+                                  :icon="$category->icon ?: 'heroicon-o-photo'" :hint="__('banners.image_hint', ['mb' => round(config('uploads.image.max_kb') / 1024, 1)])" :label="__('offers.sec_photo')" />
             <x-admin.prompt-box :title="__('banners.prompt_title')" :hint="__('banners.prompt_hint')" :text="\App\Domain\Content\Banner::imagePrompt($item['title_uz'] ?: null)" />
         </x-admin.section>
 

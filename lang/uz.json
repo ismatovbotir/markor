@@ -853,7 +853,7 @@
     "banners.starts": "Boshlanish sanasi",
     "banners.ends": "Tugash sanasi",
     "banners.image": "Rasm (brend logotipi yoki mahsulot)",
-    "banners.image_hint": "PNG/JPG/WebP, 3 MB gacha. Eng yaxshisi: 1600×1200 (4:3), oq fon, mahsulot markazda va har tomonda bo'sh joy.",
+    "banners.image_hint": "PNG/JPG/WebP, :mb MB gacha. Eng yaxshisi: 1600×1200 (4:3), oq fon, mahsulot markazda va har tomonda bo'sh joy.",
     "banners.sponsored": "Homiy / reklama banneri",
     "banners.sponsored_hint": "Brend yoki hamkor (masalan, ribbon/etiketka sotuvchisi) reklamasi: bannerda \"Reklama\" belgisi chiqadi, havola homiy havolasi sifatida belgilanadi (rel=sponsored).",
     "banners.ad": "Reklama",
