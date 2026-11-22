@@ -71,7 +71,7 @@ class PrinterDriverTest extends TestCase
             ->set('item.brand', 'Godex')->set('item.model', 'G500 / G530')->set('item.driver_url', 'https://www.godexintl.com/downloads')
             ->set('addOffer', $g500->id)->set('addOffer', $g530->id)->set('addOffer', $g500->id) // twice → once
             ->assertSet('offerIds', [$g500->id, $g530->id])
-            ->call('save')->assertRedirect(route('admin.drivers'));
+            ->call('save')->assertRedirect(route('admin.drivers.edit', 'godex-g500-g530')); // a new driver continues on its edit page
 
         $driver = PrinterDriver::where('slug', 'godex-g500-g530')->firstOrFail();
         $this->assertEqualsCanonicalizing([$g500->id, $g530->id], $driver->offers()->pluck('offers.id')->all());

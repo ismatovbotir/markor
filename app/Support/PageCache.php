@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Cache;
  *  - the per-visitor CSRF token is cut out before storing and put back on every request,
  *    so forms on the cached page (order requests) keep working;
  *  - any change of settings, SEO texts, Marketplace items or label templates clears it at once
- *    (bump()), so an edit never waits 6 hours.
+ *    (bump()), so an edit never waits 6 hours;
+ *  - a deploy that changes the page templates, translations or built CSS starts a new cache key (codeVersion()).
  */
 class PageCache
 {
@@ -26,7 +27,7 @@ class PageCache
     /** @param \Closure(): string $render */
     public static function remember(string $page, \Closure $render): array
     {
-        $key = 'page.' . $page . '.' . app()->getLocale() . '.v' . self::version();
+        $key = 'page.' . $page . '.' . app()->getLocale() . '.v' . self::version() . '.' . self::codeVersion();
         $hit = Cache::has($key);
         $html = $hit ? Cache::get($key) : null;
 
@@ -42,6 +43,18 @@ class PageCache
     public static function bump(): void
     {
         Cache::forever('page.version', self::version() + 1);
+    }
+
+    /** Newest modification time of the files the cached pages are built from (views, translations, CSS manifest). */
+    private static function codeVersion(): int
+    {
+        $files = array_merge(
+            [resource_path('views/home.blade.php'), public_path('build/manifest.json')],
+            glob(resource_path('views/partials/*.blade.php')) ?: [],
+            glob(lang_path('*.json')) ?: [],
+        );
+
+        return max(array_map(fn ($f) => is_file($f) ? filemtime($f) : 0, $files));
     }
 
     private static function version(): int

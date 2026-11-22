@@ -125,11 +125,17 @@
                                     @svg('heroicon-o-lock-closed', 'w-4 h-4') {{ __('balance.pay_to_open') }}
                                 </a>
                             @elseif($batch->status === 'completed' && $batch->marking_codes_count > 0)
-<button type="button"
-                                        x-on:click="open(@js(['url' => route('import-batches.labels', $batch), 'partsUrl' => route('import-batches.parts', $batch), 'name' => pathinfo($batch->original_filename, PATHINFO_FILENAME), 'count' => $batch->marking_codes_count]))"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-amber-700 text-amber-700 rounded-lg text-xs font-medium hover:bg-amber-50 transition">
-                                    @svg('heroicon-o-printer', 'w-4 h-4') {{ __('import.labels_pdf') }}
-                                </button>
+@php $dl = ['url' => route('import-batches.labels', $batch), 'partsUrl' => route('import-batches.parts', $batch), 'printUrl' => route('import-batches.print', $batch), 'name' => pathinfo($batch->original_filename, PATHINFO_FILENAME), 'count' => $batch->marking_codes_count]; @endphp
+                                <span class="inline-flex items-center gap-2 whitespace-nowrap">
+                                    <button type="button" x-on:click="open(@js($dl), 'print')"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-700 text-white rounded-lg text-xs font-medium hover:bg-amber-800 transition">
+                                        @svg('heroicon-o-printer', 'w-4 h-4') {{ __('import.print') }}
+                                    </button>
+                                    <button type="button" x-on:click="open(@js($dl), 'pdf')"
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-amber-700 text-amber-700 rounded-lg text-xs font-medium hover:bg-amber-50 transition">
+                                        @svg('heroicon-o-document-arrow-down', 'w-4 h-4') {{ __('import.labels_pdf') }}
+                                    </button>
+                                </span>
                             @endif
                         </td>
                     </tr>
@@ -223,26 +229,25 @@
 
             <div x-show="state === 'choose'">
                 <p class="text-xs font-medium text-stone-600 mb-2">{{ __('import.choose_design') }}</p>
-                <div class="bg-stone-100 rounded-lg p-4 mb-3 flex items-center justify-center h-44">
+                <p x-show="mode === 'print'" class="text-[11px] text-stone-500 -mt-1 mb-2">{{ __('import.print_hint') }}</p>
+                <label for="label-template" class="sr-only">{{ __('import.choose_design') }}</label>
+                <select id="label-template" x-model.number="templateId" x-on:change="loadParts()"
+                        class="w-full border border-stone-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    @foreach($templates as $t)
+                        <option value="{{ $t->id }}">{{ $t->name }} — {{ $t->width_mm }}×{{ $t->height_mm }} mm{{ ($t->columns ?? 1) > 1 ? ' · ' . $t->columns . ' ' . __('templates.per_row') : '' }}</option>
+                    @endforeach
+                </select>
+                <div class="bg-stone-100 rounded-lg p-4 mt-3 flex items-center justify-center h-44">
                     @foreach($templates as $t)
                         <div x-show="templateId == {{ $t->id }}">
                             @include('partials.template-preview', ['template' => $t, 'previewHtml' => $previews[$t->id], 'maxW' => 330, 'maxH' => 145])
                         </div>
                     @endforeach
                 </div>
-                <div class="space-y-2 max-h-64 overflow-y-auto">
-                    @foreach($templates as $t)
-                        <label class="flex items-center gap-3 border rounded-lg px-3 py-2.5 cursor-pointer transition"
-                               :class="templateId == {{ $t->id }} ? 'border-amber-600 bg-amber-50' : 'border-stone-200 hover:bg-stone-50'">
-                            <input type="radio" x-model.number="templateId" x-on:change="loadParts()" value="{{ $t->id }}" class="text-amber-600">
-                            <span class="flex-1 text-sm font-medium">{{ $t->name }}</span>
-                            <span class="text-xs text-stone-500">{{ $t->width_mm }}×{{ $t->height_mm }} mm</span>
-                        </label>
-                    @endforeach
-                </div>
                 <div class="flex justify-end gap-3 pt-5">
                     <button type="button" x-on:click="close()" class="px-4 py-2 text-sm text-stone-600 hover:text-stone-800">{{ __('common.cancel') }}</button>
-                    <button type="button" x-show="parts.length <= 1" x-on:click="generate(1)" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition">{{ __('import.generate_download') }}</button>
+                    <button type="button" x-show="parts.length <= 1" x-on:click="printPart(1)" :class="mode === 'print' ? 'bg-amber-700 text-white hover:bg-amber-800' : 'border border-amber-700 text-amber-700 hover:bg-amber-50'" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm transition">@svg('heroicon-o-printer', 'w-4 h-4') {{ __('import.print') }}</button>
+                    <button type="button" x-show="parts.length <= 1" x-on:click="generate(1)" :class="mode === 'pdf' ? 'bg-amber-700 text-white hover:bg-amber-800' : 'border border-amber-700 text-amber-700 hover:bg-amber-50'" class="px-4 py-2 rounded-lg text-sm transition">{{ __('import.generate_download') }}</button>
                 </div>
                 <div x-show="parts.length > 1" x-cloak class="mt-4 border-t border-stone-100 pt-4">
                     <p class="text-xs font-medium text-stone-600">{{ __('import.parts_title') }}</p>
@@ -254,7 +259,10 @@
                                     <span class="font-medium" x-text="@js(__('import.part_line', ['part' => '__P__', 'first' => '__F__', 'last' => '__L__'])).replace('__P__', p.part).replace('__F__', p.first.toLocaleString('ru-RU')).replace('__L__', p.last.toLocaleString('ru-RU'))"></span>
                                     <span x-show="p.ready" class="ml-1 text-[11px] text-emerald-700">✓ {{ __('import.part_ready') }}</span>
                                 </span>
-                                <button type="button" x-on:click="generate(p.part)" class="px-3 py-1 border border-amber-700 text-amber-700 rounded-md text-xs font-medium hover:bg-amber-50">{{ __('import.download_part') }}</button>
+                                <span class="inline-flex gap-1.5">
+                                    <button type="button" x-on:click="printPart(p.part)" class="inline-flex items-center gap-1 px-3 py-1 border border-amber-700 text-amber-700 rounded-md text-xs font-medium hover:bg-amber-50" :aria-label="@js(__('import.print')) + ' ' + p.part">@svg('heroicon-o-printer', 'w-3.5 h-3.5') {{ __('import.print') }}</button>
+                                    <button type="button" x-on:click="generate(p.part)" class="px-3 py-1 border border-amber-700 text-amber-700 rounded-md text-xs font-medium hover:bg-amber-50">{{ __('import.download_part') }}</button>
+                                </span>
                             </div>
                         </template>
                     </div>

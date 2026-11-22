@@ -43,6 +43,26 @@ HTML;
         'template', 'layout', 'is_default',
     ];
 
+    /**
+     * Templates offered to a company for PDF / printing: the ones it chose ("my templates"),
+     * or all templates while it has not chosen any. Default first, then by name.
+     */
+    public static function forCompany(?\App\Domain\Companies\Company $company)
+    {
+        $query = static::query()->orderByDesc('is_default')->orderBy('name');
+        if ($company && $company->labelTemplates()->exists()) {
+            $query->whereIn('id', $company->labelTemplates()->select('label_templates.id'));
+        }
+
+        return $query;
+    }
+
+    /** "58×40" — label size, used by the size filter. */
+    public function sizeKey(): string
+    {
+        return $this->width_mm . '×' . $this->height_mm;
+    }
+
     protected function casts(): array
     {
         return [

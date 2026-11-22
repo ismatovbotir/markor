@@ -26,15 +26,4 @@ class MarketplaceController extends Controller
                 ->filter(fn ($c) => $c->offers->isNotEmpty())->values(),
         ]);
     }
-
-    /** Price as a number for structured data ("1 250 000 so'm" → 1250000), or null when it isn't a plain price. */
-    public static function numericPrice(?string $price): ?int
-    {
-        if (blank($price) || !preg_match('/\d/', $price)) {
-            return null;
-        }
-        $digits = preg_replace('/\D/', '', $price);
-
-        return strlen($digits) >= 3 ? (int) $digits : null;
-    }
 }

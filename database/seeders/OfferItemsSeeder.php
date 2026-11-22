@@ -58,7 +58,7 @@ class OfferItemsSeeder extends Seeder
                 'offer_category_id' => $category->id, 'category' => $category->slug, 'icon' => $category->icon,
                 'title_uz' => $r['title_uz'], 'title_ru' => $r['title_ru'] ?: null, 'title_zh' => $r['title_zh'] ?: null,
                 'description_uz' => $r['description_uz'] ?: null, 'description_ru' => $r['description_ru'] ?: null, 'description_zh' => $r['description_zh'] ?: null,
-                'price' => $r['price'] ?: null, 'url' => $r['url'] ?: null,
+                'url' => $r['url'] ?: null, // the price column of the file is ignored: products have no price
                 'action' => in_array($r['button'], ['order', 'call'], true) ? $r['button'] : 'order',
                 'sort_order' => (int) $r['order'],
                 'is_active' => !in_array(mb_strtolower($r['visible']), ['0', 'no', "yo'q", 'нет', 'false'], true),

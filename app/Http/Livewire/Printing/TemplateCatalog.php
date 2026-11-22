@@ -13,6 +13,10 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class TemplateCatalog extends Component
 {
+    public const SIZE_TOLERANCE_MM = 5; // the size filter also shows templates up to ±5 mm away
+    #[\Livewire\Attributes\Url(as: 'w', except: '')] public $width = '';    // label width filter, mm ('' = any)
+    #[\Livewire\Attributes\Url(as: 'h', except: '')] public $height = '';   // label height filter, mm ('' = any)
+    #[\Livewire\Attributes\Url(as: 'mine', except: false)] public bool $mine = false; // only "my templates"
     public bool $ordering = false;
     public array $order = ['width_mm' => '', 'height_mm' => '', 'columns' => 1, 'rows' => '', 'gap_mm' => '', 'comment' => ''];
 
@@ -53,13 +57,46 @@ class TemplateCatalog extends Component
         $this->dispatch('notify', type: 'success', message: __('template_requests.sent'));
     }
 
+    /** Add a template to the company's "my templates" or remove it (shared by the whole company). */
+    public function toggleMine(int $id): void
+    {
+        $company = auth()->user()->company;
+        abort_unless($company, 403);
+        $template = LabelTemplate::findOrFail($id);
+        $company->labelTemplates()->toggle([$template->id]);
+    }
+
+    public function clearSize(): void
+    {
+        $this->width = '';
+        $this->height = '';
+    }
+
     public function render(LabelPdfService $pdf)
     {
-        $templates = LabelTemplate::orderByDesc('is_default')->orderBy('name')->get();
+        $company = auth()->user()->company;
+        $mineIds = $company ? $company->labelTemplates()->pluck('label_templates.id')->all() : [];
+        $total = LabelTemplate::count();
+        $w = is_numeric($this->width) ? (int) $this->width : null;
+        $h = is_numeric($this->height) ? (int) $this->height : null;
+        $tol = self::SIZE_TOLERANCE_MM;
+
+        $templates = LabelTemplate::orderByDesc('is_default')->orderBy('name')
+            ->when($w !== null, fn ($q) => $q->whereBetween('width_mm', [$w - $tol, $w + $tol]))
+            ->when($h !== null, fn ($q) => $q->whereBetween('height_mm', [$h - $tol, $h + $tol]))
+            ->when($this->mine, fn ($q) => $q->whereIn('id', $mineIds ?: [0]))
+            ->get();
+        if ($w !== null || $h !== null) {
+            // closest size first (exact match on top)
+            $templates = $templates->sortBy(fn ($t) => abs($t->width_mm - ($w ?? $t->width_mm)) + abs($t->height_mm - ($h ?? $t->height_mm)))->values();
+        }
 
         return view('livewire.printing.template-catalog', [
             'templates' => $templates,
             'previews'  => $templates->mapWithKeys(fn ($t) => [$t->id => $pdf->previewDocument($t)]),
+            'mineIds'   => $mineIds,
+            'total'     => $total,
+            'filtering' => $w !== null || $h !== null || $this->mine,
             'requests'  => auth()->user()->company_id
                 ? TemplateRequest::where('company_id', auth()->user()->company_id)->latest()->limit(10)->get()
                 : collect(),

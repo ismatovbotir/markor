@@ -61,8 +61,7 @@
                                     </dl>
                                 </details>
                             @endif
-                            <div class="flex items-center justify-between gap-2 mt-3">
-                                <span class="text-xs text-stone-500">{{ $item->price ?: __('offers.price_on_request') }}</span>
+                            <div class="flex items-center justify-end gap-2 mt-3">
                                 @if($item->action === 'call' && $catTel)
                                     <a href="{{ $catTel }}" class="text-xs font-semibold text-amber-700 hover:text-amber-900">{{ __('offers.action.call') }}</a>
                                 @else

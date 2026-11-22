@@ -71,6 +71,21 @@ class LabelPdfStore
         return null;
     }
 
+    /** Codes of one part (same split as the PDF parts), with their products. */
+    public function partCodes(ImportBatch $batch, array $part)
+    {
+        return MarkingCode::withoutGlobalScope('owner')->with('product')->where('import_batch_id', $batch->id)
+            ->orderBy('id')->offset($part['first'] - 1)->limit($part['labels'])->get();
+    }
+
+    /** PDF generated or sent to the printer: imported / assigned codes become "printed". */
+    public function markPrinted($codes): void
+    {
+        MarkingCode::withoutGlobalScope('owner')->whereIn('id', collect($codes)->pluck('id'))
+            ->whereIn('status', ['imported', 'assigned'])
+            ->update(['status' => 'printed', 'printed_at' => now()]);
+    }
+
     public function markDownloaded(LabelPdf $pdf): void
     {
         $pdf->increment('downloads', 1, ['last_downloaded_at' => now()]);
@@ -79,13 +94,9 @@ class LabelPdfStore
     /** @return array{0: LabelPdf, 1: string} */
     private function render(ImportBatch $batch, LabelTemplate $template, ?User $user, ?LabelPdf $existing, array $part): array
     {
-        $codes = MarkingCode::withoutGlobalScope('owner')->with('product')->where('import_batch_id', $batch->id)
-            ->orderBy('id')->offset($part['first'] - 1)->limit($part['labels'])->get();
+        $codes = $this->partCodes($batch, $part);
         $contents = $this->renderer->pdf($template, $codes, pathinfo($batch->original_filename, PATHINFO_FILENAME));
-
-        MarkingCode::withoutGlobalScope('owner')->whereIn('id', $codes->pluck('id'))
-            ->whereIn('status', ['imported', 'assigned'])
-            ->update(['status' => 'printed', 'printed_at' => now()]);
+        $this->markPrinted($codes);
 
         $path = 'pdfs/' . $batch->id . '-' . $template->id . '-p' . $part['part'] . '-' . Str::random(8) . '.pdf';
         Storage::disk(self::DISK)->put($path, $contents);

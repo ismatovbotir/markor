@@ -10,10 +10,11 @@ use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-/** Client cabinet: users of the company. The owner adds and manages them; everyone sees the list. */
+/** Client cabinet: users of the company, shown as a section of the company page. The owner adds and manages them; everyone sees the list. */
 #[Layout('layouts.app')]
 class CompanyUsers extends Component
 {
+    public bool $embedded = false;   // true: a section of the company page (no page title)
     public bool $showForm = false;
     public ?int $editingId = null;
     public array $form = [];

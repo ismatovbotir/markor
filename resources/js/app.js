@@ -325,8 +325,10 @@ window.labelDownload = (defaultTemplateId, offersCount = 0) => ({
     timer: null,
 
     parts: [],
-    open(batch) {
+    mode: 'pdf', // which button opened the dialog: 'print' or 'pdf' (both actions stay available)
+    open(batch, mode = 'pdf') {
         this.batch = batch;
+        this.mode = mode;
         this.state = 'choose';
         this.progress = 0;
         this.loadParts();
@@ -345,6 +347,12 @@ window.labelDownload = (defaultTemplateId, offersCount = 0) => ({
     close() {
         if (this.state === 'working') return;
         this.batch = null;
+    },
+    // same template and parts as the PDF; opens the browser print page (it starts the print dialog itself)
+    printPart(part = 1) {
+        if (!this.batch?.printUrl || !this.templateId) return;
+        window.open(`${this.batch.printUrl}?template=${this.templateId}&part=${part}`, '_blank');
+        this.$wire.$refresh();
     },
     async generate(part = 1) {
         const info = this.parts.find((p) => p.part === part);
@@ -767,3 +775,6 @@ window.orderModal = (config) => ({
         }
     },
 });
+
+// Super admin: the multilingual form (x-admin.i18n-form)
+import './admin/i18n-form.js';

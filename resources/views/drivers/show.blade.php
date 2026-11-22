@@ -93,7 +93,6 @@
                     <a href="{{ HomeController::localizedUrl('marketplace.item', $loc, ['offer' => $item->slug]) }}" class="bg-white border border-stone-200 rounded-xl p-3 hover:border-amber-400 transition">
                         @if($item->image_url)<img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy" class="h-24 w-full object-contain">@else<div class="h-24 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">@svg($item->icon ?: 'heroicon-o-printer', 'w-8 h-8')</div>@endif
                         <p class="font-semibold text-sm text-stone-900 mt-3 leading-snug">{{ $item->title }}</p>
-                        <p class="text-xs text-stone-500 mt-1">{{ $item->price ?: __('offers.price_on_request') }}</p>
                     </a>
                 @endforeach
             </div>

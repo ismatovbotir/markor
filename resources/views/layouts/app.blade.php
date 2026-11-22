@@ -7,17 +7,28 @@
     <meta name="robots" content="noindex, nofollow">
     <title>{{ config('app.name') }}</title>
     @include('partials.icons')
+    {{-- the super admin uses the public site's type (Golos Text body, JetBrains Mono for Markdown) --}}
+    @can('admin')
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=golos-text:400,500,600|jetbrains-mono:400,500&display=swap" rel="stylesheet">
+    @endcan
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="bg-stone-50 text-stone-800 font-sans antialiased">
+<body class="bg-stone-50 text-stone-800 {{ auth()->user()?->isAdmin() ? 'font-body' : 'font-sans' }} antialiased">
 
-<div class="flex min-h-screen">
-    {{-- Sidebar --}}
-    <aside class="w-64 bg-stone-100 border-r border-stone-200 flex flex-col">
-        <div class="px-6 py-6 border-b border-stone-200">
-            <h1><img src="/images/logo.png" alt="{{ config('app.name') }}" width="128" height="32" class="h-8 w-auto"></h1>
-            <p class="text-xs text-stone-500 mt-1">{{ __('app.tagline') }}</p>
+<div class="flex min-h-screen" x-data="{ drawer: false }" x-on:keydown.escape.window="drawer = false">
+    {{-- Sidebar: a column from lg up, a drawer opened by the menu button below lg --}}
+    <div x-show="drawer" x-cloak x-transition.opacity x-on:click="drawer = false" class="fixed inset-0 z-40 bg-stone-900/40 lg:hidden"></div>
+    <aside id="app-sidebar" :data-open="drawer" aria-label="{{ __('nav.menu') }}"
+           class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-stone-100 border-r border-stone-200 flex flex-col transition-[transform,visibility] duration-200 motion-reduce:transition-none
+                  max-lg:invisible max-lg:-translate-x-full max-lg:data-[open=true]:visible max-lg:data-[open=true]:translate-x-0 max-lg:data-[open=true]:shadow-xl lg:sticky lg:top-0 lg:z-10 lg:h-screen lg:w-64 lg:shrink-0">
+        <div class="px-6 py-4 lg:py-6 border-b border-stone-200 flex items-start justify-between gap-2">
+            <div>
+                <h1><img src="/images/logo.png" alt="{{ config('app.name') }}" width="128" height="32" class="h-8 w-auto"></h1>
+                <p class="text-xs text-stone-500 mt-1">{{ __('app.tagline') }}</p>
+            </div>
+            <button type="button" x-on:click="drawer = false" aria-label="{{ __('admin.nav.close') }}" class="lg:hidden p-2 -mr-2 rounded-lg text-stone-600 hover:bg-stone-200">@svg('heroicon-o-x-mark', 'w-5 h-5')</button>
         </div>
 
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
@@ -58,12 +69,8 @@
                     <span class="flex-1">{{ __('nav.balance') }}</span>
                     <span class="text-xs tabular-nums {{ (auth()->user()->company?->balance ?? 0) < 0 ? 'text-rose-600' : 'text-stone-500' }}">{{ number_format((float) auth()->user()->company?->balance, 0, '.', ' ') }}</span>
                 </a>
-                <a href="{{ route('company.users') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('company.users') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
-                    @svg('heroicon-o-users', 'w-5 h-5 mr-3')
-                    <span>{{ __('nav.company_users') }}</span>
-                </a>
                 @endif
-                <a href="{{ route('profile') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('profile') ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
+                <a href="{{ route('profile') }}" class="flex items-center px-4 py-3 rounded-lg font-medium transition {{ request()->routeIs('profile') || (auth()->user()->company_id && request()->routeIs('company.*')) ? 'bg-amber-100 text-amber-900' : 'text-stone-700 hover:bg-stone-200' }}">
                     @svg('heroicon-o-user-circle', 'w-5 h-5 mr-3')
                     <span>{{ __('nav.profile') }}</span>
                 </a>
@@ -91,7 +98,13 @@
 
     {{-- Main --}}
     <main class="flex-1 min-w-0 flex flex-col">
-        <div class="px-8 py-6 flex-1">
+        {{-- top bar with the menu button (below lg only) --}}
+        <div class="lg:hidden bg-stone-100 border-b border-stone-200 px-3 py-2 flex items-center gap-2">
+            <button type="button" x-on:click="drawer = true" :aria-expanded="drawer" aria-controls="app-sidebar" aria-label="{{ __('admin.nav.open') }}" data-menu-button
+                    class="p-2 -ml-1 rounded-lg text-stone-700 hover:bg-stone-200">@svg('heroicon-o-bars-3', 'w-6 h-6')</button>
+            <img src="/images/logo.png" alt="{{ config('app.name') }}" width="96" height="24" class="h-6 w-auto">
+        </div>
+        <div class="px-4 sm:px-6 lg:px-8 py-6 flex-1">
             @php $helpPage = \App\Http\Controllers\HelpController::FOR_ROUTE[request()->route()?->getName()] ?? null; @endphp
             @if($helpPage && !auth()->user()?->isAdmin())
                 <a href="{{ route('help', $helpPage) }}" class="float-right ml-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-stone-200 bg-white text-xs text-stone-600 hover:text-amber-700 hover:border-amber-300" title="{{ __('help.title') }}">
@@ -110,11 +123,13 @@
     x-on:notify.window="const d = Array.isArray($event.detail) ? $event.detail[0] : $event.detail; show = true; type = d.type; message = d.message; clearTimeout(window.__toastTimer); window.__toastTimer = setTimeout(() => show = false, 3000)"
     x-show="show"
     x-transition
-    class="fixed bottom-5 right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-sm text-white"
+    class="fixed {{ auth()->user()?->isAdmin() ? 'bottom-20' : 'bottom-5' }} right-5 z-50 px-4 py-3 rounded-lg shadow-lg text-sm text-white"
     :class="type === 'success' ? 'bg-emerald-600' : 'bg-rose-600'"
 >
     <span x-text="message"></span>
 </div>
+
+@can('admin')<x-admin.confirm-delete />@endcan
 
 @livewireScripts
 @include('partials.dev-role-switch')

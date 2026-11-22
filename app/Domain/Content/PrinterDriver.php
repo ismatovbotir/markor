@@ -10,6 +10,9 @@ class PrinterDriver extends Model
     public const KINDS = ['desktop', 'industrial', 'mobile'];
     public const OS = ['windows', 'macos', 'linux'];
 
+    /** Texts kept per language as {field}_{uz|ru|zh}. */
+    public const TRANSLATABLE = ['summary', 'notes'];
+
     protected $fillable = ['brand', 'model', 'slug', 'kind', 'language', 'os', 'driver_url',
         'summary_uz', 'summary_ru', 'summary_zh', 'notes_uz', 'notes_ru', 'notes_zh', 'sort_order', 'is_active'];
 

@@ -36,6 +36,42 @@ class LabelPdfController extends Controller
         return $this->inline($pdf, $name);
     }
 
+    /**
+     * One part of a batch on the browser print page (same template, parts and rules as the PDF):
+     * the system print dialog opens by itself; set the label size as paper size in the printer driver.
+     */
+    public function print(Request $request, ImportBatch $batch, LabelPdfService $service)
+    {
+        Gate::authorize('view', $batch);
+        abort_unless($batch->status === 'completed' && $batch->processed_rows > 0, 404);
+        abort_if($batch->is_locked, 402, __('balance.locked_batch'));
+        $template = $request->filled('template') ? LabelTemplate::findOrFail($request->integer('template')) : LabelTemplate::default();
+
+        set_time_limit(0);
+        ini_set('memory_limit', '1G');
+        $store = app(\App\Domain\Printing\Services\LabelPdfStore::class);
+        $parts = $store->parts($batch, $template);
+        $part = $parts[max(1, min($request->integer('part', 1), count($parts))) - 1];
+        $codes = $store->partCodes($batch, $part);
+        [$css, $labels] = $service->labelsHtml($template, $codes, pathinfo($batch->original_filename, PATHINFO_FILENAME));
+        $store->markPrinted($codes);
+
+        $columns = max(1, (int) $template->columns);
+        $gap = (float) $template->gap_mm;
+
+        return response()->view('studio.print', [
+            'pages'  => array_chunk($labels, $columns),
+            'css'    => $css,
+            'width'  => (float) $template->width_mm,
+            'height' => (float) $template->height_mm,
+            'gap'    => $gap,
+            'pageW'  => $columns * $template->width_mm + ($columns - 1) * $gap,
+            'from'   => $part['first'],
+            'to'     => $part['last'],
+            'total'  => array_sum(array_column($parts, 'labels')),
+        ]);
+    }
+
     /** How a batch is split into PDF parts for a design (for the download dialog). */
     public function parts(Request $request, ImportBatch $batch)
     {

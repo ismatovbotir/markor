@@ -4,29 +4,41 @@
 @endphp
 <header x-data="{ menu: false }" x-on:keydown.escape.window="menu = false" class="sticky top-0 z-30 border-b border-stone-200/80 bg-stone-50/90 backdrop-blur">
     <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        {{-- logo and menu together on the left; language and login on the right --}}
+        <div class="flex items-center gap-3 min-w-0">
         <a href="{{ route('home') }}" class="flex items-center shrink-0" aria-label="{{ config('app.name') }}">
             <img src="/images/logo.png" alt="{{ config('app.name') }}" width="112" height="28" class="h-6 sm:h-7 w-auto">
         </a>
         @php
             $loc = app()->getLocale();
             $u = fn ($route) => \App\Http\Controllers\Guest\HomeController::localizedUrl($route, $loc);
-            // one list for the desktop menu and the phone menu: [url, label, active, desktop visibility]
+            // Markor's own icon (resources/svg/markor), or the Heroicon fallback while a file is missing
+            $i = fn (string $name, string $fallback) => is_file(resource_path("svg/markor/$name.svg")) ? "markor-$name" : "heroicon-o-$fallback";
+            // one list for the desktop icon bar and the phone menu: [url, label, active, icon]
             $menu = array_values(array_filter([
-                [$u('studio'), __('nav.studio'), request()->routeIs('studio'), 'lg:inline'],
-                [$u('aslbelgi'), 'Asl Belgisi', request()->routeIs('aslbelgi'), 'lg:inline'],
-                [$u('marketplace'), __('nav.offers'), request()->routeIs('marketplace', 'marketplace.item'), 'lg:inline'],
-                [$u('faq'), __('home.nav.faq'), request()->routeIs('faq'), 'xl:inline'],
-                $loc === 'zh' ? [$u('china'), __('china.nav'), request()->routeIs('china'), 'lg:inline'] : null,
-                [route('guide'), __('guide.title'), request()->routeIs('guide'), 'xl:inline'],
-                [$u('drivers'), __('nav.drivers'), request()->routeIs('drivers*'), 'lg:inline'],
-                [$u('contact'), __('contact.title'), request()->routeIs('contact'), 'lg:inline'],
+                [$u('home'), __('nav.home'), request()->routeIs('home'), $i('home', 'home')],
+                [$u('studio'), __('nav.studio'), request()->routeIs('studio'), $i('label-studio', 'pencil-square')],
+                [$u('aslbelgi'), 'Asl Belgisi', request()->routeIs('aslbelgi'), $i('asl-belgisi', 'qr-code')],
+                [$u('marketplace'), __('nav.offers'), request()->routeIs('marketplace', 'marketplace.item'), $i('marketplace', 'shopping-bag')],
+                [$u('faq'), __('home.nav.faq'), request()->routeIs('faq'), $i('faq', 'question-mark-circle')],
+                $loc === 'zh' ? [$u('china'), __('china.nav'), request()->routeIs('china'), $i('china', 'globe-asia-australia')] : null,
+                [route('guide'), __('guide.title'), request()->routeIs('guide'), $i('guide', 'book-open')],
+                [$u('drivers'), __('nav.drivers'), request()->routeIs('drivers*'), $i('drivers', 'arrow-down-tray')],
+                [$u('news'), __('nav.news'), request()->routeIs('news*'), $i('news', 'newspaper')],
+                [$u('contact'), __('contact.title'), request()->routeIs('contact'), $i('contact', 'phone')],
             ]));
         @endphp
-        <nav class="hidden lg:flex items-center gap-4 xl:gap-6 text-sm text-stone-600 whitespace-nowrap">
-            @foreach($menu as [$href, $label, $active, $show])
-                <a href="{{ $href }}" class="hidden {{ $show }} hover:text-amber-700 {{ $active ? 'text-amber-700 font-medium' : '' }}">{{ $label }}</a>
+        {{-- desktop: icons only; the name shows as a tooltip and is read by screen readers --}}
+        <nav class="hidden lg:flex items-center gap-1 text-stone-600 border-l border-stone-200 pl-3 ml-2" aria-label="{{ __('nav.menu') }}">
+            @foreach($menu as [$href, $label, $active, $icon])
+                <a href="{{ $href }}" title="{{ $label }}" aria-label="{{ $label }}" @if($active) aria-current="page" @endif
+                   class="group relative inline-flex items-center justify-center w-10 h-10 rounded-lg transition {{ $active ? 'text-amber-700 bg-amber-50' : 'hover:text-amber-700 hover:bg-stone-100' }}">
+                    @svg($icon, 'w-5 h-5')
+                    <span class="pointer-events-none absolute top-full mt-1.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-stone-900 text-white text-xs px-2 py-1 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition z-40" aria-hidden="true">{{ $label }}</span>
+                </a>
             @endforeach
         </nav>
+        </div>
         <div class="flex items-center gap-2 sm:gap-3 text-sm">
             <span class="hidden sm:inline-flex">@include('partials.locale-switcher')</span>
             @guest
@@ -56,8 +68,8 @@
     </div>
     <nav x-show="menu" x-cloak x-transition.origin.top class="lg:hidden border-t border-stone-200 bg-stone-50">
         <div class="max-w-6xl mx-auto px-4 py-2 grid sm:grid-cols-2 gap-x-6">
-            @foreach($menu as [$href, $label, $active])
-                <a href="{{ $href }}" x-on:click="menu = false" class="py-3 border-b border-stone-200/70 text-[15px] {{ $active ? 'text-amber-700 font-medium' : 'text-stone-700' }}">{{ $label }}</a>
+            @foreach($menu as [$href, $label, $active, $icon])
+                <a href="{{ $href }}" x-on:click="menu = false" @if($active) aria-current="page" @endif class="flex items-center gap-3 py-3 border-b border-stone-200/70 text-[15px] {{ $active ? 'text-amber-700 font-medium' : 'text-stone-700' }}">@svg($icon, 'w-5 h-5 shrink-0') {{ $label }}</a>
             @endforeach
             <div class="py-3 sm:hidden">@include('partials.locale-switcher')</div>
         </div>

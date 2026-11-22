@@ -42,6 +42,8 @@ Route::get('/marketplace', [HomeController::class, 'marketplace'])->name('market
 Route::get('/faq', [HomeController::class, 'faqIndex'])->name('faq');
 Route::get('/drivers', [\App\Http\Controllers\Guest\DriverController::class, 'index'])->name('drivers');
 Route::get('/drivers/{driver:slug}', [\App\Http\Controllers\Guest\DriverController::class, 'show'])->name('drivers.show');
+Route::get('/news', [\App\Http\Controllers\Guest\NewsController::class, 'index'])->name('news');
+Route::get('/news/{post:slug}', [\App\Http\Controllers\Guest\NewsController::class, 'show'])->name('news.show');
 // public page of a Marketplace item
 Route::get('/marketplace/{offer:slug}', [\App\Http\Controllers\Guest\MarketplaceController::class, 'show'])->name('marketplace.item');
 Route::get('/label-image/{w}x{h}.svg', [\App\Http\Controllers\Guest\LabelImageController::class, 'show'])->whereNumber(['w', 'h'])->name('label-image');
@@ -106,8 +108,10 @@ Route::middleware(['auth', 'company'])->prefix('aslbelgi')->group(function () {
     Route::get('/', ImportBatchIndex::class)->middleware('client.only:admin.clients')->name('import-batches.index');
     Route::get('/imports/{batch}/labels.pdf', [LabelPdfController::class, 'batch'])->name('import-batches.labels');
     Route::get('/imports/{batch}/parts', [LabelPdfController::class, 'parts'])->name('import-batches.parts');
+    Route::get('/imports/{batch}/print', [LabelPdfController::class, 'print'])->name('import-batches.print');
     Route::get('/codes', MarkingCodeIndex::class)->name('marking-codes.index');
-    Route::get('/users', \App\Http\Livewire\Account\CompanyUsers::class)->middleware('client.only:admin.clients')->name('company.users');
+    // users are a section of the company page now; the old address keeps working
+    Route::get('/users', fn () => redirect(route('company.setup') . '#users'))->middleware('client.only:admin.clients')->name('company.users');
     Route::get('/balance', \App\Http\Livewire\Account\BalancePage::class)->middleware('client.only:admin.payments')->name('balance');
     Route::get('/products', ProductIndex::class)->name('products.index');
     Route::get('/offers', OfferIndex::class)->name('offers.index');
@@ -133,6 +137,9 @@ Route::middleware(['auth', 'can:admin'])->prefix('admin')->group(function () {
     Route::get('/drivers', \App\Http\Livewire\Admin\DriverIndex::class)->name('admin.drivers');
     Route::get('/drivers/create', \App\Http\Livewire\Admin\DriverForm::class)->name('admin.drivers.create');
     Route::get('/drivers/{driver}/edit', \App\Http\Livewire\Admin\DriverForm::class)->name('admin.drivers.edit');
+    Route::get('/news', \App\Http\Livewire\Admin\NewsIndex::class)->name('admin.news');
+    Route::get('/news/create', \App\Http\Livewire\Admin\NewsForm::class)->name('admin.news.create');
+    Route::get('/news/{post}/edit', \App\Http\Livewire\Admin\NewsForm::class)->name('admin.news.edit');
     Route::get('/stats', \App\Http\Livewire\Admin\StatsPage::class)->name('admin.stats');
     Route::get('/telegram', \App\Http\Livewire\Admin\TelegramPage::class)->name('admin.telegram');
     Route::get('/payments', \App\Http\Livewire\Admin\PaymentIndex::class)->name('admin.payments');

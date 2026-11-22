@@ -44,6 +44,26 @@ class LabelPdfService
     }
 
     /**
+     * The same labels as pdf(), as HTML for the browser print page: [css, [label html, ...]].
+     * @param iterable<MarkingCode> $codes
+     */
+    public function labelsHtml(LabelTemplate $template, iterable $codes, ?string $batchName = null): array
+    {
+        if ($template->layout) {
+            $renderer = app(LayoutRenderer::class);
+            $label    = ['width_mm' => $template->width_mm, 'height_mm' => $template->height_mm, 'elements' => $template->layout];
+            $captions = LayoutRenderer::markingFields();
+            $now      = now();
+
+            return ['', collect($codes)->values()->map(fn (MarkingCode $code, int $i) => $renderer->render($label, LayoutRenderer::markingRow($code, $batchName), $i, $now, $code, $captions))->all()];
+        }
+
+        [$css, $body] = $this->splitStyles($template->template);
+
+        return [$css, collect($codes)->map(fn (MarkingCode $code) => $this->fill($body, $code, $batchName))->values()->all()];
+    }
+
+    /**
      * Generic entry point. Each PDF page is one row of the roll: `$columns` labels side by side,
      * separated by `$gapMm`.
      *

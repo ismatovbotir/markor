@@ -9,6 +9,9 @@ class OfferCategory extends Model
     /** How many items a category shows before the "more items" button. */
     public const SHOWN_ITEMS = 5;
 
+    /** Texts kept per language as {field}_{uz|ru|zh}. */
+    public const TRANSLATABLE = ['name', 'description'];
+
     protected $fillable = [
         'slug', 'kind', 'icon', 'name_uz', 'name_ru', 'name_zh',
         'description_uz', 'description_ru', 'description_zh',

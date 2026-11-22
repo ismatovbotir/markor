@@ -34,8 +34,9 @@
                 <p class="text-xs text-stone-500">{{ __('company.title_edit') }}</p>
                 <p class="font-medium">{{ $company->name }}</p>
                 <p class="text-xs text-stone-500 font-mono">{{ __('company.tin') }}: {{ $company->tin }}</p>
+                <p class="text-xs text-stone-500 mt-1 flex items-center gap-1">@svg('heroicon-o-users', 'w-3.5 h-3.5') {{ __('company.users_count', ['count' => $company->users()->count()]) }}</p>
             </div>
-            <a href="{{ route('company.setup') }}" class="text-sm text-amber-700 font-medium hover:underline whitespace-nowrap">{{ __('common.edit') }} →</a>
+            <a href="{{ route('company.setup') }}" class="text-sm text-amber-700 font-medium hover:underline whitespace-nowrap">{{ auth()->user()->isCompanyOwner() ? __('company.manage') : __('company.open') }} →</a>
         </div>
     @endif
 

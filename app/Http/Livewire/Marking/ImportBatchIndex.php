@@ -173,7 +173,7 @@ class ImportBatchIndex extends Component
             'polling'   => $batches->contains(fn ($b) => in_array($b->status, ['uploaded', 'pending', 'processing', 'checking'], true)),
             'items'     => $this->itemsOf($batches->pluck('id')),
             'offers'    => \App\Domain\Offers\Models\Offer::active()->orderBy('sort_order')->get(),
-            'templates' => $templates = LabelTemplate::orderByDesc('is_default')->orderBy('name')->get(),
+            'templates' => $templates = LabelTemplate::forCompany(auth()->user()->company)->get(), // the company's "my templates" (all while none chosen)
             'previews'  => $templates->mapWithKeys(fn ($t) => [$t->id => app(\App\Domain\Printing\Services\LabelPdfService::class)->previewDocument($t)]),
         ]);
     }

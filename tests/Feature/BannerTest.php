@@ -87,7 +87,7 @@ class BannerTest extends TestCase
         $this->assertFalse(Banner::forHome()->contains('id', $banner->id), 'hidden product → banner hidden');
 
         Livewire::test(BannerForm::class, ['banner' => $banner])->assertSet('item.offer_id', $offer->id)
-            ->set('item.title_uz', 'Yangi sarlavha')->call('save')->assertRedirect(route('admin.banners'));
+            ->set('item.title_uz', 'Yangi sarlavha')->call('save')->assertHasNoErrors()->assertNoRedirect(); // stays on the edit page
         $this->assertSame('Yangi sarlavha', $banner->fresh()->title_uz);
 
         Livewire::test(BannerIndex::class)->call('delete', $banner->id);

@@ -4,7 +4,7 @@ namespace App\Domain\Ai;
 
 /**
  * Marketplace item texts with Claude: name, short description and 3–4 FAQ entries in Uzbek (Latin),
- * Russian and Chinese, from what the super admin gives (name, category, price, link, notes).
+ * Russian and Chinese, from what the super admin gives (name, category, link, notes).
  * The result only fills the form — the admin reviews and saves it. Returns null when AI is
  * unavailable (no key, credit finished, API down); the form then stays for manual input.
  */
@@ -12,11 +12,10 @@ class OfferWriter
 {
     public function __construct(private Claude $claude) {}
 
-    /** @param array{title:string, category:string, price:?string, url:?string, notes:?string} $input */
+    /** @param array{title:string, category:string, url:?string, notes:?string} $input */
     public function write(array $input): ?array
     {
         $prompt = "Category: {$input['category']}\nItem name: {$input['title']}\n"
-            . (filled($input['price'] ?? null) ? "Price: {$input['price']}\n" : '')
             . (filled($input['url'] ?? null) ? "Shop link: {$input['url']}\n" : '')
             . (filled($input['notes'] ?? null) ? "Facts from the seller:\n{$input['notes']}\n" : '');
 

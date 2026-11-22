@@ -52,4 +52,13 @@
             </div>
         @endif
     </form>
+
+    @if($editing)
+        <div class="mt-8">
+            @livewire(\App\Http\Livewire\Account\CompanyUsers::class, ['embedded' => true])
+        </div>
+    @endif
+    @if(auth()->user()->isCompanyOwner() && auth()->user()->company)
+        @livewire(\App\Http\Livewire\Account\AslbelgiApiKey::class)
+    @endif
 </div>

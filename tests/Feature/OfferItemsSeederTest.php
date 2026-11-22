@@ -11,7 +11,7 @@ class OfferItemsSeederTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_file_loads_items_with_price_and_faq_for_the_product_page(): void
+    public function test_file_loads_items_with_faq_and_ignores_the_price_column(): void
     {
         $this->seed(\Database\Seeders\OfferSeeder::class); // the Marketplace categories
         $copy = tempnam(sys_get_temp_dir(), 'offers');
@@ -28,7 +28,7 @@ class OfferItemsSeederTest extends TestCase
         $seeder->run();
 
         $printer = Offer::where('slug', 'xprinter-xp-365b')->firstOrFail();
-        $this->assertSame("1 250 000 so'm", $printer->price);
+        $this->assertNull($printer->price); // products have no price: the column of the file is ignored
         $this->assertCount(2, $printer->faq);
         $this->assertSame('Qaysi etiketkalar mos keladi?', $printer->faq[0]['q_uz']);
         $this->assertSame('Термоэтикетки шириной 20–80 мм.', $printer->faq[0]['a_ru']);

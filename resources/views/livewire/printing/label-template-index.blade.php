@@ -1,60 +1,63 @@
+@php use App\Domain\Printing\Models\LabelTemplate; @endphp
 <div>
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <p class="text-xs text-stone-500">{{ __('nav.offers') }}</p>
-            <h1 class="text-xl font-semibold">{{ __('offers.labels_title') }}</h1>
-            @if($labelsCategory = \App\Domain\Offers\Models\OfferCategory::where('kind', 'templates')->first())
-                <a href="{{ route('admin.offers', $labelsCategory) }}" class="text-xs text-amber-700 hover:underline">{{ __('offers.category_settings') }}{{ $labelsCategory->market_url ? '' : ' — ' . __('offers.market_missing') }}</a>
+    @php $labelsCategory = \App\Domain\Offers\Models\OfferCategory::where('kind', 'templates')->first(); @endphp
+    <x-admin.page-header :crumb="__('nav.group.content')" :title="__('nav.templates')" :hint="__('templates.admin_hint')">
+        <x-slot:actions>
+            @if($labelsCategory)
+                {{-- short label; a missing shop link is an amber dot with a tooltip instead of extra text --}}
+                <x-admin.button icon="cog-6-tooth" :href="route('admin.offers', [$labelsCategory, 'tab' => 'settings'])"
+                                :title="$labelsCategory->market_url ? null : __('offers.market_missing')">
+                    {{ __('offers.category_settings') }}
+                    @unless($labelsCategory->market_url)
+                        <span class="inline-block align-middle ml-1 w-2 h-2 rounded-full bg-amber-500" aria-hidden="true"></span><span class="sr-only">— {{ __('offers.market_missing') }}</span>
+                    @endunless
+                </x-admin.button>
             @endif
-        </div>
-        @can('create', \App\Domain\Printing\Models\LabelTemplate::class)
-            <button wire:click="openCopy" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition">
-                + {{ __('templates.new_from_default') }}
-            </button>
-        @endcan
-    </div>
+            @can('create', LabelTemplate::class)
+                <x-admin.button variant="primary" icon="plus" wire:click="openCopy">{{ __('templates.new_from_default') }}</x-admin.button>
+            @endcan
+        </x-slot:actions>
+    </x-admin.page-header>
 
-    <div class="bg-white border border-stone-200 rounded-xl overflow-hidden">
-        <table class="w-full text-sm">
-            <thead class="bg-stone-50 border-b border-stone-200">
-                <tr>
-                    <th class="text-left px-4 py-3 font-medium text-stone-600">{{ __('common.name') }}</th>
-                    <th class="text-left px-4 py-3 font-medium text-stone-600">{{ __('templates.size') }}</th>
-                    <th class="px-4 py-3"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-100">
-                @forelse($templates as $t)
-                    <tr class="hover:bg-stone-50" wire:key="tpl-{{ $t->id }}">
-                        <td class="px-4 py-3 font-medium">
-                            {{ $t->name }}
-                            @if($t->is_default)
-                                <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-normal bg-amber-100 text-amber-700" title="{{ __('templates.default_hint') }}">
-                                    @svg('heroicon-o-star', 'w-3 h-3') {{ __('templates.default') }}
-                                </span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3 text-stone-500">{{ $t->width_mm }}×{{ $t->height_mm }} mm</td>
-                        <td class="px-4 py-3 text-right space-x-3 whitespace-nowrap">
-                            <a href="{{ route('label-templates.preview', $t) }}" target="_blank" class="text-stone-500 hover:text-amber-700 text-xs">{{ __('templates.preview') }}</a>
-                            @can('create', \App\Domain\Printing\Models\LabelTemplate::class)
-                                <button wire:click="openCopy({{ $t->id }})" class="text-stone-500 hover:text-amber-700 text-xs">{{ __('templates.copy') }}</button>
-                            @endcan
-                            @can('update', $t)
-                                <button wire:click="openEdit({{ $t->id }})" class="text-stone-500 hover:text-amber-700 text-xs">{{ __('common.edit') }}</button>
+    {{-- names are in one language for now, so the languages column stays empty --}}
+    <x-admin.list wide :head="[__('common.name'), __('templates.size'), '', __('admin.list.updated'), __('admin.list.actions')]">
+        @forelse($templates as $t)
+            <x-admin.list-row wire:key="tpl-{{ $t->id }}">
+                {{ $t->name }}
+                <x-slot:meta>
+                    @if($t->is_default)
+                        <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-800 ring-1 ring-amber-300 px-1.5 py-0.5 text-[11px] font-medium" title="{{ __('templates.default_hint') }}">@svg('heroicon-o-star', 'w-3 h-3') {{ __('templates.default') }}</span>
+                    @endif
+                    @if(($t->columns ?: 1) > 1)<span>{{ $t->columns }}{{ __('templates.per_row_short') }}</span>@endif
+                </x-slot:meta>
+                <x-slot:status><span class="text-sm text-stone-700 tabular-nums whitespace-nowrap">{{ $t->width_mm }}×{{ $t->height_mm }} mm</span></x-slot:status>
+                <x-slot:updated><time datetime="{{ $t->updated_at?->toIso8601String() }}" title="{{ $t->updated_at?->format('d.m.Y H:i') }}">{{ $t->updated_at?->isToday() ? $t->updated_at->format('H:i') : $t->updated_at?->format('d.m.Y') }}</time></x-slot:updated>
+                <x-slot:actions>
+                    <a href="{{ route('label-templates.preview', $t) }}" target="_blank" rel="noopener" aria-label="{{ __('templates.preview_pdf') }}: {{ $t->name }}" title="{{ __('templates.preview_pdf') }}"
+                       class="admin-focus p-2 rounded-lg text-stone-600 hover:bg-stone-200">@svg('heroicon-o-eye', 'w-4 h-4')</a>
+                    @can('update', $t)
+                        <button type="button" wire:click="openEdit({{ $t->id }})" class="admin-focus px-2.5 py-1.5 rounded-lg text-sm text-amber-800 hover:bg-amber-50 font-medium">{{ __('common.edit') }}</button>
+                    @endcan
+                    @canany(['create', 'delete'], $t)
+                        <x-admin.row-menu>
+                            @can('create', LabelTemplate::class)
+                                <x-admin.menu-item wire:click="openCopy({{ $t->id }})">{{ __('templates.copy') }}</x-admin.menu-item>
                             @endcan
                             @can('delete', $t)
-                                <button wire:click="delete({{ $t->id }})" wire:confirm="{{ __('common.confirm_delete') }}" class="text-stone-500 hover:text-rose-600 text-xs">{{ __('common.delete') }}</button>
+                                <x-admin.menu-item danger x-on:click="$dispatch('confirm-delete', { title: {{ Js::from(__('templates.delete_title')) }}, name: {{ Js::from($t->name) }}, text: {{ Js::from(__('templates.delete_text')) }}, run: () => $wire.delete({{ $t->id }}) })">{{ __('common.delete') }}…</x-admin.menu-item>
                             @endcan
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="3" class="px-4 py-8 text-center text-stone-400">{{ __('common.no_data') }}</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    <div class="mt-4">{{ $templates->links() }}</div>
+                        </x-admin.row-menu>
+                    @endcanany
+                </x-slot:actions>
+            </x-admin.list-row>
+        @empty
+            <x-admin.empty-state icon="document-duplicate" :title="__('templates.empty_admin')" :text="__('templates.empty_admin_text')" />
+        @endforelse
+        @if($templates->total())
+            <x-slot:footer>{{ __('admin.list.count', ['shown' => $templates->count(), 'total' => $templates->total()]) }}</x-slot:footer>
+        @endif
+    </x-admin.list>
+    @if($templates->hasPages())<div class="mt-4">{{ $templates->links() }}</div>@endif
 
     @if($showForm)
         @php

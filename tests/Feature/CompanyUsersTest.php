@@ -74,7 +74,11 @@ class CompanyUsersTest extends TestCase
 
         $this->actingAs($member);
         Livewire::test(CompanyUsers::class)->call('openCreate')->assertForbidden();
-        $this->get(route('company.users'))->assertOk()->assertSee('Owner');
+        // users are a section of the company page; the old address redirects there
+        $this->get(route('company.users'))->assertRedirect(route('company.setup') . '#users');
+        $this->get(route('company.setup'))->assertOk()->assertSee('Owner')->assertSee('id="users"', false)
+            ->assertDontSee('wire:click="openCreate"', false);           // members only see the list
+        $this->assertStringNotContainsString('href="' . route('company.users') . '"', $this->get(route('profile'))->getContent()); // no menu item
     }
 
     public function test_removed_member_loses_access_but_data_stays(): void

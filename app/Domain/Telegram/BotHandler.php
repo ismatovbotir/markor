@@ -244,7 +244,7 @@ class BotHandler
             return;
         }
 
-        $templates = LabelTemplate::orderByDesc('is_default')->orderBy('name')->limit(8)->get();
+        $templates = LabelTemplate::forCompany($user->company)->limit(8)->get(); // the company's "my templates" first
         $buttons = $templates->map(fn ($t) => [['text' => '📄 ' . $t->name . " ({$t->width_mm}×{$t->height_mm})", 'callback_data' => "pdf:{$batch->id}:{$t->id}"]])->values()->all();
 
         $text = $this->t($user, 'bot.batch_done', ['file' => e($batch->original_filename), 'count' => $batch->processed_rows]);

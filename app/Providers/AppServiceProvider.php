@@ -23,7 +23,15 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        // Markor's own icon set (resources/svg/markor): @svg('markor-home'), same 24px outline grammar as Heroicons
+        if (is_dir(resource_path('svg/markor'))) {
+            $this->callAfterResolving(\BladeUI\Icons\Factory::class, fn (\BladeUI\Icons\Factory $icons) => $icons->add('markor', [
+                'path' => resource_path('svg/markor'), 'prefix' => 'markor',
+            ]));
+        }
+    }
 
     public function boot(): void
     {

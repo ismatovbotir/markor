@@ -23,6 +23,7 @@
   }
   @media print { .bar { display: none; } }
 </style>
+@if(!empty($css))<style>{!! $css !!}</style>@endif
 </head>
 <body>
 <div class="bar">

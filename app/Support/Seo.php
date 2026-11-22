@@ -17,8 +17,16 @@ use App\Domain\Settings\Setting;
  */
 class Seo
 {
-    public const PAGES = ['home', 'studio', 'aslbelgi', 'marketplace', 'faq', 'china', 'contact', 'drivers'];
+    public const PAGES = ['home', 'studio', 'aslbelgi', 'marketplace', 'faq', 'china', 'contact', 'drivers', 'news'];
     public const FIELDS = ['title' => 60, 'description' => 160]; // recommended max length
+    public const FIELDS_ZH = ['title' => 32, 'description' => 85]; // Chinese: search results cut by width, so fewer characters fit
+    public const MAX = ['title' => 120, 'description' => 320];     // hard limit of an override (validation)
+
+    /** Recommended length of a field per language: ['uz' => 60, 'ru' => 60, 'zh' => 32]. */
+    public static function recommended(string $field): array
+    {
+        return collect(AdminI18n::locales())->mapWithKeys(fn ($l) => [$l => ($l === 'zh' ? self::FIELDS_ZH : self::FIELDS)[$field]])->all();
+    }
 
     public static function get(string $key): ?string
     {

@@ -62,7 +62,7 @@ class LlmsText
                     continue;
                 }
                 foreach ($category->offers as $item) {
-                    $line = '- [' . $item->title . '](' . HomeController::localizedUrl('marketplace.item', $l, ['offer' => $item->slug]) . ')' . ($item->description ? ': ' . $item->description : '') . ($item->price ? ' (' . $item->price . ')' : '');
+                    $line = '- [' . $item->title . '](' . HomeController::localizedUrl('marketplace.item', $l, ['offer' => $item->slug]) . ')' . ($item->description ? ': ' . $item->description : '');
                     $out[] = $line;
                     if ($full) {
                         foreach ($item->localizedFaq() as $f) {

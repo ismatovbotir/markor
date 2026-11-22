@@ -47,4 +47,8 @@
     <div class="mt-6">
         @livewire(\App\Http\Livewire\Admin\AiSettings::class)
     </div>
+
+    <div class="mt-6">
+        @livewire(\App\Http\Livewire\Admin\McpSettings::class)
+    </div>
 </div>

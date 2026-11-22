@@ -1,44 +1,52 @@
-@php $field = 'w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white'; @endphp
 <div>
-    <div class="flex items-start justify-between gap-4 flex-wrap mb-6">
-        <div>
-            <h1 class="text-xl font-semibold">{{ __('nav.drivers') }}</h1>
-            <p class="text-sm text-stone-500 mt-1 max-w-3xl">{{ __('drivers.admin_hint') }}</p>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('drivers') }}" target="_blank" class="px-3 py-2 border border-stone-200 rounded-lg text-sm text-stone-600 hover:bg-stone-50">/drivers ↗</a>
-            <a href="{{ route('admin.drivers.create') }}" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800">+ {{ __('drivers.add') }}</a>
-        </div>
-    </div>
+    <x-admin.page-header :crumb="__('nav.group.content')" :title="__('nav.drivers')" :hint="__('drivers.admin_hint')" :view-url="route('drivers')" view-label="/drivers">
+        <x-slot:actions>
+            <x-admin.button variant="primary" icon="plus" :href="route('admin.drivers.create')">{{ __('drivers.add') }}</x-admin.button>
+        </x-slot:actions>
+    </x-admin.page-header>
 
-    <input wire:model.live.debounce.300ms="search" type="search" placeholder="{{ __('common.search') }}…" class="{{ $field }} max-w-xs mb-4">
+    <x-admin.toolbar>
+        <x-admin.search model="search" />
+        <x-admin.filter-tabs model="status" :value="$status" :options="$statuses" />
+        <x-admin.filter-toggle model="missing" :active="$missing" :count="$missingCount">{{ __('admin.list.missing') }}</x-admin.filter-toggle>
+    </x-admin.toolbar>
 
-    <div class="bg-white border border-stone-200 rounded-xl divide-y divide-stone-100">
+    <x-admin.list :head="[__('drivers.driver_name'), __('common.status'), __('admin.list.langs'), __('admin.list.updated'), __('admin.list.actions')]">
         @forelse($drivers as $d)
-            <div class="flex items-center gap-4 px-4 py-3" wire:key="driver-{{ $d->id }}">
-                <div class="flex-1 min-w-0">
-                    <p class="font-medium"><a href="{{ route('admin.drivers.edit', $d) }}" class="hover:text-amber-700">{{ $d->name() }}</a> <span class="text-xs text-stone-400 font-normal">· {{ __('drivers.kinds.' . $d->kind) }}@if($d->language) · {{ $d->language }}@endif</span></p>
-                    <p class="text-xs text-stone-500 truncate"><a href="{{ $d->driver_url }}" target="_blank" rel="noopener" class="hover:text-amber-700">{{ $d->driver_url }}</a></p>
-                    <div class="flex flex-wrap gap-1 mt-1.5">
-                        @forelse($d->offers as $o)
-                            <span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 ring-1 ring-amber-200 text-[11px]">{{ $o->title_uz }}</span>
-                        @empty
-                            <span class="text-[11px] text-stone-400">{{ __('drivers.no_products') }}</span>
-                        @endforelse
-                    </div>
-                </div>
-                <div class="flex items-center gap-1 shrink-0 text-xs">
-                    <a href="{{ route('drivers.show', $d) }}" target="_blank" class="px-2 text-stone-500 hover:text-amber-700">↗</a>
-                    <label class="inline-flex items-center gap-1.5 px-2 cursor-pointer select-none {{ $d->is_active ? 'text-emerald-700' : 'text-stone-500' }}">
-                        <input type="checkbox" wire:click="toggle({{ $d->id }})" @checked($d->is_active) class="rounded border-stone-300 text-emerald-600"> {{ __('banners.publish') }}
-                    </label>
-                    <a href="{{ route('admin.drivers.edit', $d) }}" class="px-2 text-stone-500 hover:text-amber-700">{{ __('common.edit') }}</a>
-                    <button wire:click="delete({{ $d->id }})" wire:confirm="{{ __('common.confirm_delete') }}" class="px-2 text-stone-500 hover:text-rose-600">{{ __('common.delete') }}</button>
-                </div>
-            </div>
+            <x-admin.list-row :href="route('admin.drivers.edit', $d)" :muted="!$d->is_active" wire:key="driver-{{ $d->id }}">
+                {{ $d->name() }}
+                <x-slot:meta>
+                    <span class="block truncate">{{ __('drivers.kinds.' . $d->kind) }}@if($d->language) · {{ $d->language }}@endif · {{ $d->host() }}</span>
+                    <span class="block truncate">@if($d->offers->isNotEmpty()){{ __('drivers.products') }}: {{ $d->offers->pluck('title_uz')->join(', ') }}@else{{ __('drivers.no_products') }}@endif</span>
+                </x-slot:meta>
+                <x-slot:status><x-admin.status-pill :status="$d->is_active ? 'published' : 'hidden'" /></x-slot:status>
+                <x-slot:langs><x-admin.lang-completeness :item="$d" :fields="\App\Domain\Content\PrinterDriver::TRANSLATABLE" /></x-slot:langs>
+                <x-slot:updated><time datetime="{{ $d->updated_at?->toIso8601String() }}" title="{{ $d->updated_at?->format('d.m.Y H:i') }}">{{ $d->updated_at?->isToday() ? $d->updated_at->format('H:i') : $d->updated_at?->format('d.m.Y') }}</time></x-slot:updated>
+                <x-slot:actions>
+                    @if($d->is_active)
+                        <a href="{{ route('drivers.show', $d) }}" target="_blank" rel="noopener" aria-label="{{ __('admin.view_on_site') }}" title="{{ __('admin.view_on_site') }}"
+                           class="admin-focus p-2 rounded-lg text-stone-600 hover:bg-stone-200">@svg('heroicon-o-arrow-top-right-on-square', 'w-4 h-4')</a>
+                    @endif
+                    <a href="{{ route('admin.drivers.edit', $d) }}" class="admin-focus px-2.5 py-1.5 rounded-lg text-sm text-amber-800 hover:bg-amber-50 font-medium">{{ __('common.edit') }}</a>
+                    <x-admin.row-menu>
+                        <x-admin.menu-item wire:click="toggle({{ $d->id }})">{{ $d->is_active ? __('admin.list.hide') : __('admin.list.show') }}</x-admin.menu-item>
+                        <x-admin.menu-item danger x-on:click="$dispatch('confirm-delete', { title: {{ Js::from(__('drivers.delete_title')) }}, name: {{ Js::from($d->name()) }}, text: {{ Js::from(__('drivers.delete_text')) }}, run: () => $wire.delete({{ $d->id }}) })">{{ __('common.delete') }}…</x-admin.menu-item>
+                    </x-admin.row-menu>
+                </x-slot:actions>
+            </x-admin.list-row>
         @empty
-            <p class="px-4 py-8 text-center text-sm text-stone-500">{{ __('drivers.empty') }}</p>
+            @if($total)
+                <x-admin.empty-state icon="magnifying-glass" :title="__('admin.list.none_found')" :text="__('admin.list.none_found_text')">
+                    <x-slot:action><x-admin.button wire:click="clearFilters">{{ __('admin.list.clear_filters') }}</x-admin.button></x-slot:action>
+                </x-admin.empty-state>
+            @else
+                <x-admin.empty-state icon="arrow-down-tray" :title="__('drivers.empty')" :text="__('drivers.empty_admin_text')">
+                    <x-slot:action><x-admin.button variant="primary" icon="plus" :href="route('admin.drivers.create')">{{ __('drivers.add') }}</x-admin.button></x-slot:action>
+                </x-admin.empty-state>
+            @endif
         @endforelse
-    </div>
-
+        @if($drivers->isNotEmpty())
+            <x-slot:footer>{{ __('admin.list.count', ['shown' => $drivers->count(), 'total' => $total]) }}</x-slot:footer>
+        @endif
+    </x-admin.list>
 </div>

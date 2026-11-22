@@ -36,6 +36,9 @@ class TemplateRequestIndex extends Component
         $this->validate(['note' => 'nullable|string|max:1000', 'templateId' => 'nullable|exists:label_templates,id']);
         $r = TemplateRequest::findOrFail($this->answering);
         $r->update(['status' => $status, 'admin_note' => $this->note ?: null, 'template_id' => $status === 'done' ? $this->templateId : null, 'decided_at' => now()]);
+        if ($status === 'done' && $r->template_id && $r->company) {
+            $r->company->labelTemplates()->syncWithoutDetaching([$r->template_id]); // the ordered template lands in "my templates"
+        }
         $notifier->templateRequestAnswered($r);
         $this->answering = null;
         $this->dispatch('notify', type: 'success', message: __('common.saved'));

@@ -3,15 +3,13 @@
 <head>
 @php
     $url = \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace.item', app()->getLocale(), ['offer' => $offer->slug]);
-    $price = \App\Http\Controllers\Guest\MarketplaceController::numericPrice($offer->price);
     $phone = config('contact.phone');
     $tel = $phone ? 'tel:' . preg_replace('/[^\d+]/', '', $phone) : null;
     $product = [
         '@context' => 'https://schema.org', '@type' => 'Product',
         'name' => $offer->title, 'description' => $offer->description ?: $category->description,
         'category' => $category->name, 'url' => $url,
-    ] + ($offer->image_url ? ['image' => url($offer->image_url)] : [])
-      + ($price ? ['offers' => ['@type' => 'Offer', 'price' => $price, 'priceCurrency' => 'UZS', 'availability' => 'https://schema.org/InStock', 'url' => $url]] : []);
+    ] + ($offer->image_url ? ['image' => url($offer->image_url)] : []);
     $jsonLd = [$product, [
         '@context' => 'https://schema.org', '@type' => 'BreadcrumbList',
         'itemListElement' => [
@@ -29,8 +27,7 @@
     // Chinese characters are wider in results: shorter limits there
     'seoTitle' => (mb_strlen($offer->title . ' — ' . $category->name) <= ($zh = app()->getLocale() === 'zh' ? 22 : 50) ? $offer->title . ' — ' . $category->name : \Illuminate\Support\Str::limit($offer->title, $zh)) . ' | ' . config('app.name'),
     'seoDescription' => \Illuminate\Support\Str::limit(trim(__('marketplace.meta', [
-        'title' => $offer->title, 'text' => rtrim((string) ($offer->description ?: $category->description), '. 。'), 'category' => $category->name,
-        'price' => $offer->price ?: __('offers.price_on_request')])), app()->getLocale() === 'zh' ? 84 : 158),
+        'title' => $offer->title, 'text' => rtrim((string) ($offer->description ?: $category->description), '. 。'), 'category' => $category->name])), app()->getLocale() === 'zh' ? 84 : 158),
     'seoRoute' => 'marketplace.item',
     'seoParams' => ['offer' => $offer->slug],
     'jsonLd' => $jsonLd,
@@ -60,8 +57,6 @@
             <p class="text-sm text-amber-700 font-medium">{{ $category->name }}</p>
             <h1 class="font-display font-bold text-2xl sm:text-3xl text-stone-900 tracking-tight mt-1">{{ $offer->title }}</h1>
             @if($offer->description)<p class="text-stone-600 mt-4 leading-relaxed">{{ $offer->description }}</p>@endif
-
-            <p class="mt-6 text-xl font-semibold text-stone-900">{{ $offer->price ?: __('offers.price_on_request') }}</p>
 
             <div class="flex flex-wrap gap-3 mt-6">
                 @if($offer->action === 'call' && $tel)
@@ -123,7 +118,6 @@
                     <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace.item', app()->getLocale(), ['offer' => $item->slug]) }}" class="bg-white border border-stone-200 rounded-xl p-3 hover:border-amber-400 transition">
                         @if($item->image_url)<img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy" class="h-28 w-full object-contain">@else<div class="h-28 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">@svg($item->icon ?: $category->icon ?: 'heroicon-o-cube', 'w-9 h-9')</div>@endif
                         <p class="font-semibold text-sm text-stone-900 mt-3 leading-snug">{{ $item->title }}</p>
-                        <p class="text-xs text-stone-500 mt-1">{{ $item->price ?: __('offers.price_on_request') }}</p>
                     </a>
                 @endforeach
             </div>
@@ -143,7 +137,6 @@
                                 <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace.item', app()->getLocale(), ['offer' => $item->slug]) }}" class="bg-white border border-stone-200 rounded-lg p-2 hover:border-amber-400 transition">
                                     @if($item->image_url)<img src="{{ $item->image_url }}" alt="{{ $item->title }}" loading="lazy" class="h-16 w-full object-contain">@else<div class="h-16 rounded bg-amber-50 text-amber-700 flex items-center justify-center">@svg($item->icon ?: $cat->icon ?: 'heroicon-o-cube', 'w-6 h-6')</div>@endif
                                     <p class="text-xs font-medium text-stone-800 mt-2 leading-snug line-clamp-2">{{ $item->title }}</p>
-                                    <p class="text-[11px] text-stone-500 mt-0.5 truncate">{{ $item->price ?: __('offers.price_on_request') }}</p>
                                 </a>
                             @endforeach
                             @if($sm || $xs)

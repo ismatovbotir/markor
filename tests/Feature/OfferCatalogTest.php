@@ -47,7 +47,8 @@ class OfferCatalogTest extends TestCase
             ->set('item.title_uz', 'Termo printer X1')
             ->assertSet('item.slug', 'termo-printer-x1')
             ->set('photo', UploadedFile::fake()->image('p.jpg', 400, 300))
-            ->call('save')->assertHasNoErrors()->assertRedirect(route('admin.offers', $printers));
+            ->call('save')->assertHasNoErrors()
+            ->assertRedirect(route('admin.offers.edit', [$printers, $printers->offers()->where('title_uz', 'Termo printer X1')->firstOrFail()])); // a new product continues on its edit page
 
         $item = $printers->offers()->where('title_uz', 'Termo printer X1')->firstOrFail();
         $this->assertSame('termo-printer-x1', $item->slug);

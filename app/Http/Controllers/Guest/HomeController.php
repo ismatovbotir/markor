@@ -9,7 +9,7 @@ use App\Http\Middleware\SetLocale;
 class HomeController extends Controller
 {
     /** Public pages that search engines should index. */
-    private const PUBLIC_ROUTES = ['home', 'studio', 'aslbelgi', 'marketplace', 'faq', 'china', 'contact', 'drivers'];
+    private const PUBLIC_ROUTES = ['home', 'studio', 'aslbelgi', 'marketplace', 'faq', 'china', 'contact', 'drivers', 'news'];
 
     public function index()
     {
@@ -201,6 +201,16 @@ class HomeController extends Controller
                     $xml .= '    <xhtml:link rel="alternate" hreflang="' . $hreflang . '" href="' . e(self::localizedUrl('drivers.show', $alt, ['driver' => $driver->slug])) . '"/>' . "\n";
                 }
                 $xml .= '    <lastmod>' . $driver->updated_at?->toDateString() . "</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n";
+            }
+        }
+
+        foreach (\App\Domain\Content\NewsPost::published()->get(['slug', 'updated_at']) as $post) {
+            foreach (array_keys(SetLocale::LOCALES) as $locale) {
+                $xml .= "  <url>\n    <loc>" . e(self::localizedUrl('news.show', $locale, ['post' => $post->slug])) . "</loc>\n";
+                foreach (SetLocale::HREFLANG as $alt => $hreflang) {
+                    $xml .= '    <xhtml:link rel="alternate" hreflang="' . $hreflang . '" href="' . e(self::localizedUrl('news.show', $alt, ['post' => $post->slug])) . '"/>' . "\n";
+                }
+                $xml .= '    <lastmod>' . $post->updated_at?->toDateString() . "</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n";
             }
         }
 

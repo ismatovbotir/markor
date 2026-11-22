@@ -16,7 +16,7 @@ class MarketplaceItemPageTest extends TestCase
         $category = OfferCategory::create(['slug' => 'printers-page', 'name_uz' => 'Printerlar', 'name_ru' => 'Принтеры', 'icon' => 'heroicon-o-printer', 'is_active' => true, 'sort_order' => 1]);
 
         return Offer::create($extra + ['offer_category_id' => $category->id, 'slug' => 'xprinter-xp-365b', 'category' => 'printers-page', 'title_uz' => 'Xprinter XP-365B',
-            'title_ru' => 'Термопринтер Xprinter XP-365B', 'description_uz' => '20–80 mm etiketkalar uchun.', 'price' => "1 250 000 so'm", 'action' => 'order', 'is_active' => true,
+            'title_ru' => 'Термопринтер Xprinter XP-365B', 'description_uz' => '20–80 mm etiketkalar uchun.', 'action' => 'order', 'is_active' => true,
             'faq' => [['q_uz' => 'Qaysi etiketkalar mos?', 'a_uz' => '20–80 mm.']]]);
     }
 
@@ -24,11 +24,12 @@ class MarketplaceItemPageTest extends TestCase
     {
         $offer = $this->item();
         $html = $this->get(route('marketplace.item', $offer->slug))->assertOk()
-            ->assertSee('<h1', false)->assertSee('Xprinter XP-365B')->assertSee("1 250 000 so'm")
+            ->assertSee('<h1', false)->assertSee('Xprinter XP-365B')
             ->assertSee('<link rel="canonical" href="' . route('marketplace.item', 'xprinter-xp-365b') . '">', false)
             ->assertSee('Qaysi etiketkalar mos?')->getContent();
         $this->assertStringContainsString('"@type":"Product"', $html);
-        $this->assertStringContainsString('"price":1250000', $html);
+        $this->assertStringNotContainsString('"price"', $html);                 // products have no price
+        $this->assertStringNotContainsString("Narxi so'rov bo'yicha", $html);  // no "price on request" label either
         $this->assertStringContainsString('"@type":"BreadcrumbList"', $html);
         $this->assertStringContainsString('"@type":"FAQPage"', $html);
 

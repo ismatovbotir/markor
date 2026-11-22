@@ -8,6 +8,25 @@ class Banner extends Model
 {
     public const STYLES = ['light', 'dark', 'amber'];
 
+    /** Texts kept per language as {field}_{uz|ru|zh}. */
+    public const TRANSLATABLE = ['title', 'text', 'button'];
+
+    /** Admin: fields that make a banner's translation incomplete (the button has a standard text in every language). */
+    public const TRANSLATION_CHECK = ['title', 'text'];
+
+    /** Text limits shared by the admin form (counters) and its validation. */
+    public const LIMITS = ['title' => 160, 'text' => 400, 'button' => 60];
+
+    /** For the admin list: published (on the site now), scheduled (start date not come yet) or hidden (off or ended). */
+    public function status(): string
+    {
+        if (!$this->is_active || ($this->ends_at && $this->ends_at->copy()->endOfDay()->isPast())) {
+            return 'hidden';
+        }
+
+        return $this->starts_at && $this->starts_at->isFuture() ? 'scheduled' : 'published';
+    }
+
     /** Tailwind classes per style: [background, title, text, button]. */
     public const THEMES = [
         'light' => ['bg-stone-100', 'text-stone-900', 'text-stone-600', 'bg-amber-700 text-white hover:bg-amber-800'],

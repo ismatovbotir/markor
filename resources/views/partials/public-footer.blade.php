@@ -17,6 +17,7 @@
             <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('marketplace', app()->getLocale()) }}" class="hover:text-amber-700">{{ __('nav.offers') }}</a>
             <a href="{{ route('guide') }}" class="hover:text-amber-700">{{ __('guide.title') }}</a>
             <a href="{{ HomeController::localizedUrl('drivers', $fLocale) }}" class="hover:text-amber-700">{{ __('drivers.title') }}</a>
+            <a href="{{ HomeController::localizedUrl('news', $fLocale) }}" class="hover:text-amber-700">{{ __('nav.news') }}</a>
         </nav>
         <nav class="flex flex-col gap-2 text-stone-600">
             <a href="{{ \App\Http\Controllers\Guest\HomeController::localizedUrl('faq', app()->getLocale()) }}" class="hover:text-amber-700">{{ __('home.nav.faq') }}</a>

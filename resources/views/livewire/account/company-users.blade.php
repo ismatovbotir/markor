@@ -1,15 +1,19 @@
 @php $field = 'w-full border border-stone-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white'; @endphp
-<div class="w-full">
+<div class="w-full" id="users">
     <div class="flex items-center justify-between gap-4 flex-wrap mb-2">
         <div>
-            <p class="text-xs text-stone-500">{{ $company?->name }}</p>
-            <h1 class="text-xl font-semibold">{{ __('nav.company_users') }}</h1>
+            @if($embedded)
+                <h2 class="text-base font-semibold flex items-center gap-2">@svg('heroicon-o-users', 'w-5 h-5 text-amber-700') {{ __('nav.company_users') }} <span class="text-xs font-normal text-stone-500">{{ $users->count() }}</span></h2>
+            @else
+                <p class="text-xs text-stone-500">{{ $company?->name }}</p>
+                <h1 class="text-xl font-semibold">{{ __('nav.company_users') }}</h1>
+            @endif
         </div>
         @if($isOwner)
             <button wire:click="openCreate" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800">+ {{ __('company_users.add') }}</button>
         @endif
     </div>
-    <p class="text-sm text-stone-500 mb-6">{{ __('company_users.hint') }}</p>
+    <p class="text-sm text-stone-500 {{ $embedded ? 'mb-4' : 'mb-6' }}">{{ __('company_users.hint') }}</p>
 
     <div class="bg-white border border-stone-200 rounded-xl overflow-x-auto">
         <table class="w-full text-sm">
