@@ -920,7 +920,8 @@ window.pdfCodeReader = (groups, systems, fallback) => ({
     // like MarkingCodeParser::detectSystem(): codes that fit one system only decide; else the company's usual
     get system() {
         const pick = (o) => Object.entries(o).sort((a, b) => b[1] - a[1])[0]?.[0];
-        return pick(this.votes) || pick(this.hints) || fallback;
+        // like MarkingCodeParser::detectSystem(): unique structure, the company's own choice, GTIN prefix
+        return pick(this.votes) || fallback || pick(this.hints) || 'aslbelgisi';
     },
     get systemDetected() { return Object.keys(this.votes).length > 0; },
     get systemLabel() { return systems[this.system] || this.system; },

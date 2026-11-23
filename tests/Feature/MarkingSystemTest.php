@@ -75,9 +75,10 @@ class MarkingSystemTest extends TestCase
         $other83 = '0108712345678906' . '21ABCDEFGHIJ123' . '91EE06' . '92' . 'abcdefghijABCDEFGHIJabcdefghijABCDEFGHIJ1234'; // 871: neither
 
         $this->assertSame('chestny_znak', MarkingCodeParser::gtinHint($parser->normalize($ru83)));
-        $this->assertSame(['chestny_znak', false], $parser->detectSystem([$ru83], 'aslbelgisi'));   // prefix beats the company default
-        $this->assertSame(['aslbelgisi', false], $parser->detectSystem([$uz83], 'chestny_znak'));
-        $this->assertSame(['chestny_znak', false], $parser->detectSystem([$other83], 'chestny_znak')); // no hint: the company default
+        $this->assertSame(['chestny_znak', false], $parser->detectSystem([$ru83]));                   // new company: the prefix decides
+        $this->assertSame(['aslbelgisi', false], $parser->detectSystem([$uz83]));
+        $this->assertSame(['chestny_znak', false], $parser->detectSystem([$uz83], 'chestny_znak')); // an exporter's own choice beats a 478 GTIN
+        $this->assertSame(['aslbelgisi', false], $parser->detectSystem([$other83]));                 // no history, no hint: Asl Belgisi
         $this->assertSame(['aslbelgisi', true], $parser->detectSystem([$ru83, self::UZ_90]));       // a unique structure still wins
     }
 

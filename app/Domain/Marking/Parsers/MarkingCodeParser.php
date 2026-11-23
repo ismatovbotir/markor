@@ -125,8 +125,8 @@ class MarkingCodeParser
 
     /**
      * The marking system of a set of codes: decided by any code whose structure exists in one
-     * system only. Returns [system|null, detected]: detected = false when every code fits several
-     * systems (then $fallback is used), system = null when no code is a marking code.
+     * system only. Otherwise (detected = false): the company's usual system ($fallback), then the
+     * GTIN prefix hint, then Asl Belgisi. system = null when no code is a marking code.
      *
      * @param iterable<string> $raws
      * @return array{0: ?string, 1: bool}
@@ -150,14 +150,22 @@ class MarkingCodeParser
 
             return [array_key_first($votes), true];
         }
+        if (!$any) {
+            return [null, false];
+        }
+        // The structure fits several systems. The company's own earlier choice wins (a code belongs to the
+        // country of sale: an Uzbek 478 GTIN exported to Russia carries a Честный ЗНАК code); the GTIN's
+        // GS1 prefix only helps a company without history. Always switchable on the batch.
+        if ($fallback) {
+            return [$fallback, false];
+        }
         if ($hints) {
-            // the structure fits several systems; the GTIN's GS1 prefix breaks the tie (still switchable)
             arsort($hints);
 
             return [array_key_first($hints), false];
         }
 
-        return [$any ? ($fallback ?: \App\Domain\Marking\Support\MarkingSystem::ASLBELGISI) : null, false];
+        return [\App\Domain\Marking\Support\MarkingSystem::ASLBELGISI, false];
     }
 
     /**

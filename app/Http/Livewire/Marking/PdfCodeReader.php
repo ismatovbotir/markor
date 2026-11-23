@@ -32,7 +32,7 @@ class PdfCodeReader extends Component
                 ->map(fn ($g) => ['id' => $g->id, 'name' => $g->{$name} ?: $g->name_uz, 'system' => $g->marking_system ?: MarkingSystem::ASLBELGISI, 'structure' => $g->structure])
                 ->values(),
             'systems'  => MarkingSystem::options(),
-            'fallback' => auth()->user()->company?->marking_system ?: MarkingSystem::ASLBELGISI,
+            'fallback' => auth()->user()->company?->marking_system, // null: no history yet (then the GTIN prefix)
         ]);
     }
 }
