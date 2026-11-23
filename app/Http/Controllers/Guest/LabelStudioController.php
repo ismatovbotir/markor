@@ -190,7 +190,7 @@ class LabelStudioController extends Controller
             'elements'             => 'required|array|min:1|max:40',
             'watermark'            => 'nullable|boolean',             // the small "markor.uz" mark (on unless unchecked)
             'elements.*.type'      => 'required|in:text,barcode,image,mark',
-            'elements.*.mark'      => 'nullable|required_if:elements.*.type,mark|in:' . implode(',', \App\Domain\Printing\Renderers\LayoutRenderer::MARKS),
+            'elements.*.mark'      => ['nullable', 'required_if:elements.*.type,mark', \Illuminate\Validation\Rule::in(\App\Domain\Printing\Models\LabelMark::keys())],
             // the visitor's own image: a PNG / JPEG data URI made in the browser (≤ 1 MB decoded, checked below)
             'elements.*.src'       => 'nullable|string|max:' . (int) ceil(\App\Domain\Printing\Services\LabelImage::MAX_KB * 1024 * 4 / 3 + 64),
             'elements.*.bw'        => 'nullable|boolean',             // image printed black-and-white (default) or grayscale

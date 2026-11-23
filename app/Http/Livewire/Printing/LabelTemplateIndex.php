@@ -114,7 +114,7 @@ class LabelTemplateIndex extends Component
             'elements'             => 'required|array|min:1|max:40',
             'watermark'            => 'nullable|boolean',
             'elements.*.type'      => 'required|in:datamatrix,text,barcode,logo,mark',
-            'elements.*.mark'      => 'nullable|required_if:elements.*.type,mark|in:' . implode(',', \App\Domain\Printing\Renderers\LayoutRenderer::MARKS),
+            'elements.*.mark'      => ['nullable', 'required_if:elements.*.type,mark', \Illuminate\Validation\Rule::in(\App\Domain\Printing\Models\LabelMark::keys())],
             'elements.*.symbology' => 'nullable|in:qr,datamatrix,code128,ean13',
             'elements.*.source'    => 'nullable|string|max:20',
             'elements.*.caption'   => 'nullable|boolean',

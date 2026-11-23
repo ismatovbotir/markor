@@ -147,7 +147,7 @@
             <button type="button" x-on:click="add('barcode', '123456', 'code128', headers[0] || '')" class="{{ $chip }}">Code 128</button>
             <button type="button" x-on:click="add('barcode', '4780000000007', 'ean13', headers[0] || '')" class="{{ $chip }}">EAN-13</button>
             <button type="button" x-on:click="pickImage()" class="{{ $chip }} inline-flex items-center gap-1">@svg('heroicon-o-photo', 'w-3.5 h-3.5') {{ __('studio.image_add') }}</button>
-            <button type="button" x-on:click="add('mark', 'aslbelgi')" class="{{ $chip }} inline-flex items-center gap-1" title="{{ __('labels.mark_hint') }}"><img src="/images/marks/aslbelgi.png" alt="" class="w-3.5 h-3.5"> {{ __('labels.mark_aslbelgi') }}</button>
+            @include('partials.label-marks-menu', ['chip' => $chip])
             <input x-ref="imageInput" type="file" accept=".png,.jpg,.jpeg,image/png,image/jpeg" class="hidden" x-on:change="imageChosen($event)">
             <span class="w-px h-4 bg-stone-300 mx-1"></span>
             <button type="button" x-on:click="add('text', '', 'qr', '@date')" class="{{ $chip }}">{{ __('studio.source_date') }}</button>

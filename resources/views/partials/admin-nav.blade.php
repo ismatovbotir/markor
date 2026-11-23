@@ -52,6 +52,8 @@
             ['href' => route('admin.drivers'), 'label' => __('nav.drivers'), 'icon' => 'heroicon-o-arrow-down-tray', 'active' => request()->routeIs('admin.drivers*'),
                 'gap' => AdminI18n::incompleteCount(PrinterDriver::class, PrinterDriver::TRANSLATABLE), 'gapHref' => route('admin.drivers', ['missing' => 1])],
             ['href' => route('label-templates.index'), 'label' => __('nav.templates'), 'icon' => 'heroicon-o-document-duplicate', 'active' => request()->routeIs('label-templates.*')],
+            ['href' => route('admin.label-marks'), 'label' => __('nav.label_marks'), 'icon' => 'heroicon-o-check-badge', 'active' => request()->routeIs('admin.label-marks*'),
+                'gap' => AdminI18n::incompleteCount(\App\Domain\Printing\Models\LabelMark::class, \App\Domain\Printing\Models\LabelMark::TRANSLATABLE), 'gapHref' => route('admin.label-marks', ['missing' => 1])],
             ['href' => route('admin.seo'), 'label' => 'SEO', 'icon' => 'heroicon-o-magnifying-glass', 'active' => request()->routeIs('admin.seo'), 'flag' => \App\Support\Seo::noindex() ? 'noindex' : null],
         ]],
         ['key' => 'system', 'label' => __('nav.group.system'), 'items' => [

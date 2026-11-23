@@ -52,7 +52,7 @@ window.labelEditor = (initial, sampleDm, sample) => ({
     },
     // Logo / own image: shown fitted in the box; black-and-white like on the printed label.
     imageSrc(el) {
-        if (el.type === 'mark') return `/images/marks/${el.mark || 'aslbelgi'}.png`;
+        if (el.type === 'mark') return (window.labelMarks || {})[el.mark || 'aslbelgi'] || ''; // urls from partials/label-marks-menu
         return el.type === 'logo' ? this.sampleLogo : (el.src || '');
     },
     imageFilter(el) {

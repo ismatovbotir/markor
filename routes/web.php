@@ -144,6 +144,9 @@ Route::middleware(['auth', 'can:admin'])->prefix('admin')->group(function () {
     Route::get('/drivers', \App\Http\Livewire\Admin\DriverIndex::class)->name('admin.drivers');
     Route::get('/drivers/create', \App\Http\Livewire\Admin\DriverForm::class)->name('admin.drivers.create');
     Route::get('/drivers/{driver}/edit', \App\Http\Livewire\Admin\DriverForm::class)->name('admin.drivers.edit');
+    Route::get('/label-marks', \App\Http\Livewire\Admin\LabelMarkIndex::class)->name('admin.label-marks');
+    Route::get('/label-marks/create', \App\Http\Livewire\Admin\LabelMarkForm::class)->name('admin.label-marks.create');
+    Route::get('/label-marks/{mark}/edit', \App\Http\Livewire\Admin\LabelMarkForm::class)->name('admin.label-marks.edit');
     Route::get('/news', \App\Http\Livewire\Admin\NewsIndex::class)->name('admin.news');
     Route::get('/news/create', \App\Http\Livewire\Admin\NewsForm::class)->name('admin.news.create');
     Route::get('/news/{post}/edit', \App\Http\Livewire\Admin\NewsForm::class)->name('admin.news.edit');

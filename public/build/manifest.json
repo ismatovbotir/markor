@@ -8,7 +8,7 @@
     "src": "node_modules/zxing-wasm/dist/reader/zxing_reader.wasm"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DXNVbVuk.css",
+    "file": "assets/app-DvLdMFsF.css",
     "name": "app",
     "names": [
       "app.css"
@@ -17,7 +17,7 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-Ks5-eXd8.js",
+    "file": "assets/app--yRZGfmI.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -26,7 +26,7 @@
     ]
   },
   "resources/js/pdf-code-reader/decoder.js": {
-    "file": "assets/decoder-D0xEhRbt.js",
+    "file": "assets/decoder-APgAWAtt.js",
     "name": "decoder",
     "src": "resources/js/pdf-code-reader/decoder.js",
     "isDynamicEntry": true,

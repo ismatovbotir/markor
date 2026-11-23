@@ -148,26 +148,25 @@ class LayoutRenderer
         return $html . '</div>';
     }
 
-    /** The image fitted inside a w×h mm box (contain, centred) — dompdf has no object-fit. */
-    /** Standard signs a label can carry (public/images/marks/{key}.png, black and white). */
-    public const MARKS = ['aslbelgi'];
-
-    /** One sign as ['uri', 'w', 'h'], read once per process (thousands of labels share it). */
+    /** One label icon (LabelMark, managed in the admin) as ['uri', 'w', 'h'], read once per process and image version. */
     public static function mark(string $key): ?array
     {
         static $cache = [];
-        if (!in_array($key, self::MARKS, true)) {
+        $m = \App\Domain\Printing\Models\LabelMark::cached()[$key] ?? null;
+        $file = \App\Domain\Printing\Models\LabelMark::fileOf($m['path'] ?? null);
+        if (!$file) {
             return null;
         }
-        if (!array_key_exists($key, $cache)) {
-            $path = public_path("images/marks/$key.png");
-            $info = is_file($path) ? @getimagesize($path) : false;
-            $cache[$key] = $info ? ['uri' => 'data:image/png;base64,' . base64_encode(file_get_contents($path)), 'w' => $info[0], 'h' => $info[1]] : null;
+        $id = $key . '@' . $m['path']; // a replaced image always gets a new file name
+        if (!array_key_exists($id, $cache)) {
+            $info = is_file($file) ? @getimagesize($file) : false;
+            $cache[$id] = $info ? ['uri' => 'data:' . $info['mime'] . ';base64,' . base64_encode(file_get_contents($file)), 'w' => $info[0], 'h' => $info[1]] : null;
         }
 
-        return $cache[$key];
+        return $cache[$id];
     }
 
+    /** The image fitted inside a w×h mm box (contain, centred) — dompdf has no object-fit. */
     public static function fittedImage(array $image, float $w, float $h): string
     {
         $ratio = max(0.0001, $image['w']) / max(0.0001, $image['h']);
