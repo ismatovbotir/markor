@@ -53,7 +53,7 @@ class OfferCategory extends Model
     {
         $pdf = app(\App\Domain\Printing\Services\LabelPdfService::class);
 
-        return \App\Domain\Printing\Models\LabelTemplate::orderByDesc('is_default')->orderBy('name')->limit(self::SHOWN_ITEMS)->get()
+        return \App\Domain\Printing\Models\LabelTemplate::public()->orderByDesc('is_default')->orderBy('name')->limit(self::SHOWN_ITEMS)->get()
             ->mapWithKeys(fn ($t) => [$t->id => $pdf->previewDocument($t)])->all();
     }
 

@@ -38,8 +38,10 @@ class MyTemplatesTest extends TestCase
             ->set('width', 64)->assertDontSee('Karobka 58×40')                                                 // 6 mm away
             ->set('width', '')->set('height', 22)->assertSee('Default 20×20')->assertSee('Kichik 25×25')->assertDontSee('Karobka 58×40')
             ->call('clearSize')->call('toggleMine', $b->id)->call('toggleMine', $c->id)
-            ->set('mine', true)->assertSee('Karobka 58×40')->assertDontSee('Default 20×20')
-            ->call('toggleMine', $c->id)->assertDontSee('Kichik 25×25');
+            ->assertViewHas('mineList', fn ($list) => $list->pluck('id')->sort()->values()->all() === collect([$b->id, $c->id])->sort()->values()->all())
+            ->call('toggleMine', $c->id)
+            ->assertViewHas('mineList', fn ($list) => $list->pluck('id')->all() === [$b->id])
+            ->assertViewHas('global', fn ($list) => $list->count() === LabelTemplate::count()); // the global block always lists everything
 
         // chosen: only "my templates" are offered for PDF / Telegram
         $this->assertSame([$b->id], LabelTemplate::forCompany($company->fresh())->pluck('id')->all());

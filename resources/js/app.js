@@ -898,3 +898,100 @@ window.orderModal = (config) => ({
 
 // Super admin: the multilingual form (x-admin.i18n-form)
 import './admin/i18n-form.js';
+
+// Client: read DataMatrix codes from the client's own PDF files, in the browser (the PDF is not
+// uploaded), and save them as a CSV for the normal import. Prototype (beta).
+window.pdfCodeReader = (groups, systems, fallback) => ({
+    state: 'idle', // idle | reading | done
+    files: [],
+    progress: { file: '', page: 0, pages: 0 },
+    pages: [],      // [{ file, page, decoded, unreadable }]
+    codes: [],      // unique, valid codes in reading order
+    rejected: [],   // [{ file, page, text }] decoded but not a marking code of any category
+    duplicates: 0,
+    notGs1: 0,
+    votes: {},      // system => codes that fit only that system
+    hints: {},      // system => ambiguous codes whose GTIN prefix points to it (460–469 RU, 478 UZ)
+    error: '',
+    cancelled: false,
+    started: 0,
+    seconds: 0,
+
+    // like MarkingCodeParser::detectSystem(): codes that fit one system only decide; else the company's usual
+    get system() {
+        const pick = (o) => Object.entries(o).sort((a, b) => b[1] - a[1])[0]?.[0];
+        return pick(this.votes) || pick(this.hints) || fallback;
+    },
+    get systemDetected() { return Object.keys(this.votes).length > 0; },
+    get systemLabel() { return systems[this.system] || this.system; },
+    get unreadable() { return this.pages.reduce((n, p) => n + p.unreadable, 0); },
+    get problemPages() { return this.pages.filter((p) => p.unreadable > 0); },
+    get byGtin() {
+        const m = {};
+        for (const c of this.codes) {
+            const g = (c.found.find((f) => f.group.system === this.system) || c.found[0]).group.name;
+            const k = c.gtin + '|' + g;
+            (m[k] ??= { gtin: c.gtin, group: g, count: 0 }).count++;
+        }
+        return Object.values(m).sort((a, b) => b.count - a.count);
+    },
+
+    pick(event) {
+        this.files = [...event.target.files].filter((f) => /\.pdf$/i.test(f.name) || f.type === 'application/pdf');
+        event.target.value = '';
+        if (this.files.length) this.read();
+    },
+
+    async read() {
+        Object.assign(this, { state: 'reading', pages: [], codes: [], rejected: [], duplicates: 0, notGs1: 0, votes: {}, hints: {}, error: '', cancelled: false, started: Date.now() });
+        const seen = new Set();
+        try {
+            const { readPdf, normalize, matchStructures } = await import('./pdf-code-reader/decoder.js');
+            for (const file of this.files) {
+                if (this.cancelled) break;
+                this.progress = { file: file.name, page: 0, pages: 0 };
+                await readPdf(file, {
+                    isCancelled: () => this.cancelled,
+                    onPage: ({ page, pages, decoded, unreadable }) => {
+                        this.progress = { file: file.name, page, pages };
+                        this.pages.push({ file: file.name, page, decoded: decoded.length, unreadable });
+                        for (const d of decoded) {
+                            const code = normalize(d.text);
+                            const found = matchStructures(code, groups);
+                            if (!found.length) { this.rejected.push({ file: file.name, page, text: code }); continue; }
+                            if (seen.has(code)) { this.duplicates++; continue; }
+                            seen.add(code);
+                            if (!d.gs1) this.notGs1++;
+                            const fits = [...new Set(found.map((f) => f.group.system))];
+                            if (fits.length === 1) {
+                                this.votes[fits[0]] = (this.votes[fits[0]] || 0) + 1;
+                            } else {
+                                // GS1 prefix of the GTIN as a tie-breaker (like MarkingCodeParser::gtinHint)
+                                const prefix = Number(code.slice(3, 6));
+                                const hint = prefix >= 460 && prefix <= 469 ? 'chestny_znak' : prefix === 478 ? 'aslbelgisi' : null;
+                                if (hint && fits.includes(hint)) this.hints[hint] = (this.hints[hint] || 0) + 1;
+                            }
+                            this.codes.push({ code, gtin: found[0].gtin, found });
+                        }
+                    },
+                });
+            }
+        } catch (e) {
+            this.error = e?.message || String(e);
+        }
+        this.seconds = Math.round((Date.now() - this.started) / 1000);
+        this.state = 'done';
+    },
+
+    // one code per line, exactly what the CSV import reads (codes may contain quotes and commas)
+    download() {
+        const blob = new Blob([this.codes.map((c) => c.code).join('\n') + '\n'], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = (this.files.length === 1 ? this.files[0].name.replace(/\.pdf$/i, '') : 'codes') + '.csv';
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    },
+
+    reset() { Object.assign(this, { state: 'idle', files: [], pages: [], codes: [], rejected: [], error: '' }); },
+});

@@ -45,7 +45,7 @@
                 </div>
             </template>
             {{-- "markor.uz" mark at its real size and place (keep this corner free) --}}
-            <div x-show="watermarkShown" x-cloak class="absolute z-20 pointer-events-none text-black text-right whitespace-nowrap" :style="watermarkStyle()">markor.uz</div>
+            <div x-show="watermarkShown" x-cloak class="absolute z-20 pointer-events-none text-[#8c8c8c] text-right whitespace-nowrap" :style="watermarkStyle()">markor.uz</div>
         </div>
 
         {{-- The rest of the row: read-only copies of the label --}}
@@ -68,7 +68,7 @@
                         </template>
                     </div>
                 </template>
-                <div x-show="watermarkShown" class="absolute text-black text-right whitespace-nowrap" :style="watermarkStyle()">markor.uz</div>
+                <div x-show="watermarkShown" class="absolute text-[#8c8c8c] text-right whitespace-nowrap" :style="watermarkStyle()">markor.uz</div>
             </div>
         </template>
         </div>

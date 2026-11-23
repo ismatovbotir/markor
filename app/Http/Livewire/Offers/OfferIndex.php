@@ -13,7 +13,7 @@ class OfferIndex extends Component
 {
     public function render(LabelPdfService $pdf)
     {
-        $templates = LabelTemplate::orderByDesc('is_default')->orderBy('name')->limit(OfferCategory::SHOWN_ITEMS)->get();
+        $templates = LabelTemplate::public()->orderByDesc('is_default')->orderBy('name')->limit(OfferCategory::SHOWN_ITEMS)->get();
 
         return view('livewire.offers.offer-index', [
             'catalog'          => OfferCategory::catalog(),

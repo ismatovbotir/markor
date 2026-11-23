@@ -37,6 +37,24 @@ class LayoutRenderer
         return $this;
     }
 
+    /** Product labels have no marking code: the template's DataMatrix area shows the Markor logo. */
+    private bool $markorInCodeArea = false;
+
+    public function withMarkorInCodeArea(bool $on = true): static
+    {
+        $this->markorInCodeArea = $on;
+
+        return $this;
+    }
+
+    /** The Markor mark (square logo) as an image for fittedImage(). */
+    public static function markorLogo(): array
+    {
+        static $logo = null;
+
+        return $logo ??= ['uri' => 'data:image/svg+xml;base64,' . base64_encode((string) file_get_contents(public_path('images/mark.svg'))), 'w' => 190, 'h' => 190];
+    }
+
     /**
      * @param array{width_mm:int|float, height_mm:int|float, elements:array} $label
      * @param array<string,string> $row      values available to bound elements
@@ -68,6 +86,10 @@ class LayoutRenderer
             }
 
             if ($el['type'] === 'datamatrix') {
+                if (!$code && $this->markorInCodeArea) {
+                    $html .= LabelTemplate::elementBox($el, '', self::fittedImage(self::markorLogo(), $w, $h));
+                    continue;
+                }
                 if ($code) {
                     $html .= LabelTemplate::elementBox($el, '', sprintf(
                         '<img src="%s" style="display:block;width:%smm;height:%smm;">',
@@ -157,14 +179,14 @@ class LayoutRenderer
         );
     }
 
-    /** "markor.uz", black 4 pt, right-aligned in the bottom-right box, on top of everything. */
+    /** "markor.uz", grey 4 pt, right-aligned in the bottom-right box, on top of everything. */
     public static function watermark(float $widthMm, float $heightMm): string
     {
         $m = LabelTemplate::WATERMARK_MARGIN;
 
         return sprintf(
             '<div style="position:absolute;left:%smm;top:%smm;width:%smm;height:%smm;overflow:visible;z-index:10;'
-            . 'font-family:\'DejaVu Sans\',sans-serif;font-size:%dpt;line-height:%smm;font-weight:normal;color:#000;text-align:right;white-space:nowrap;">%s</div>',
+            . 'font-family:\'DejaVu Sans\',sans-serif;font-size:%dpt;line-height:%smm;font-weight:normal;color:#8c8c8c;text-align:right;white-space:nowrap;">%s</div>',
             LabelTemplate::mm($widthMm - $m - LabelTemplate::WATERMARK_W), LabelTemplate::mm($heightMm - $m - LabelTemplate::WATERMARK_H),
             LabelTemplate::mm(LabelTemplate::WATERMARK_W), LabelTemplate::mm(LabelTemplate::WATERMARK_H),
             // line-height 1.4 mm puts the baseline ≈0.55 mm above the label edge in dompdf (measured)
@@ -192,17 +214,32 @@ class LayoutRenderer
     /** The values an Asl Belgisi template can bind to, for one marking code. */
     public static function markingRow(MarkingCode $code, ?string $batchName): array
     {
-        $product = $code->product?->forCompany($code->company_id); // the company's own name, if it gave one
+        $product = $code->product; // the company's own product
 
         return [
             'gtin'   => (string) $code->gtin,
             'serial' => (string) $code->serial,
-            'name'   => (string) ($product?->name ?: $code->gtin), // not named (unknown to the classifier): the GTIN
-            'sku'    => (string) ($product?->sku ?? ''),
             'batch'  => (string) ($batchName ?? ''),
             'code'   => (string) $code->code,
             'date'   => now()->format('d.m.Y'), // legacy {date} placeholder
-        ];
+        ] + self::productFields($product, (string) $code->gtin);
+    }
+
+    /** A product label (no marking code): the card's fields; serial / batch / code stay empty. */
+    public static function productRow(\App\Domain\Catalog\Models\Product $product): array
+    {
+        return ['gtin' => (string) $product->gtin, 'serial' => '', 'batch' => '', 'code' => '', 'date' => now()->format('d.m.Y')]
+            + self::productFields($product, (string) $product->gtin);
+    }
+
+    private static function productFields(?\App\Domain\Catalog\Models\Product $product, string $gtin): array
+    {
+        $row = ['name' => (string) ($product?->name ?: $gtin)]; // not named yet: the GTIN
+        foreach (['sku', 'description', 'weight', 'manufacturer', 'country', 'shelf_life'] as $field) {
+            $row[$field] = (string) ($product?->{$field} ?? '');
+        }
+
+        return $row;
     }
 
     /** Field keys of Asl Belgisi templates with their display names (for the editor dropdown and captions). */
@@ -215,6 +252,12 @@ class LayoutRenderer
             'sku'    => 'SKU',
             'batch'  => __('templates.field.batch'),
             'code'   => __('templates.field.code'),
+            // product card fields
+            'description'  => __('products.field.description'),
+            'weight'       => __('products.field.weight'),
+            'manufacturer' => __('products.field.manufacturer'),
+            'country'      => __('products.field.country'),
+            'shelf_life'   => __('products.field.shelf_life'),
         ];
     }
 }

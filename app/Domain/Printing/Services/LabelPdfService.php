@@ -45,6 +45,33 @@ class LabelPdfService
     }
 
     /**
+     * One label of a product (no marking code): [css, label html]. The template's DataMatrix area shows
+     * the Markor logo; copies are set in the system print dialog.
+     */
+    public function productLabelHtml(LabelTemplate $template, \App\Domain\Catalog\Models\Product $product, ?array $logo = null): array
+    {
+        if ($template->layout) {
+            $renderer = app(LayoutRenderer::class)->withLogo($logo)->withMarkorInCodeArea();
+
+            return ['', $renderer->render($template->labelDefinition(), LayoutRenderer::productRow($product), 0, now(), null, LayoutRenderer::markingFields())];
+        }
+
+        // older HTML-only templates: placeholders, the code placeholder becomes the Markor logo
+        [$css, $body] = $this->splitStyles($template->template);
+        $row = LayoutRenderer::productRow($product);
+        $logoImg = '<img class="datamatrix" src="' . LayoutRenderer::markorLogo()['uri'] . '">';
+
+        return [$css, strtr($body, ['{datamatrix}' => $logoImg] + collect($row)->mapWithKeys(fn ($v, $k) => ['{' . $k . '}' => e($v)])->all())];
+    }
+
+    public function productLabelPdf(LabelTemplate $template, \App\Domain\Catalog\Models\Product $product, ?array $logo = null): string
+    {
+        [$css, $label] = $this->productLabelHtml($template, $product, $logo);
+
+        return $this->pdfFromPages($template->width_mm, $template->height_mm, $css, [$label], 1, 0);
+    }
+
+    /**
      * The same labels as pdf(), as HTML for the browser print page: [css, [label html, ...]].
      * @param iterable<MarkingCode> $codes
      */
@@ -173,7 +200,7 @@ HTML;
             'serial'      => 'AF9-&eDmMbl?6CkOyAEB',
             'crypto_tail' => 'UZF0TDRFasF7Lf27Qv4/muaq3qoqmZ5x3WAKhKoLmzlyNi4=',
         ]);
-        $code->setRelation('product', new \App\Domain\Catalog\Models\Product(['name_uz' => __('templates.sample_name'), 'name_ru' => __('templates.sample_name'), 'sku' => 'SKU-001']));
+        $code->setRelation('product', new \App\Domain\Catalog\Models\Product(['name' => __('templates.sample_name'), 'sku' => 'SKU-001', 'description' => __('templates.sample_description'), 'weight' => '0.5 kg', 'manufacturer' => 'Markor', 'country' => "O'zbekiston", 'shelf_life' => '24']));
 
         return $code;
     }

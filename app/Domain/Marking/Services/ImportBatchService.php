@@ -81,4 +81,38 @@ class ImportBatchService
             'uploaded_by' => $userId, 'company_id' => \App\Models\User::find($userId)?->company_id, 'status' => 'pending', 'source' => $source,
         ]);
     }
+
+    /**
+     * The client says which marking system a batch is for, when its codes fit several (the same
+     * structure exists in Asl Belgisi and Честный ЗНАК). Each code moves to the category of the
+     * other system with the same structure; the company remembers the choice for next files.
+     */
+    public function switchSystem(ImportBatch $batch, string $system): void
+    {
+        if (!in_array($system, \App\Domain\Marking\Support\MarkingSystem::ALL, true)) {
+            throw new \DomainException('marking_system.unknown');
+        }
+        if ($batch->marking_system_detected) {
+            throw new \DomainException('marking_system.fixed'); // the codes themselves tell the system
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($batch, $system) {
+            $groups = \App\Domain\Catalog\Models\ProductGroup::active()->whereNotNull('structure')->get();
+            $key = fn ($g) => json_encode(array_map(fn ($s) => [(string) $s['ai'], (int) $s['length']], $g->structure));
+            $target = $groups->where('marking_system', $system)->keyBy($key);
+
+            $used = MarkingCode::withoutGlobalScope('owner')->where('import_batch_id', $batch->id)
+                ->whereNotNull('product_group_id')->distinct()->pluck('product_group_id');
+            foreach ($groups->whereIn('id', $used) as $from) {
+                if (($to = $target->get($key($from))) && $to->id !== $from->id) {
+                    MarkingCode::withoutGlobalScope('owner')->where('import_batch_id', $batch->id)
+                        ->where('product_group_id', $from->id)->update(['product_group_id' => $to->id]);
+                }
+            }
+
+            $batch->update(['marking_system' => $system]);
+            $batch->company?->update(['marking_system' => $system]);
+            \App\Domain\Reporting\AuditLog::record('import_batch.marking_system', 'import_batch', $batch->id, ['system' => $system]);
+        });
+    }
 }

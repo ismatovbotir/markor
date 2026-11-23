@@ -19,6 +19,14 @@
         </x-slot:actions>
     </x-admin.page-header>
 
+    {{-- owner filter: all / made by the super admin / made by clients --}}
+    <div class="flex flex-wrap gap-2 mb-3 text-sm" role="group" aria-label="{{ __('templates.owner') }}">
+        @foreach(['' => __('templates.owner_all'), 'global' => __('templates.owner_global'), 'clients' => __('templates.owner_clients'), 'deleted' => __('templates.owner_deleted')] as $key => $label)
+            <button type="button" wire:click="$set('owner', @js($key))" aria-pressed="{{ $owner === $key ? 'true' : 'false' }}"
+                    class="admin-focus px-3 py-1.5 rounded-full border {{ $owner === $key ? 'bg-amber-100 border-amber-300 text-amber-900' : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-100' }}">{{ $label }}</button>
+        @endforeach
+    </div>
+
     {{-- names are in one language for now, so the languages column stays empty --}}
     <x-admin.list wide :head="[__('common.name'), __('templates.size'), '', __('admin.list.updated'), __('admin.list.actions')]">
         @forelse($templates as $t)
@@ -29,6 +37,19 @@
                         <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 text-amber-800 ring-1 ring-amber-300 px-1.5 py-0.5 text-[11px] font-medium" title="{{ __('templates.default_hint') }}">@svg('heroicon-o-star', 'w-3 h-3') {{ __('templates.default') }}</span>
                     @endif
                     @if(($t->columns ?: 1) > 1)<span>{{ $t->columns }}{{ __('templates.per_row_short') }}</span>@endif
+                    @if($t->company_id)
+                        <span class="inline-flex items-center gap-1 text-stone-600">@svg('heroicon-o-building-office', 'w-3 h-3') {{ $t->company?->name ?? '#' . $t->company_id }}</span>
+                        @if($t->client_deleted_at && !$t->shared_at)
+                            <span class="rounded-full bg-rose-50 text-rose-700 ring-1 ring-rose-200 px-1.5 py-0.5 text-[11px] font-medium" title="{{ $t->client_deleted_at->format('d.m.Y H:i') }}">{{ __('templates.status_deleted') }}</span>
+                        @endif
+                        @if($t->shared_at)
+                            <span class="rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 px-1.5 py-0.5 text-[11px] font-medium">{{ __('templates.status_global') }}</span>
+                        @elseif($t->share_consent)
+                            <span class="rounded-full bg-sky-50 text-sky-800 ring-1 ring-sky-200 px-1.5 py-0.5 text-[11px] font-medium">{{ __('templates.status_consent') }}</span>
+                        @else
+                            <span class="rounded-full bg-stone-100 text-stone-600 px-1.5 py-0.5 text-[11px]">{{ __('templates.status_private') }}</span>
+                        @endif
+                    @endif
                 </x-slot:meta>
                 <x-slot:status><span class="text-sm text-stone-700 tabular-nums whitespace-nowrap">{{ $t->width_mm }}×{{ $t->height_mm }} mm</span></x-slot:status>
                 <x-slot:updated><time datetime="{{ $t->updated_at?->toIso8601String() }}" title="{{ $t->updated_at?->format('d.m.Y H:i') }}">{{ $t->updated_at?->isToday() ? $t->updated_at->format('H:i') : $t->updated_at?->format('d.m.Y') }}</time></x-slot:updated>
@@ -38,8 +59,17 @@
                     @can('update', $t)
                         <button type="button" wire:click="openEdit({{ $t->id }})" class="admin-focus px-2.5 py-1.5 rounded-lg text-sm text-amber-800 hover:bg-amber-50 font-medium">{{ __('common.edit') }}</button>
                     @endcan
-                    @canany(['create', 'delete'], $t)
+                    @if($t->company_id || auth()->user()->can('create', LabelTemplate::class) || auth()->user()->can('delete', $t))
                         <x-admin.row-menu>
+                            @if($t->company_id && $t->shared_at)
+                                <x-admin.menu-item wire:click="share({{ $t->id }}, false)">{{ __('templates.unpublish') }}</x-admin.menu-item>
+                            @elseif($t->company_id)
+                                @can('publish', $t)
+                                    <x-admin.menu-item wire:click="share({{ $t->id }}, true)">{{ $t->client_deleted_at ? __('templates.accept_global') : __('templates.publish') }}</x-admin.menu-item>
+                                @else
+                                    <span class="block px-3 py-2 text-xs text-stone-400">{{ __('templates.publish_needs_consent') }}</span>
+                                @endcan
+                            @endif
                             @can('create', LabelTemplate::class)
                                 <x-admin.menu-item wire:click="openCopy({{ $t->id }})">{{ __('templates.copy') }}</x-admin.menu-item>
                             @endcan
@@ -47,7 +77,7 @@
                                 <x-admin.menu-item danger x-on:click="$dispatch('confirm-delete', { title: {{ Js::from(__('templates.delete_title')) }}, name: {{ Js::from($t->name) }}, text: {{ Js::from(__('templates.delete_text')) }}, run: () => $wire.delete({{ $t->id }}) })">{{ __('common.delete') }}…</x-admin.menu-item>
                             @endcan
                         </x-admin.row-menu>
-                    @endcanany
+                    @endif
                 </x-slot:actions>
             </x-admin.list-row>
         @empty
@@ -59,75 +89,5 @@
     </x-admin.list>
     @if($templates->hasPages())<div class="mt-4">{{ $templates->links() }}</div>@endif
 
-    @if($showForm)
-        @php
-            $input = 'border border-stone-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white';
-            $chip = 'px-2.5 py-1 border border-stone-300 rounded-md hover:bg-stone-100 bg-white';
-        @endphp
-        <div class="fixed inset-0 bg-stone-50 z-40 overflow-y-auto" wire:key="editor-{{ $editorKey }}">
-            <div class="max-w-6xl mx-auto px-4 py-6" wire:ignore
-                 x-data="labelEditor(@js($editor), @js($sampleDm), @js($sample))"
-                 x-on:pointermove.window="move($event)" x-on:pointerup.window="stop()">
-
-                <div class="flex items-center justify-between gap-4 flex-wrap mb-5">
-                    <div>
-                        <p class="text-xs text-stone-500">{{ __('nav.template_designer') }}</p>
-                        <h1 class="text-xl font-semibold">{{ $editingId ? __('common.edit') : __('templates.new') }}</h1>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button type="button" x-on:click="$wire.set('showForm', false)" class="px-4 py-2 text-sm text-stone-600 hover:text-stone-800">{{ __('common.cancel') }}</button>
-                        <button type="button" x-on:click="save()" :disabled="saving" class="px-5 py-2 bg-amber-700 text-white rounded-lg text-sm font-medium hover:bg-amber-800 transition disabled:opacity-50">{{ __('common.save') }}</button>
-                    </div>
-                </div>
-
-                {{-- 1. Template --}}
-                <section class="bg-white border border-stone-200 rounded-xl p-5 mb-4">
-                    <h2 class="font-semibold mb-3"><span class="text-amber-700">1.</span> {{ __('templates.step_template') }}</h2>
-                    <div class="flex items-end gap-3 flex-wrap text-sm text-stone-600">
-                        <label class="flex-1 min-w-60">
-                            <span class="block text-xs font-medium mb-1">{{ __('common.name') }}</span>
-                            <input x-model="name" type="text" class="{{ $input }} w-full">
-                        </label>
-                        <label><span class="block text-xs font-medium mb-1">{{ __('templates.width') }}</span><input x-model.number="width" x-on:change="clampAll()" type="number" min="10" max="300" class="{{ $input }} w-24"></label>
-                        <label><span class="block text-xs font-medium mb-1">{{ __('templates.height') }}</span><input x-model.number="height" x-on:change="clampAll()" type="number" min="10" max="300" class="{{ $input }} w-24"></label>
-                        <label><span class="block text-xs font-medium mb-1">{{ __('templates.columns') }}</span><input x-model.number="columns" type="number" min="1" max="10" class="{{ $input }} w-20"></label>
-                        <label><span class="block text-xs font-medium mb-1">{{ __('templates.gap') }}</span><input x-model.number="gap" type="number" min="0" max="30" step="0.5" class="{{ $input }} w-20"></label>
-                        <label title="{{ __('templates.labels_per_pdf_hint') }}"><span class="block text-xs font-medium mb-1">{{ __('templates.labels_per_pdf') }}</span><input x-model.number="labelsPerPdf" type="number" min="100" max="10000" step="100" class="{{ $input }} w-24"></label>
-                        <button type="button" x-on:click="rotateLabel()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 border border-stone-300 rounded-lg text-xs hover:bg-stone-100 whitespace-nowrap">
-                            @svg('heroicon-o-arrow-path', 'w-3.5 h-3.5') {{ __('templates.rotate_label') }}
-                        </button>
-                        <span class="inline-flex items-center gap-2 flex-wrap pb-1.5">@include('partials.label-watermark-toggle')</span>
-                    </div>
-                </section>
-
-                {{-- 2. Design --}}
-                <section class="bg-white border border-stone-200 rounded-xl p-5 mb-4">
-                    <h2 class="font-semibold mb-3"><span class="text-amber-700">2.</span> {{ __('studio.step_design') }}</h2>
-                    <div class="flex items-center gap-2 mb-2 flex-wrap text-xs">
-                        <span class="text-stone-500">{{ __('templates.add') }}:</span>
-                        <button type="button" x-on:click="add('datamatrix')" class="{{ $chip }} border-amber-400 text-amber-800 font-medium">{{ __('templates.marking_dm') }}</button>
-                        <button type="button" x-on:click="add('text', @js(__('templates.text')))" class="{{ $chip }}">{{ __('templates.text') }}</button>
-                        <button type="button" x-on:click="add('barcode', '', 'qr', 'code')" class="{{ $chip }}">QR</button>
-                        <button type="button" x-on:click="add('barcode', '', 'code128', 'gtin')" class="{{ $chip }}">Code 128</button>
-                        <button type="button" x-on:click="add('barcode', '', 'ean13', 'gtin')" class="{{ $chip }}">EAN-13</button>
-                        <button type="button" x-on:click="add('logo')" class="{{ $chip }} inline-flex items-center gap-1">@svg('heroicon-o-photo', 'w-3.5 h-3.5') {{ __('templates.logo') }}</button>
-                        <button type="button" x-on:click="add('mark', 'aslbelgi')" class="{{ $chip }} inline-flex items-center gap-1" title="{{ __('labels.mark_hint') }}"><img src="/images/marks/aslbelgi.png" alt="" class="w-3.5 h-3.5"> {{ __('labels.mark_aslbelgi') }}</button>
-                        <span class="w-px h-4 bg-stone-300 mx-1"></span>
-                        <button type="button" x-on:click="add('text', '', 'qr', '@date')" class="{{ $chip }}">{{ __('studio.source_date') }}</button>
-                        <button type="button" x-on:click="add('text', '', 'qr', '@serial')" class="{{ $chip }}">{{ __('studio.source_serial') }}</button>
-                    </div>
-                    <div class="flex items-center gap-2 mb-3 flex-wrap text-xs">
-                        <span class="text-stone-500">{{ __('templates.fields') }}:</span>
-                        <template x-for="f in fields" :key="f.value">
-                            <button type="button" x-on:click="add('text', '', 'qr', f.value)" class="{{ $chip }} border-amber-300 text-amber-800" x-text="f.label"></button>
-                        </template>
-                    </div>
-
-                    @include('partials.label-editor-body')
-                </section>
-
-                <p class="text-xs text-stone-500">{{ __('templates.editor_footer') }}</p>
-            </div>
-        </div>
-    @endif
+    @include('livewire.printing.partials.template-editor', ['clientMode' => false])
 </div>

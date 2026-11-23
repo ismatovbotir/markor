@@ -68,9 +68,12 @@ class ClientIsolationTest extends TestCase
         $this->actingAs($admin);
         $this->assertSame(2, ImportBatch::count());
         $this->assertSame(50, MarkingCode::count());
-        $this->assertSame(1, Product::count(), 'one product per GTIN, shared by both owners');
-        $owners = Product::ownersOf([Product::first()->id])[Product::first()->id];
-        $this->assertSame([[$ali->id, 30], [$bek->id, 20]], array_map(fn ($o) => [$o['user']->id, $o['codes']], $owners));
+        // products are never shared: each company has its own product for the same GTIN
+        $this->assertSame(2, Product::count());
+        $this->assertSame(1, Product::distinct()->count('gtin'));
+        $this->assertEqualsCanonicalizing([$ali->company_id, $bek->company_id], Product::pluck('company_id')->all());
+        $row = app(\App\Domain\Catalog\Services\ProductService::class)->gtinAnalytics()->first(); // super admin analytics across companies
+        $this->assertSame([2, 50], [(int) $row->companies, (int) $row->codes]);
 
         $carol = $this->user();
         $this->actingAs($carol);
@@ -97,17 +100,21 @@ class ClientIsolationTest extends TestCase
         $this->actingAs($admin)->get(route('products.index'))->assertOk();
     }
 
-    public function test_client_cannot_edit_shared_products(): void
+    public function test_client_edits_only_its_own_products(): void
     {
         $ali = $this->user();
+        $bek = $this->user();
         $this->import($ali, '04780000000059', 2);
-        $product = Product::withoutGlobalScope('owner')->firstOrFail();
+        $this->import($bek, '04780000000059', 2);
+        $aliProduct = Product::withoutGlobalScope('owner')->where('company_id', $ali->company_id)->firstOrFail();
+        $bekProduct = Product::withoutGlobalScope('owner')->where('company_id', $bek->company_id)->firstOrFail();
 
         $this->actingAs($ali);
-        // a client may edit only ITS OWN name for the product; the shared product never changes
-        \Livewire\Livewire::test(\App\Http\Livewire\Catalog\ProductIndex::class)->call('openEdit', $product->id)->set('name_uz', 'X')->call('save')->assertHasNoErrors();
-        $this->assertNull($product->fresh()->name_uz);
-        $this->assertSame('X', $product->fresh()->forCompany($ali->company_id)->name_uz);
+        \Livewire\Livewire::test(\App\Http\Livewire\Catalog\ProductIndex::class)->call('openEdit', $aliProduct->id)->set('card.name', 'X')->call('save')->assertHasNoErrors();
+        $this->assertSame('X', $aliProduct->fresh()->name);
+        $this->assertNotSame('X', $bekProduct->fresh()->name); // never shared
+        // another company's product: not even found
+        \Livewire\Livewire::test(\App\Http\Livewire\Catalog\ProductIndex::class)->call('openEdit', $bekProduct->id)->assertNotFound();
     }
 
     public function test_guest_is_sent_to_login(): void

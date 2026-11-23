@@ -1,6 +1,14 @@
 {
+  "node_modules/pdfjs-dist/build/pdf.worker.min.mjs": {
+    "file": "assets/pdf.worker.min-CIqJB0yW.mjs",
+    "src": "node_modules/pdfjs-dist/build/pdf.worker.min.mjs"
+  },
+  "node_modules/zxing-wasm/dist/reader/zxing_reader.wasm": {
+    "file": "assets/zxing_reader-CLNBINTx.wasm",
+    "src": "node_modules/zxing-wasm/dist/reader/zxing_reader.wasm"
+  },
   "resources/css/app.css": {
-    "file": "assets/app-Bo-vgUsl.css",
+    "file": "assets/app-DXNVbVuk.css",
     "name": "app",
     "names": [
       "app.css"
@@ -9,9 +17,25 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-d1dgsZLW.js",
+    "file": "assets/app-B42DAyJb.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/pdf-code-reader/decoder.js"
+    ]
+  },
+  "resources/js/pdf-code-reader/decoder.js": {
+    "file": "assets/decoder-CJx7-SCB.js",
+    "name": "decoder",
+    "src": "resources/js/pdf-code-reader/decoder.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js"
+    ],
+    "assets": [
+      "assets/pdf.worker.min-CIqJB0yW.mjs",
+      "assets/zxing_reader-CLNBINTx.wasm"
+    ]
   }
 }

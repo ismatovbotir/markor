@@ -11,7 +11,7 @@ class ImportBatch extends Model
 {
     protected $fillable = [
         'uuid', 'filename', 'original_filename', 'uploaded_by', 'company_id',
-        'type', 'product_id', 'status',
+        'type', 'marking_system', 'marking_system_detected', 'product_id', 'status',
         'total_rows', 'processed_rows', 'failed_rows',
         'unit_price', 'discount_percent', 'amount', 'source', 'origin', 'is_locked', 'charged_at', 'charge_cancelled_at',
         'error_log', 'processed_at', 'aslbelgi_revision',
@@ -26,6 +26,7 @@ class ImportBatch extends Model
             'discount_percent' => 'float',
             'amount'           => 'float',
             'is_locked'        => 'boolean',
+            'marking_system_detected' => 'boolean',
             'charge_cancelled_at' => 'datetime',
             'charged_at'       => 'datetime',
             'aslbelgi_revision' => 'integer',

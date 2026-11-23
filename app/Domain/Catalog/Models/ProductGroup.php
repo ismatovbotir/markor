@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * Asl Belgisi product category with the DataMatrix structure of its marking codes.
+ * Product category of a marking system (Asl Belgisi, Честный ЗНАК — `marking_system`) with the DataMatrix structure of its marking codes.
  * structure: [{ai: "01", label: "GTIN", length: 14, variable: false}, ...]
  *   ai       — GS1 application identifier ("" = raw tail without an AI)
  *   length   — exact number of characters of the value
@@ -18,7 +18,7 @@ class ProductGroup extends Model implements Auditable
     use SoftDeletes, \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
-        'slug', 'name_uz', 'name_ru', 'name_zh', 'code_format', 'structure', 'code_length', 'sample_code',
+        'slug', 'marking_system', 'name_uz', 'name_ru', 'name_zh', 'code_format', 'structure', 'code_length', 'sample_code',
         'serial_length', 'crypto_length', 'requires_eds', 'is_active', 'sort_order',
     ];
 

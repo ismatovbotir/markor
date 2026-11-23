@@ -27,6 +27,9 @@ class ProcessImportBatchJob implements ShouldQueue
     /** gtin => product id */
     private array $products = [];
 
+    /** Marking system of the whole file (codes fitting several systems are filed under it). */
+    private ?string $system = null;
+
     public function __construct(public ImportBatch $batch) {}
 
     public function handle(MarkingCodeParser $parser): void
@@ -39,6 +42,8 @@ class ProcessImportBatchJob implements ShouldQueue
             if (!$file) {
                 throw new \RuntimeException("File not found: {$path}");
             }
+
+            $this->detectSystem($parser, $file);
 
             $line = 0;
             $total = 0;
@@ -160,6 +165,30 @@ class ProcessImportBatchJob implements ShouldQueue
         @unlink($this->path());
     }
 
+    /**
+     * First pass over the file: which marking system its codes belong to (Asl Belgisi, Честный ЗНАК…).
+     * A file whose codes fit several systems gets the company's usual one; the client may switch it.
+     */
+    private function detectSystem(MarkingCodeParser $parser, $file): void
+    {
+        $codes = (function () use ($parser, $file) {
+            while (($raw = fgets($file)) !== false) {
+                if (trim($raw) !== '' && ($parsed = $this->parseLine($parser, $raw)) !== null) {
+                    yield $parsed['code'];
+                }
+            }
+        })();
+        $company = $this->batch->company_id ? \App\Domain\Companies\Company::find($this->batch->company_id) : null;
+        [$system, $detected] = $parser->detectSystem($codes, $company?->marking_system);
+        rewind($file);
+
+        $this->system = $system ?? \App\Domain\Marking\Support\MarkingSystem::ASLBELGISI;
+        $this->batch->update(['marking_system' => $this->system, 'marking_system_detected' => $detected]);
+        if ($detected && $company && $company->marking_system !== $this->system) {
+            $company->update(['marking_system' => $this->system]); // learned: the company's usual market
+        }
+    }
+
     private function parseLine(MarkingCodeParser $parser, string $raw): ?array
     {
         $candidates = [$raw];
@@ -172,7 +201,7 @@ class ProcessImportBatchJob implements ShouldQueue
 
         foreach ($candidates as $candidate) {
             try {
-                return $parser->parse($candidate);
+                return $parser->parse($candidate, $this->system);
             } catch (\InvalidArgumentException) {
                 // try next candidate
             }
@@ -181,15 +210,19 @@ class ProcessImportBatchJob implements ShouldQueue
         return null;
     }
 
-    /** One global product per GTIN, created from the GTIN alone; name etc. are filled in later. */
+    /**
+     * The company's own product for this GTIN (products are never shared), created from the GTIN alone;
+     * the name comes later from the classifier (tasnif), or is the GTIN when tasnif doesn't know it.
+     */
     private function productId(string $gtin, ?int $groupId): int
     {
         if (!isset($this->products[$gtin])) {
-            $find = fn () => Product::withoutGlobalScope('owner')->withTrashed()->where('gtin', $gtin)->first();
+            $companyId = $this->batch->company_id;
+            $find = fn () => Product::withoutGlobalScope('owner')->withTrashed()->where('company_id', $companyId)->where('gtin', $gtin)->first();
 
-            // Another upload may create the same product at the same moment: then use theirs.
+            // Another upload of the same company may create it at the same moment: then use theirs.
             try {
-                $product = $find() ?? Product::withoutGlobalScope('owner')->create(['gtin' => $gtin, 'is_active' => true, 'product_group_id' => $groupId]);
+                $product = $find() ?? Product::withoutGlobalScope('owner')->create(['company_id' => $companyId, 'gtin' => $gtin, 'is_active' => true, 'product_group_id' => $groupId]);
             } catch (\Illuminate\Database\UniqueConstraintViolationException) {
                 $product = $find();
             }

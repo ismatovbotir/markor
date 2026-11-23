@@ -26,6 +26,13 @@ class LabelTemplateIndex extends Component
     /** Bumped on every open so the editor re-initialises. */
     public int $editorKey = 0;
 
+    /** Client designer: the owner agrees that the super admin may make the template available to everyone. */
+    public bool $shareConsent = false;
+
+    /** Super admin list filter: '' all, 'global', 'clients'. */
+    #[\Livewire\Attributes\Url(as: 'owner', except: '')]
+    public string $owner = '';
+
     /** New template always starts as a copy — of the default one unless another is given. */
     public function openCopy(?int $id = null): void
     {
@@ -34,6 +41,7 @@ class LabelTemplateIndex extends Component
         $source = $id ? LabelTemplate::findOrFail($id) : LabelTemplate::default();
 
         $this->editingId = null;
+        $this->shareConsent = false;
         $this->open($source, $source->name . ' — ' . __('templates.copy_suffix'));
     }
 
@@ -43,6 +51,7 @@ class LabelTemplateIndex extends Component
         $this->authorize('update', $t);
 
         $this->editingId = $id;
+        $this->shareConsent = (bool) $t->share_consent;
         $this->open($t, $t->name);
     }
 
@@ -151,17 +160,42 @@ class LabelTemplateIndex extends Component
             'layout'    => array_values($data['elements']),
         ];
 
-        $existing ? $service->update($existing, $data) : $service->store($data);
+        $user = auth()->user();
+        if ($user->isAdmin()) {
+            $existing ? $service->update($existing, $data) : $service->store($data);
+        } else {
+            try {
+                $template = $existing ? $service->update($existing, $data) : $service->storeForCompany($data, $user->company, $user->id);
+            } catch (\DomainException $e) {
+                $this->dispatch('notify', type: 'error', message: __($e->getMessage(), ['limit' => $user->company->template_limit]));
+                return;
+            }
+            if ((bool) $template->share_consent !== $this->shareConsent) {
+                $service->setConsent($template, $this->shareConsent);
+            }
+        }
 
         $this->showForm = false;
         $this->dispatch('notify', type: 'success', message: __('common.saved'));
+    }
+
+    /** Super admin: make a client's template available to everyone (needs the client's consent) or take it back. */
+    public function share(int $id, bool $shared, LabelTemplateService $service): void
+    {
+        $t = LabelTemplate::findOrFail($id);
+        abort_unless(auth()->user()->isAdmin() && $t->company_id !== null, 403);
+        if ($shared) {
+            $this->authorize('publish', $t);
+        }
+        $service->setShared($t, $shared);
+        $this->dispatch('notify', type: 'success', message: __($shared ? 'templates.published' : 'templates.unpublished'));
     }
 
     public function delete(int $id, LabelTemplateService $service): void
     {
         $t = LabelTemplate::findOrFail($id);
         $this->authorize('delete', $t);
-        $service->destroy($t);
+        auth()->user()->isAdmin() ? $service->destroy($t) : $service->clientDelete($t);
         $this->dispatch('notify', type: 'success', message: __('common.deleted'));
     }
 
@@ -170,7 +204,7 @@ class LabelTemplateIndex extends Component
         $sample = $this->showForm ? $pdf->demoCode() : null;
 
         return view('livewire.printing.label-template-index', [
-            'templates' => $service->paginate(),
+            'templates' => $service->paginate(20, $this->owner),
             'sampleDm'  => $sample ? $renderer->renderAsBase64($sample, 4) : null,
             'sample'    => $sample ? LayoutRenderer::markingRow($sample, 'partiya_01') : null,
         ]);

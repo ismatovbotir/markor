@@ -68,7 +68,7 @@ class AggregationIndex extends Component
     {
         return view('livewire.aggregation.aggregation-index', [
             'aggregations' => $service->paginate(),
-            'products'     => Product::active()->get(['id', 'name_ru', 'name_uz']),
+            'products'     => Product::active()->get(['id', 'gtin', 'name', 'name_ru', 'name_uz']),
         ]);
     }
 }

@@ -37,7 +37,7 @@ class LabelMarkTest extends TestCase
         $html = app(LayoutRenderer::class)->render($label, [], 0, now());
         $this->assertStringContainsString(LayoutRenderer::mark('aslbelgi')['uri'], $html);
 
-        $this->assertStringContainsString("add('mark', 'aslbelgi')", file_get_contents(resource_path('views/livewire/printing/label-template-index.blade.php')));
+        $this->assertStringContainsString("add('mark', 'aslbelgi')", file_get_contents(resource_path('views/livewire/printing/partials/template-editor.blade.php')));
         $this->assertStringContainsString("add('mark', 'aslbelgi')", file_get_contents(resource_path('views/studio/index.blade.php')));
     }
 }

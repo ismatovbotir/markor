@@ -30,7 +30,7 @@ class MarkingCodeIndex extends Component
                 'product_id' => $this->filterProduct,
                 'status'     => $this->filterStatus,
             ]),
-            'products' => Product::active()->get(['id', 'gtin', 'name_ru', 'name_uz']),
+            'products' => Product::active()->get(['id', 'gtin', 'name', 'name_ru', 'name_uz']),
             'statuses' => ['imported', 'assigned', 'printed', 'aggregated', 'shipped', 'cancelled'],
         ]);
     }

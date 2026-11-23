@@ -13,9 +13,13 @@ class Product extends Model implements Auditable
     use SoftDeletes, \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
-        'product_group_id', 'gtin', 'name_uz', 'name_ru',
+        'company_id', 'product_group_id', 'gtin', 'name', 'description', 'weight', 'manufacturer', 'country', 'shelf_life', 'gtin_seq',
+        'name_uz', 'name_ru', // classifier names (tasnif / AI), the source of `name` until the client edits it
         'sku', 'barcode_ean', 'attributes', 'lookup_status', 'lookup_at', 'is_active',
     ];
+
+    /** Printable fields of the product card (label designer "product" fields). */
+    public const CARD_FIELDS = ['name', 'description', 'sku', 'weight', 'manufacturer', 'country', 'shelf_life'];
 
     protected function casts(): array
     {
@@ -27,38 +31,87 @@ class Product extends Model implements Auditable
     }
 
     /**
-     * Global catalogue, one product per GTIN. A registered user only sees products they have
-     * marking codes for; the super admin sees all.
+     * Products belong to a company and are never shared: a client sees its company's products only
+     * (GTIN unique per company); the super admin sees all, read-only. Queue jobs (no user) are not filtered.
      */
     protected static function booted(): void
     {
         static::addGlobalScope('owner', function ($query) {
             $user = \Illuminate\Support\Facades\Auth::user();
             if ($user && !$user->isAdmin()) {
-                $query->whereExists(fn ($q) => $q->selectRaw('1')->from('marking_codes')
-                    ->whereColumn('marking_codes.product_id', 'products.id')
-                    ->where('marking_codes.company_id', $user->company_id ?? 0));
+                $query->where($query->qualifyColumn('company_id'), $user->company_id ?? 0);
+            }
+        });
+
+        // Until the client edits the name, it follows the classifier (tasnif / AI); unknown to tasnif → the GTIN.
+        static::saving(function (self $product) {
+            if (!empty(($product->getAttribute('attributes') ?? [])['name_by_client'])) {
+                return;
+            }
+            if ($auto = $product->name_uz ?: $product->name_ru) {
+                $product->setAttribute('name', mb_substr($auto, 0, 255));
+            } elseif (blank($product->getAttributeFromArray('name')) && $product->lookup_status === 'not_found') {
+                $product->setAttribute('name', $product->gtin);
             }
         });
     }
 
-    /**
-     * Owners of the given products: [product_id => [[user, codes], ...]], biggest owner first.
-     */
-    public static function ownersOf(iterable $productIds): array
+    /** Saves a name the client typed: from now on the classifier never changes it. */
+    public function markNamedByClient(): void
     {
-        $rows = \App\Domain\Marking\Models\MarkingCode::withoutGlobalScope('owner')
-            ->whereIn('product_id', collect($productIds)->all())
-            ->whereNotNull('user_id')
-            ->selectRaw('product_id, user_id, count(*) as codes')
-            ->groupBy('product_id', 'user_id')
-            ->orderByDesc('codes')
-            ->get();
-        $users = \App\Models\User::whereIn('id', $rows->pluck('user_id')->unique())->get(['id', 'name', 'email'])->keyBy('id');
+        $this->setAttribute('attributes', ['name_by_client' => true] + ($this->getAttribute('attributes') ?? []));
+    }
 
-        return $rows->groupBy('product_id')
-            ->map(fn ($group) => $group->map(fn ($r) => ['user' => $users[$r->user_id] ?? null, 'codes' => (int) $r->codes])->filter(fn ($o) => $o['user'])->values()->all())
-            ->all();
+    public function company()
+    {
+        return $this->belongsTo(\App\Domain\Companies\Company::class);
+    }
+
+    /**
+     * The next internal EAN-13 of a company: "20" (GS1 in-store range) + company id (4) + item number (6)
+     * + check digit, stored as GTIN-14. Valid for in-house labels only — never for Asl Belgisi / Честный ЗНАК.
+     * Call inside a transaction holding the company row lock.
+     * @return array{gtin: string, gtin_seq: int}
+     */
+    public static function nextInternalGtin(int $companyId): array
+    {
+        if ($companyId > 9999) {
+            throw new \DomainException('products.gtin_company_too_big');
+        }
+        $seq = (int) static::withoutGlobalScope('owner')->withTrashed()->where('company_id', $companyId)->max('gtin_seq') + 1;
+        do {
+            if ($seq > 999999) {
+                throw new \DomainException('products.gtin_sequence_full');
+            }
+            $body = '20' . str_pad((string) $companyId, 4, '0', STR_PAD_LEFT) . str_pad((string) $seq, 6, '0', STR_PAD_LEFT);
+            $gtin = '0' . $body . self::checkDigit($body);
+            $taken = static::withoutGlobalScope('owner')->withTrashed()->where('company_id', $companyId)->where('gtin', $gtin)->exists();
+        } while ($taken && ++$seq);
+
+        return ['gtin' => $gtin, 'gtin_seq' => $seq];
+    }
+
+    /** GS1 check digit (mod 10) of the digits before it. */
+    public static function checkDigit(string $digits): int
+    {
+        $sum = 0;
+        foreach (array_reverse(str_split($digits)) as $i => $d) {
+            $sum += (int) $d * ($i % 2 === 0 ? 3 : 1);
+        }
+
+        return (10 - $sum % 10) % 10;
+    }
+
+    /** An internal (in-store, 20–29) barcode: fine for labels, not for marking. */
+    public function hasInternalGtin(): bool
+    {
+        return (bool) preg_match('/^02[0-9]/', (string) $this->gtin);
+    }
+
+    /** The GTIN as the 13-digit EAN printed under the barcode (leading 0 of GTIN-14 dropped). */
+    public function ean13(): string
+    {
+        return str_starts_with((string) $this->gtin, '0') ? substr($this->gtin, 1) : (string) $this->gtin;
     }
 
     public function productGroup()
@@ -81,11 +134,13 @@ class Product extends Model implements Auditable
         return $query->where('is_active', true);
     }
 
+    /** The card's name (one text, as the client wrote it); before it is set — the classifier name. */
     public function getNameAttribute(): ?string
     {
-        $name = app()->getLocale() === 'uz'
-            ? ($this->name_uz ?: $this->name_ru)
-            : ($this->name_ru ?: $this->name_uz);
+        $name = $this->attributes['name'] ?? null;
+        if (blank($name)) {
+            $name = app()->getLocale() === 'ru' ? ($this->name_ru ?: $this->name_uz) : ($this->name_uz ?: $this->name_ru);
+        }
 
         return $name ?: null;
     }
@@ -98,37 +153,17 @@ class Product extends Model implements Auditable
             ?? ($this->getAttribute('attributes')['lookup'] ?? null);
     }
 
-    /** The classifier did not know this GTIN and nobody has named it yet: the client must fill in the name. */
+    /** The classifier did not know this GTIN and the name is still the GTIN: the client should name it. */
     public function needsName(): bool
     {
-        return blank($this->name_uz) && blank($this->name_ru) && $this->lookupStatus() === 'not_found';
+        return (blank($this->attributes['name'] ?? null) || ($this->attributes['name'] ?? null) === $this->gtin)
+            && blank($this->name_uz) && blank($this->name_ru) && $this->lookupStatus() === 'not_found';
     }
 
-    /**
-     * This product as a company sees it: its own name for it (if it gave one) over the shared one.
-     * Returns a copy for display/printing — never save it.
-     */
+    /** Products are per company now: kept so older callers keep working. */
     public function forCompany(?int $companyId): static
     {
-        $own = $companyId ? self::companyName($companyId, $this->id) : null;
-        if (!$own) {
-            return $this;
-        }
-        $copy = clone $this;
-        foreach (['name_uz', 'name_ru', 'sku'] as $field) {
-            if (filled($own[$field] ?? null)) {
-                $copy->setAttribute($field, $own[$field]);
-            }
-        }
-
-        return $copy;
-    }
-
-    /** A company's own name for a product (cached for the request / queue job). */
-    public static function companyName(int $companyId, int $productId): ?array
-    {
-        return once(fn () => CompanyProductName::where('company_id', $companyId)->where('product_id', $productId)
-            ->first(['name_uz', 'name_ru', 'sku'])?->toArray());
+        return $this;
     }
 
     /** Name if filled in, otherwise the GTIN — for dropdowns and lists. */

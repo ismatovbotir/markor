@@ -36,7 +36,7 @@ class OfferRequestController extends Controller
             $category = \App\Domain\Offers\Models\OfferCategory::findOrFail($data['offer_category_id'])->name_uz;
             $title = "So'rov: {$category} (katalogda yo'q narsa)";
         } else {
-            $template = LabelTemplate::findOrFail($data['label_template_id']);
+            $template = LabelTemplate::public()->findOrFail($data['label_template_id']);
             $title = "Etiketka {$template->width_mm}×{$template->height_mm} mm ({$template->name})";
             $category = 'Etiketkalar';
         }

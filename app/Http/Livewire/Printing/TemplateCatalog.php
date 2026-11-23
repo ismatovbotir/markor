@@ -9,14 +9,13 @@ use App\Domain\Telegram\Notifier;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-/** Clients don't design labels: they browse the super admin's templates and can order a new one. */
+/** Clients browse the global templates and their own (MyTemplates), and can order a new one. */
 #[Layout('layouts.app')]
 class TemplateCatalog extends Component
 {
     public const SIZE_TOLERANCE_MM = 5; // the size filter also shows templates up to ±5 mm away
     #[\Livewire\Attributes\Url(as: 'w', except: '')] public $width = '';    // label width filter, mm ('' = any)
     #[\Livewire\Attributes\Url(as: 'h', except: '')] public $height = '';   // label height filter, mm ('' = any)
-    #[\Livewire\Attributes\Url(as: 'mine', except: false)] public bool $mine = false; // only "my templates"
     public bool $ordering = false;
     public array $order = ['width_mm' => '', 'height_mm' => '', 'columns' => 1, 'rows' => '', 'gap_mm' => '', 'comment' => ''];
 
@@ -72,31 +71,46 @@ class TemplateCatalog extends Component
         $this->height = '';
     }
 
+    /** A client deletes its own design (the super admin still sees it and may accept it as global). */
+    public function deleteOwn(int $id, \App\Domain\Printing\Services\LabelTemplateService $service): void
+    {
+        $template = LabelTemplate::findOrFail($id);
+        $this->authorize('delete', $template);
+        $service->clientDelete($template);
+        $this->dispatch('notify', type: 'success', message: __('common.deleted'));
+    }
+
     public function render(LabelPdfService $pdf)
     {
         $company = auth()->user()->company;
         $mineIds = $company ? $company->labelTemplates()->pluck('label_templates.id')->all() : [];
-        $total = LabelTemplate::count();
         $w = is_numeric($this->width) ? (int) $this->width : null;
         $h = is_numeric($this->height) ? (int) $this->height : null;
         $tol = self::SIZE_TOLERANCE_MM;
-
-        $templates = LabelTemplate::orderByDesc('is_default')->orderBy('name')
+        $sized = fn ($q) => $q->orderByDesc('is_default')->orderBy('name')
             ->when($w !== null, fn ($q) => $q->whereBetween('width_mm', [$w - $tol, $w + $tol]))
-            ->when($h !== null, fn ($q) => $q->whereBetween('height_mm', [$h - $tol, $h + $tol]))
-            ->when($this->mine, fn ($q) => $q->whereIn('id', $mineIds ?: [0]))
-            ->get();
-        if ($w !== null || $h !== null) {
-            // closest size first (exact match on top)
-            $templates = $templates->sortBy(fn ($t) => abs($t->width_mm - ($w ?? $t->width_mm)) + abs($t->height_mm - ($h ?? $t->height_mm)))->values();
-        }
+            ->when($h !== null, fn ($q) => $q->whereBetween('height_mm', [$h - $tol, $h + $tol]));
+        // closest size first (exact match on top)
+        $closest = fn ($list) => $w === null && $h === null ? $list
+            : $list->sortBy(fn ($t) => abs($t->width_mm - ($w ?? $t->width_mm)) + abs($t->height_mm - ($h ?? $t->height_mm)))->values();
+
+        // Block 1 "Mine": own designs first, then the global templates the company starred
+        $mineList = $company
+            ? $closest($sized(LabelTemplate::ownedBy($company->id))->get()
+                ->concat($sized(LabelTemplate::public()->whereIn('id', $mineIds ?: [0]))->get())->unique('id')->values())
+            : collect();
+        // Block 2: every global template
+        $global = $closest($sized(LabelTemplate::public())->get());
 
         return view('livewire.printing.template-catalog', [
-            'templates' => $templates,
-            'previews'  => $templates->mapWithKeys(fn ($t) => [$t->id => $pdf->previewDocument($t)]),
+            'mineList'  => $mineList,
+            'global'    => $global,
+            'previews'  => $mineList->concat($global)->unique('id')->mapWithKeys(fn ($t) => [$t->id => $pdf->previewDocument($t)]),
             'mineIds'   => $mineIds,
-            'total'     => $total,
-            'filtering' => $w !== null || $h !== null || $this->mine,
+            'total'     => LabelTemplate::public()->count(),
+            'filtering' => $w !== null || $h !== null,
+            'slotsLeft' => $company ? \App\Domain\Printing\Services\LabelTemplateService::slotsLeft($company) : 0,
+            'limit'     => (int) ($company?->template_limit ?? 0),
             'requests'  => auth()->user()->company_id
                 ? TemplateRequest::where('company_id', auth()->user()->company_id)->latest()->limit(10)->get()
                 : collect(),

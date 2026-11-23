@@ -19,6 +19,7 @@ class CompanyShow extends Component
     public ?int $discountFor = null;
     public string $discountValue = '';
     public string $discountUntil = '';
+    public ?string $templateLimit = null; // editing the number of own label designs (null = not editing)
 
     public function mount(Company $company): void
     {
@@ -125,6 +126,21 @@ class CompanyShow extends Component
             'discount_until'   => $this->discountValue === '' || $this->discountUntil === '' ? null : $this->discountUntil,
         ]);
         $this->discountFor = null;
+        $this->dispatch('notify', type: 'success', message: __('common.saved'));
+    }
+
+    public function editTemplateLimit(): void
+    {
+        $this->templateLimit = (string) $this->company->template_limit;
+    }
+
+    /** How many own label designs the client may keep (5 by default). */
+    public function saveTemplateLimit(): void
+    {
+        $this->validate(['templateLimit' => 'required|integer|min:0|max:100']);
+        $this->company->update(['template_limit' => (int) $this->templateLimit]);
+        \App\Domain\Reporting\AuditLog::record('company.template_limit', 'company', $this->company->id, ['limit' => (int) $this->templateLimit]);
+        $this->templateLimit = null;
         $this->dispatch('notify', type: 'success', message: __('common.saved'));
     }
 

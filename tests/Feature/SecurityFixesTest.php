@@ -33,23 +33,26 @@ class SecurityFixesTest extends TestCase
     {
         $victim = $this->client('301000001');
         $attacker = $this->client('301000002');
-        $product = Product::withoutGlobalScope('owner')->create(['gtin' => '04780000000999', 'attributes' => ['lookup' => 'not_found'], 'lookup_status' => 'not_found', 'is_active' => true]);
-        $this->codeFor($victim, $product, 'VICTIM0000001');
-        $this->codeFor($attacker, $product, 'FORGED0000001');
+        // products are never shared: each company has its own product for the GTIN
+        $mk = fn ($user) => Product::withoutGlobalScope('owner')->create(['company_id' => $user->company_id, 'gtin' => '04780000000999', 'attributes' => ['lookup' => 'not_found'], 'lookup_status' => 'not_found', 'is_active' => true]);
+        $victimProduct = $mk($victim);
+        $attackerProduct = $mk($attacker);
+        $this->codeFor($victim, $victimProduct, 'VICTIM0000001');
+        $this->codeFor($attacker, $attackerProduct, 'FORGED0000001');
 
         $this->actingAs($attacker);
-        Livewire::test(ImportBatchIndex::class)->call('openNaming', $product->id)->set('naming.name_uz', 'Yomon nom')->call('saveNaming')->assertHasNoErrors();
+        Livewire::test(ImportBatchIndex::class)->call('openNaming', $attackerProduct->id)->set('naming.name', 'Yomon nom')->call('saveNaming')->assertHasNoErrors();
+        Livewire::test(ImportBatchIndex::class)->call('openNaming', $victimProduct->id)->assertNotFound(); // the victim's product is invisible
 
-        $this->assertNull($product->fresh()->name_uz, 'shared product untouched');
         $victimCode = MarkingCode::withoutGlobalScope('owner')->where('serial', 'VICTIM0000001')->first();
-        $this->assertSame($product->gtin, \App\Domain\Printing\Renderers\LayoutRenderer::markingRow($victimCode, null)['name'], "victim's labels don't get the attacker's name (GTIN until named)");
+        $this->assertSame($victimProduct->gtin, \App\Domain\Printing\Renderers\LayoutRenderer::markingRow($victimCode, null)['name'], "victim's labels don't get the attacker's name (GTIN until named)");
 
         $this->actingAs($victim);
-        Livewire::test(ImportBatchIndex::class)->call('openNaming', $product->id)->set('naming.name_uz', 'Choynak')->call('saveNaming');
+        Livewire::test(ImportBatchIndex::class)->call('openNaming', $victimProduct->id)->set('naming.name', 'Choynak')->call('saveNaming');
         $this->assertSame('Choynak', \App\Domain\Printing\Renderers\LayoutRenderer::markingRow($victimCode->fresh(), null)['name']);
-        // and the victim can correct its own name later
-        Livewire::test(ImportBatchIndex::class)->call('openNaming', $product->id)->assertSet('naming.name_uz', 'Choynak')->set('naming.name_uz', 'Elektr choynak')->call('saveNaming');
-        $this->assertSame('Elektr choynak', CompanyProductName::where('company_id', $victim->company_id)->value('name_uz'));
+        Livewire::test(ImportBatchIndex::class)->call('openNaming', $victimProduct->id)->assertSet('naming.name', 'Choynak')->set('naming.name', 'Elektr choynak')->call('saveNaming');
+        $this->assertSame('Elektr choynak', $victimProduct->fresh()->name);
+        $this->assertSame('Yomon nom', $attackerProduct->fresh()->name);
     }
 
     public function test_deactivated_user_is_logged_out_on_the_next_request(): void
@@ -126,20 +129,20 @@ class SecurityFixesTest extends TestCase
     {
         $client = $this->client('301000006');
         $other = $this->client('301000007');
-        $product = Product::withoutGlobalScope('owner')->create(['gtin' => '06906974316793', 'attributes' => ['lookup' => 'not_found'], 'lookup_status' => 'not_found', 'is_active' => true]);
+        $product = Product::withoutGlobalScope('owner')->create(['company_id' => $client->company_id, 'gtin' => '06906974316793', 'attributes' => ['lookup' => 'not_found'], 'lookup_status' => 'not_found', 'is_active' => true]);
         $this->codeFor($client, $product, 'OWN0000000001');
         $this->classifier = \Illuminate\Support\Facades\Http::response(['success' => true, 'data' => [['name' => 'Чойнак: Beltop, BT-EK-5510 оқ ранг', 'packages' => []]]]);
 
         $this->actingAs($client);
         Livewire::test(\App\Http\Livewire\Catalog\ProductIndex::class)
             ->call('openEdit', $product->id)
-            ->call('fetchFromTasnif')->assertSet('name_uz', 'Beltop, BT-EK-5510 oq rang')  // no AI key in tests: transliterated
-            ->set('gtin', '00000000000000')->set('sku', 'BT-5510')
+            ->call('fetchFromTasnif')->assertSet('card.name', 'Beltop, BT-EK-5510 oq rang')  // no AI key in tests: transliterated
+            ->set('card.gtin', '00000000000000')->set('card.sku', 'BT-5510')->set('card.description', 'Oq rang, 1.7 L')
             ->call('save')->assertHasNoErrors();
 
-        $this->assertSame('06906974316793', $product->fresh()->gtin, 'GTIN never changes');
-        $this->assertNull($product->fresh()->name_uz, 'shared product untouched');
-        $this->assertSame('BT-5510', $product->fresh()->forCompany($client->company_id)->sku);
+        $fresh = $product->fresh();
+        $this->assertSame('06906974316793', $fresh->gtin, 'GTIN never changes');
+        $this->assertSame(['Beltop, BT-EK-5510 oq rang', 'BT-5510', 'Oq rang, 1.7 L'], [$fresh->name, $fresh->sku, $fresh->description]);
 
         $this->actingAs($other);
         Livewire::test(\App\Http\Livewire\Catalog\ProductIndex::class)->call('openEdit', $product->id)->assertNotFound(); // invisible to other companies

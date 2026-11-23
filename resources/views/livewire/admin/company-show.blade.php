@@ -85,6 +85,22 @@
         @endif
     </div>
 
+    <div class="bg-white border border-stone-200 rounded-xl p-5 flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <p class="font-semibold text-sm">{{ __('companies.template_limit') }}</p>
+            <p class="text-xs text-stone-500">{{ __('companies.template_limit_now', ['used' => \App\Domain\Printing\Models\LabelTemplate::ownedBy($company->id)->count(), 'limit' => $company->template_limit]) }}</p>
+        </div>
+        @if($templateLimit !== null)
+            <form wire:submit="saveTemplateLimit" class="flex items-center gap-2">
+                <input wire:model="templateLimit" type="number" min="0" max="100" class="w-20 border border-stone-200 rounded-lg px-2 py-1.5 text-sm text-right" aria-label="{{ __('companies.template_limit') }}">
+                <button type="submit" class="px-3 py-1.5 bg-amber-700 text-white rounded-lg text-sm">{{ __('common.save') }}</button>
+                @error('templateLimit') <span class="text-rose-500 text-xs">{{ $message }}</span> @enderror
+            </form>
+        @else
+            <button wire:click="editTemplateLimit" class="px-3 py-1.5 border border-stone-300 rounded-lg text-sm hover:bg-stone-100">{{ __('common.edit') }}</button>
+        @endif
+    </div>
+
     <div class="bg-white border border-stone-200 rounded-xl p-5 space-y-3">
         <div class="flex items-center justify-between gap-4 flex-wrap">
             @if($storage)

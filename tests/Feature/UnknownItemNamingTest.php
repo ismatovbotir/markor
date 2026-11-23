@@ -44,15 +44,14 @@ class UnknownItemNamingTest extends TestCase
 
         Livewire::test(ImportBatchIndex::class)
             ->call('openNaming', $product->id)
-            ->set('naming.name_uz', 'Choynak X1')
+            ->set('naming.name', 'Choynak X1')
             ->call('saveNaming')->assertHasNoErrors();
 
-        // the client's name is for its own labels; the shared product stays unnamed for other companies
-        $this->assertNull($product->fresh()->name_uz);
-        $this->assertSame('Choynak X1', $product->fresh()->forCompany($client->company_id)->name_uz);
-        $this->assertFalse($product->fresh()->forCompany($client->company_id)->needsName());
-        // and the client can correct its own name
-        Livewire::test(ImportBatchIndex::class)->call('openNaming', $product->id)->assertSet('naming.name_uz', 'Choynak X1');
+        // unknown to tasnif, the name was the GTIN; now it is the company's own name (products are never shared)
+        $this->assertSame('Choynak X1', $product->fresh()->name);
+        $this->assertFalse($product->fresh()->needsName());
+        // and the client can correct it
+        Livewire::test(ImportBatchIndex::class)->call('openNaming', $product->id)->assertSet('naming.name', 'Choynak X1');
     }
 
     public function test_other_company_cannot_name_it(): void
@@ -100,9 +99,9 @@ class UnknownItemNamingTest extends TestCase
 
         $first = Product::withoutGlobalScope('owner')->where('gtin', '04780000000141')->first();
         $component = Livewire::test(ImportBatchIndex::class)->call('openNaming', $first->id, $batch->id)
-            ->set('naming.name_uz', 'A')->call('saveNaming');
+            ->set('naming.name', 'A')->call('saveNaming');
         $this->assertNotNull($component->get('namingId'), 'the next unnamed item opens');
-        $component->set('naming.name_uz', 'B')->call('saveNaming')->set('naming.name_uz', 'C')->call('saveNaming');
+        $component->set('naming.name', 'B')->call('saveNaming')->set('naming.name', 'C')->call('saveNaming');
 
         $this->assertNull($component->get('namingId'));
         $company = auth()->user()->company_id;

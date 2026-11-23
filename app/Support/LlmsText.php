@@ -56,7 +56,7 @@ class LlmsText
                 $out[] = "\n### " . $category->name;
                 if ($category->isTemplates()) {
                     // label sizes we sell = the label templates
-                    foreach (\App\Domain\Printing\Models\LabelTemplate::orderBy('width_mm')->orderBy('height_mm')->get(['width_mm', 'height_mm'])->unique(fn ($t) => $t->width_mm . 'x' . $t->height_mm) as $size) {
+                    foreach (\App\Domain\Printing\Models\LabelTemplate::public()->orderBy('width_mm')->orderBy('height_mm')->get(['width_mm', 'height_mm'])->unique(fn ($t) => $t->width_mm . 'x' . $t->height_mm) as $size) {
                         $out[] = '- ' . $t('offers.labels_size', ['size' => $size->width_mm . '×' . $size->height_mm . ' mm']);
                     }
                     continue;

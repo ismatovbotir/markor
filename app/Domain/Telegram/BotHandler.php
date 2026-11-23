@@ -212,7 +212,7 @@ class BotHandler
         }
 
         $batch = ImportBatch::withoutGlobalScope('owner')->where('company_id', $user->company_id)->find($m[1]);
-        $template = LabelTemplate::find($m[2]);
+        $template = LabelTemplate::visibleTo($user->company)->find($m[2]); // never another company's private template
         if (!$batch || !$template || $batch->status !== 'completed') {
             return;
         }

@@ -49,6 +49,7 @@ class AslbelgiCheckService
 
         return match (true) {
             !$user || $user->isAdmin() || !$user->company_id || $user->company_id !== $batch->company_id => 'aslbelgi_check.not_allowed',
+            ($batch->marking_system ?: \App\Domain\Marking\Support\MarkingSystem::ASLBELGISI) !== \App\Domain\Marking\Support\MarkingSystem::ASLBELGISI => 'aslbelgi_check.other_system',
             !$company?->hasAslbelgiKey() => 'aslbelgi_check.no_key',
             !self::keyUsable($company) => 'aslbelgi_check.key_expired',
             $batch->status !== 'completed' || $batch->is_locked || self::codesOf($batch) === 0 => 'aslbelgi_check.not_ready',

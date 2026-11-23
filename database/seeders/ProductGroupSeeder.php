@@ -6,7 +6,7 @@ use App\Domain\Catalog\Models\ProductGroup;
 use Illuminate\Database\Seeder;
 
 /**
- * Asl Belgisi product categories and the DataMatrix structure of their marking codes.
+ * Product categories (Asl Belgisi; Честный ЗНАК for exporters) and the DataMatrix structure of their marking codes.
  * Safe for production: run again any time (`php artisan db:seed --class=ProductGroupSeeder --force`).
  *  - a missing category (by slug) is created;
  *  - an existing one keeps the owner's edits — only empty fields (names, structure, sample) are filled.
@@ -72,6 +72,32 @@ class ProductGroupSeeder extends Seeder
             ['slug' => 'alcohol', 'name_uz' => 'Alkogol mahsulotlari', 'name_ru' => 'Алкогольная продукция', 'name_zh' => '酒类产品', 'code_format' => 'custom', 'is_active' => false, 'structure' => null, 'sample_code' => null],
             ['slug' => 'beer', 'name_uz' => 'Pivo va pivo ichimliklari', 'name_ru' => 'Пиво и пивные напитки', 'name_zh' => '啤酒及啤酒饮料', 'code_format' => 'custom', 'is_active' => false, 'structure' => null, 'sample_code' => null],
             ['slug' => 'water_drinks', 'name_uz' => 'Suv va alkogolsiz ichimliklar', 'name_ru' => 'Вода и безалкогольные напитки', 'name_zh' => '饮用水及软饮料', 'code_format' => 'custom', 'is_active' => false, 'structure' => null, 'sample_code' => null],
+
+            // Честный ЗНАК (Russia), for exporters. STANDARD CRPT structures, one category per
+            // structure — confirm each on a real client file and add its sample code.
+            [
+                // light industry, shoes, tyres, perfume, medicines (MDLP)
+                'slug' => 'ru_long', 'marking_system' => 'chestny_znak',
+                'name_uz' => 'Kiyim, poyabzal, dori va boshqalar — Rossiya', 'name_ru' => 'Одежда, обувь, лекарства и др. — Россия', 'name_zh' => '服装、鞋类、药品等 — 俄罗斯',
+                'code_format' => 'standard_long', 'is_active' => true,
+                'structure' => [$gtin, ['ai' => '21', 'label' => 'Serial', 'length' => 13, 'variable' => true], ...$longTail],
+                'sample_code' => null,
+            ],
+            [
+                // newer groups with the short verification code (93): water, cosmetics, household chemicals…
+                'slug' => 'ru_short', 'marking_system' => 'chestny_znak',
+                'name_uz' => 'Suv, kosmetika, maishiy kimyo va boshqalar — Rossiya', 'name_ru' => 'Вода, косметика, бытовая химия и др. — Россия', 'name_zh' => '水、化妆品、家用化学品等 — 俄罗斯',
+                'code_format' => 'custom', 'is_active' => true,
+                'structure' => [$gtin, ['ai' => '21', 'label' => 'Serial', 'length' => 13, 'variable' => true], ['ai' => '93', 'label' => 'Verification code', 'length' => 4, 'variable' => false]],
+                'sample_code' => null,
+            ],
+            [
+                'slug' => 'ru_dairy', 'marking_system' => 'chestny_znak',
+                'name_uz' => 'Sut mahsulotlari — Rossiya', 'name_ru' => 'Молочная продукция — Россия', 'name_zh' => '乳制品 — 俄罗斯',
+                'code_format' => 'custom', 'is_active' => true,
+                'structure' => [$gtin, ['ai' => '21', 'label' => 'Serial', 'length' => 6, 'variable' => true], ['ai' => '93', 'label' => 'Verification code', 'length' => 4, 'variable' => false]],
+                'sample_code' => null,
+            ],
         ];
     }
 }

@@ -66,15 +66,8 @@
         </div>
     @endif
 
-    {{-- filters: "my templates" and label size --}}
-    <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-2 text-sm" role="search">
-        @if(auth()->user()->company_id)
-            <button type="button" wire:click="$toggle('mine')" aria-pressed="{{ $mine ? 'true' : 'false' }}"
-                    class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition {{ $mine ? 'bg-amber-700 border-amber-700 text-white' : 'bg-white border-stone-300 text-stone-700 hover:bg-stone-50' }}">
-                @svg($mine ? 'heroicon-s-star' : 'heroicon-o-star', 'w-4 h-4') {{ __('templates.mine') }} <span class="tabular-nums {{ $mine ? 'text-white' : 'text-stone-500' }}">{{ count($mineIds) }}</span>
-            </button>
-            <span class="shrink-0 w-px h-6 bg-stone-200"></span>
-        @endif
+    {{-- label size filter (both blocks) --}}
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-4 text-sm" role="search">
         <div class="shrink-0 flex items-center gap-2">
             <label class="flex items-center gap-1.5 text-xs text-stone-600">{{ __('templates.filter_width') }}
                 <input wire:model.live.debounce.400ms="width" type="number" inputmode="numeric" min="1" max="300" placeholder="58"
@@ -90,54 +83,61 @@
                 <button type="button" wire:click="clearSize" class="text-xs text-stone-500 hover:text-amber-700 underline">{{ __('templates.filter_clear') }}</button>
             @endif
         </div>
-        <span class="shrink-0 ml-auto text-xs text-stone-500 tabular-nums">{{ $templates->count() }} / {{ $total }}</span>
     </div>
+
     @if(auth()->user()->company_id)
-        <p class="text-xs text-stone-500 mb-4">{{ __('templates.mine_hint') }}</p>
+        {{-- Block 1. Mine: own designs ("Мой") + global templates the company starred ("Markor") --}}
+        <section class="mb-8" aria-labelledby="mine-title">
+            <div class="flex items-baseline justify-between gap-3 mb-1 flex-wrap">
+                <h2 id="mine-title" class="text-lg font-semibold">{{ __('templates.block_mine') }}</h2>
+                <span class="text-xs text-stone-500 tabular-nums">{{ __('templates.slots', ['used' => $limit - $slotsLeft, 'limit' => $limit]) }}</span>
+            </div>
+            <p class="text-xs text-stone-500 mb-3">{{ __('templates.block_mine_hint') }}</p>
+            <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {{-- draw your own (up to the company's limit) --}}
+                @if($slotsLeft > 0)
+                    <a href="{{ route('templates.mine', ['new' => 1]) }}"
+                       class="bg-white border-2 border-dashed border-amber-300 rounded-xl p-4 flex flex-col hover:border-amber-400 hover:bg-amber-50 transition focus:outline-none focus:ring-2 focus:ring-amber-400">
+                        <span class="bg-amber-50 rounded-lg h-52 w-full flex flex-col items-center justify-center gap-3">
+                            <span class="w-12 h-12 rounded-full bg-amber-700 text-white flex items-center justify-center">@svg('heroicon-o-pencil-square', 'w-6 h-6')</span>
+                        </span>
+                        <span class="font-medium mt-3">{{ __('templates.mine_new') }}</span>
+                        <span class="text-xs text-stone-500 mt-0.5">{{ __('templates.mine_new_hint', ['left' => $slotsLeft]) }}</span>
+                    </a>
+                @endif
+                {{-- or order one from Markor --}}
+                <button type="button" wire:click="openOrder"
+                        class="bg-white border-2 border-dashed border-stone-300 rounded-xl p-4 flex flex-col text-left hover:border-amber-400 hover:bg-amber-50 transition focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    <span class="bg-stone-50 rounded-lg h-52 w-full flex flex-col items-center justify-center gap-3">
+                        <span class="w-12 h-12 rounded-full bg-stone-700 text-white flex items-center justify-center">@svg('heroicon-o-plus', 'w-6 h-6')</span>
+                        <span class="text-xs font-mono text-stone-600">? × ? mm</span>
+                    </span>
+                    <span class="font-medium mt-3">{{ __('template_requests.order') }}</span>
+                    <span class="text-xs text-stone-500 mt-0.5">{{ __('template_requests.hint') }}</span>
+                </button>
+                @foreach($mineList as $t)
+                    @include('livewire.printing.partials.catalog-card', ['t' => $t, 'block' => 'mine'])
+                @endforeach
+            </div>
+            @if($mineList->isEmpty())
+                <p class="text-sm text-stone-500 mt-3">{{ $filtering ? __('templates.nothing_found') : __('templates.block_mine_empty') }}</p>
+            @endif
+        </section>
     @endif
 
-    <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        @if(auth()->user()->company_id)
-            {{-- first card: order a template of your own size (same size as the template cards) --}}
-            <button type="button" wire:click="openOrder"
-                    class="bg-white border-2 border-dashed border-amber-300 rounded-xl p-4 flex flex-col text-left hover:border-amber-400 hover:bg-amber-50 transition focus:outline-none focus:ring-2 focus:ring-amber-400">
-                <span class="bg-amber-50 rounded-lg h-52 w-full flex flex-col items-center justify-center gap-3">
-                    <span class="w-12 h-12 rounded-full bg-amber-700 text-white flex items-center justify-center">@svg('heroicon-o-plus', 'w-6 h-6')</span>
-                    <span class="text-xs font-mono text-amber-800">? × ? mm</span>
-                </span>
-                <span class="font-medium mt-3">{{ __('template_requests.order') }}</span>
-                <span class="text-xs text-stone-500 mt-0.5">{{ __('template_requests.hint') }}</span>
-            </button>
-        @endif
-        @forelse($templates as $t)
-            @php $isMine = in_array($t->id, $mineIds, true); @endphp
-            <article wire:key="tpl-{{ $t->id }}" class="bg-white border rounded-xl p-4 flex flex-col {{ $isMine ? 'border-amber-600' : 'border-stone-200' }}">
-                <div class="relative bg-stone-100 rounded-lg p-4 flex items-center justify-center h-52">
-                    @if(auth()->user()->company_id)
-                        <button type="button" wire:click="toggleMine({{ $t->id }})" aria-pressed="{{ $isMine ? 'true' : 'false' }}"
-                                title="{{ $isMine ? __('templates.remove_mine') : __('templates.add_mine') }}" aria-label="{{ $isMine ? __('templates.remove_mine') : __('templates.add_mine') }}"
-                                class="absolute top-2 right-2 w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center transition {{ $isMine ? 'text-amber-700' : 'text-stone-400 hover:text-amber-700' }}">
-                            @svg($isMine ? 'heroicon-s-star' : 'heroicon-o-star', 'w-5 h-5')
-                        </button>
-                    @endif
-                    @include('partials.template-preview', ['template' => $t, 'previewHtml' => $previews[$t->id], 'maxW' => 260, 'maxH' => 170])
-                </div>
-                <div class="flex items-start justify-between gap-3 mt-3">
-                    <div>
-                        <h2 class="font-medium">{{ $t->name }}</h2>
-                        <p class="text-xs text-stone-500 mt-0.5">
-                            {{ $t->width_mm }}×{{ $t->height_mm }} mm
-                            @if(($t->columns ?? 1) > 1) · {{ $t->columns }} {{ __('templates.per_row') }}, {{ __('templates.gap') }} {{ rtrim(rtrim(number_format($t->gap_mm, 1, '.', ''), '0'), '.') }}@endif
-                        </p>
-                    </div>
-                    @if($t->is_default)
-                        <span class="shrink-0 px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-700">{{ __('templates.default') }}</span>
-                    @endif
-                </div>
-                <a href="{{ route('templates.preview', $t) }}" target="_blank" class="text-xs text-amber-700 hover:underline mt-2">{{ __('templates.preview_pdf') }}</a>
-            </article>
-        @empty
-            <p class="text-stone-500 text-sm self-center">{{ $filtering ? __('templates.nothing_found') : __('common.no_data') }}</p>
-        @endforelse
-    </div>
+    {{-- Block 2. Global templates (made by Markor, or published client designs) --}}
+    <section aria-labelledby="global-title">
+        <div class="flex items-baseline justify-between gap-3 mb-1 flex-wrap">
+            <h2 id="global-title" class="text-lg font-semibold">{{ __('templates.block_global') }}</h2>
+            <span class="text-xs text-stone-500 tabular-nums">{{ $global->count() }} / {{ $total }}</span>
+        </div>
+        <p class="text-xs text-stone-500 mb-3">{{ __('templates.block_global_hint') }}</p>
+        <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            @forelse($global as $t)
+                @include('livewire.printing.partials.catalog-card', ['t' => $t, 'block' => 'global'])
+            @empty
+                <p class="text-stone-500 text-sm self-center">{{ $filtering ? __('templates.nothing_found') : __('common.no_data') }}</p>
+            @endforelse
+        </div>
+    </section>
 </div>

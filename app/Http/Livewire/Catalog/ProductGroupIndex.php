@@ -11,7 +11,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-/** Super admin: Asl Belgisi product categories and the DataMatrix structure of their codes. */
+/** Super admin: product categories of each marking system (Asl Belgisi, Честный ЗНАК) and the DataMatrix structure of their codes. */
 #[Layout('layouts.app')]
 class ProductGroupIndex extends Component
 {
@@ -21,6 +21,7 @@ class ProductGroupIndex extends Component
     public bool $showForm = false;
     public ?int $editingId = null;
 
+    public string $marking_system = 'aslbelgisi';
     public string $name_uz = '';
     public ?string $name_ru = '';
     public ?string $name_zh = '';
@@ -34,6 +35,7 @@ class ProductGroupIndex extends Component
     protected function rules(): array
     {
         return [
+            'marking_system'      => ['required', \Illuminate\Validation\Rule::in(\App\Domain\Marking\Support\MarkingSystem::ALL)],
             'name_uz'             => 'required|string|max:255',
             'name_ru'             => 'nullable|string|max:255',
             'name_zh'             => 'nullable|string|max:255',
@@ -58,7 +60,7 @@ class ProductGroupIndex extends Component
     {
         $this->authorize('create', ProductGroup::class);
         $this->resetValidation();
-        $this->reset(['name_uz', 'name_ru', 'name_zh', 'sample_code', 'requires_eds', 'editingId']);
+        $this->reset(['marking_system', 'name_uz', 'name_ru', 'name_zh', 'sample_code', 'requires_eds', 'editingId']);
         $this->is_active  = true;
         $this->sort_order = (int) ProductGroup::max('sort_order') + 1;
         $this->segments   = [
@@ -76,6 +78,7 @@ class ProductGroupIndex extends Component
         $this->authorize('update', $group);
         $this->resetValidation();
         $this->fill($group->only(['name_uz', 'name_ru', 'name_zh', 'sample_code', 'requires_eds', 'is_active', 'sort_order']));
+        $this->marking_system = $group->marking_system ?: 'aslbelgisi';
         $this->segments  = $group->structure ?: [['ai' => '01', 'label' => 'GTIN', 'length' => 14, 'variable' => false]];
         $this->editingId = $id;
         $this->showForm  = true;

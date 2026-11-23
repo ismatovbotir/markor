@@ -109,13 +109,17 @@ Route::middleware(['auth', 'company'])->prefix('aslbelgi')->group(function () {
     Route::get('/imports/{batch}/labels.pdf', [LabelPdfController::class, 'batch'])->name('import-batches.labels');
     Route::get('/imports/{batch}/parts', [LabelPdfController::class, 'parts'])->name('import-batches.parts');
     Route::get('/imports/{batch}/print', [LabelPdfController::class, 'print'])->name('import-batches.print');
+    Route::get('/pdf-reader', \App\Http\Livewire\Marking\PdfCodeReader::class)->middleware('client.only:admin.clients')->name('import-batches.pdf-reader');
     Route::get('/codes', MarkingCodeIndex::class)->name('marking-codes.index');
     // users are a section of the company page now; the old address keeps working
     Route::get('/users', fn () => redirect(route('company.setup') . '#users'))->middleware('client.only:admin.clients')->name('company.users');
     Route::get('/balance', \App\Http\Livewire\Account\BalancePage::class)->middleware('client.only:admin.payments')->name('balance');
     Route::get('/products', ProductIndex::class)->name('products.index');
+    Route::get('/products/{product}/label.pdf', [\App\Http\Controllers\Printing\ProductLabelController::class, 'pdf'])->name('products.label');
+    Route::get('/products/{product}/label/print', [\App\Http\Controllers\Printing\ProductLabelController::class, 'print'])->name('products.label.print');
     Route::get('/offers', OfferIndex::class)->name('offers.index');
     Route::get('/templates', \App\Http\Livewire\Printing\TemplateCatalog::class)->middleware('client.only:label-templates.index')->name('templates.catalog');
+    Route::get('/templates/mine', \App\Http\Livewire\Printing\MyTemplates::class)->middleware('client.only:label-templates.index')->name('templates.mine');
     Route::get('/templates/{template}/preview.pdf', [LabelPdfController::class, 'preview'])->name('templates.preview');
 });
 

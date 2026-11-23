@@ -113,7 +113,7 @@ class OfferCategoryManager extends Component
     {
         $tab = in_array($this->tab, self::TABS, true) ? $this->tab : 'items';
         $isTemplates = $this->category->isTemplates();
-        $templates = $isTemplates && $tab === 'items' ? LabelTemplate::orderByDesc('is_default')->orderBy('name')->get() : collect();
+        $templates = $isTemplates && $tab === 'items' ? LabelTemplate::public()->orderByDesc('is_default')->orderBy('name')->get() : collect();
 
         $all = $isTemplates ? collect() : $this->category->offers()->get();
         $status = in_array($this->status, self::STATUSES, true) ? $this->status : 'all';

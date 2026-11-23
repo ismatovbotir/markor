@@ -29,7 +29,9 @@
                 @forelse($groups as $group)
                     <tr class="hover:bg-stone-50" wire:key="group-{{ $group->id }}">
                         <td class="px-4 py-3">
-                            <div class="font-medium">{{ $group->name_uz }}</div>
+                            <div class="font-medium">{{ $group->name_uz }}
+                                <span class="ml-1 inline-flex px-1.5 py-0.5 rounded text-[11px] font-normal {{ ($group->marking_system ?: 'aslbelgisi') === 'aslbelgisi' ? 'bg-stone-100 text-stone-600' : 'bg-sky-50 text-sky-800' }}">{{ \App\Domain\Marking\Support\MarkingSystem::label($group->marking_system) }}</span>
+                            </div>
                             <div class="text-xs text-stone-500">{{ collect([$group->name_ru, $group->name_zh])->filter()->implode(' · ') }}</div>
                         </td>
                         <td class="px-4 py-3"><code class="text-xs bg-stone-100 px-1.5 py-0.5 rounded whitespace-nowrap">{{ $group->structureSummary() ?: '—' }}</code></td>
@@ -58,6 +60,15 @@
             <div class="bg-white rounded-xl shadow-xl w-full max-w-4xl p-6">
                 <h2 class="text-lg font-semibold mb-4">{{ $editingId ? __('common.edit') : __('common.add') }} — {{ __('nav.product_groups') }}</h2>
                 <form wire:submit="save" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-medium text-stone-600 mb-1">{{ __('marking_system.field') }}</label>
+                        <select wire:model="marking_system" class="{{ $field }} sm:max-w-xs">
+                            @foreach(\App\Domain\Marking\Support\MarkingSystem::options() as $key => $label)
+                                <option value="{{ $key }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('marking_system') <p class="text-rose-500 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
                     <div class="grid sm:grid-cols-3 gap-3">
                         @foreach(['name_uz' => 'UZ', 'name_ru' => 'RU', 'name_zh' => '中文'] as $prop => $lang)
                             <div>

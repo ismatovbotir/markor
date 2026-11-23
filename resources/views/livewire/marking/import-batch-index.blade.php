@@ -8,6 +8,9 @@
                 {{ __('import.refresh') }}
             </button>
         @can('create', \App\Domain\Marking\Models\ImportBatch::class)
+            <a href="{{ route('import-batches.pdf-reader') }}" class="inline-flex items-center gap-1.5 px-3 py-2 border border-stone-300 rounded-lg text-sm text-stone-700 hover:bg-stone-100">
+                @svg('heroicon-o-document-magnifying-glass', 'w-4 h-4') {{ __('pdfreader.button') }}
+            </a>
             <button wire:click="$set('showForm', true)" class="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 transition">
                 + {{ __('import.upload_csv') }}
             </button>
@@ -56,7 +59,27 @@
                 @php $colors = ['uploaded'=>'stone','pending'=>'stone','processing'=>'amber','checking'=>'sky','completed'=>'emerald','failed'=>'rose'] @endphp
                 @forelse($batches as $batch)
                     <tr class="hover:bg-stone-50" wire:key="batch-{{ $batch->id }}">
-                        <td class="px-4 py-3 font-medium">{{ $batch->original_filename }}</td>
+                        <td class="px-4 py-3 font-medium">
+                            {{ $batch->original_filename }}
+                            @if(in_array($batch->status, ['checking', 'completed'], true))
+                                @php $sys = $batch->marking_system ?: 'aslbelgisi'; @endphp
+                                <div class="mt-1 text-xs font-normal">
+                                    @if($batch->marking_system_detected)
+                                        <span class="inline-flex px-2 py-0.5 rounded-full {{ $sys === 'aslbelgisi' ? 'bg-stone-100 text-stone-600' : 'bg-sky-50 text-sky-800' }}">{{ \App\Domain\Marking\Support\MarkingSystem::label($sys) }}</span>
+                                    @else
+                                        {{-- the codes fit several systems: the client says which one --}}
+                                        <label class="inline-flex items-center gap-1 text-stone-500" title="{{ __('marking_system.choose_hint') }}">
+                                            <span class="sr-only">{{ __('marking_system.choose_hint') }}</span>
+                                            <select wire:change="switchSystem({{ $batch->id }}, $event.target.value)" class="border border-stone-200 rounded-full px-2 py-0.5 text-xs bg-white">
+                                                @foreach(\App\Domain\Marking\Support\MarkingSystem::options() as $key => $label)
+                                                    <option value="{{ $key }}" @selected($key === $sys)>{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                        </label>
+                                    @endif
+                                </div>
+                            @endif
+                        </td>
                         @can('admin')<td class="px-4 py-3 text-stone-500" title="{{ $batch->uploader?->email }}">{{ $batch->uploader?->name ?? '—' }}</td>@endcan
                         <td class="px-4 py-3">
                             @php $batchItems = $items[$batch->id] ?? collect(); @endphp
@@ -158,7 +181,7 @@
                             @elseif($batch->status === 'completed' && $batch->marking_codes_count > 0)
 @php $dl = ['url' => route('import-batches.labels', $batch), 'partsUrl' => route('import-batches.parts', $batch), 'printUrl' => route('import-batches.print', $batch), 'name' => pathinfo($batch->original_filename, PATHINFO_FILENAME), 'count' => max(0, $batch->marking_codes_count - $problemTotal), 'blocked' => $problemTotal]; @endphp
                                 <span class="inline-flex items-center gap-2 whitespace-nowrap">
-                                    @if($canCheck)
+                                    @if($canCheck && ($batch->marking_system ?: 'aslbelgisi') === 'aslbelgisi')
                                         <button type="button" wire:click="openCheck({{ $batch->id }})" @disabled($check?->isActive())
                                                 class="inline-flex items-center justify-center w-8 h-8 border border-stone-300 text-stone-600 rounded-lg hover:bg-stone-100 hover:text-amber-800 transition disabled:opacity-40"
                                                 title="{{ __('aslbelgi_check.action') }}" aria-label="{{ __('aslbelgi_check.action') }}">
@@ -248,7 +271,7 @@
                     <h2 class="text-lg font-semibold">{{ __('import.fill_item_title') }}</h2>
                     <p class="text-sm text-stone-500 mt-1">GTIN <span class="font-mono">{{ $namingProduct?->gtin }}</span> — {{ __('import.fill_item_hint') }}</p>
                 </div>
-                @foreach(['name_uz' => 'product_groups.name_uz', 'name_ru' => 'product_groups.name_ru', 'sku' => 'SKU'] as $key => $label)
+                @foreach(['name' => 'common.name', 'sku' => 'SKU'] as $key => $label)
                     <label class="block text-xs font-medium text-stone-600">{{ __($label) }}@if($key === 'sku') <span class="text-stone-400">({{ __('common.optional') }})</span>@endif
                         <input wire:model="naming.{{ $key }}" type="text" class="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-amber-400">
                         @error("naming.$key") <span class="text-rose-500 text-xs">{{ $message }}</span> @enderror

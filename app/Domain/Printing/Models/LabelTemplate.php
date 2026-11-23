@@ -41,7 +41,79 @@ HTML;
         'name', 'product_group_id', 'printer_type',
         'width_mm', 'height_mm', 'columns', 'gap_mm', 'labels_per_pdf', 'dpi',
         'template', 'layout', 'is_default', 'watermark',
+        'company_id', 'created_by', 'share_consent', 'shared_at', 'client_deleted_at',
     ];
+
+    /**
+     * Who sees a template: the super admin — all; a client — the global ones (made by the super admin
+     * or published with the owner's consent) and its own company's. Guests, queue jobs and the Telegram
+     * bot have no logged-in client: they must use public() / visibleTo() explicitly.
+     */
+    protected static function booted(): void
+    {
+        static::addGlobalScope('visible', function ($query) {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            if ($user && !$user->isAdmin()) {
+                $query->where(fn ($q) => self::visibleWhere($q, $user->company_id));
+            }
+        });
+    }
+
+    private static function visibleWhere($q, ?int $companyId)
+    {
+        $q->whereNull($q->qualifyColumn('company_id'))->orWhereNotNull($q->qualifyColumn('shared_at'));
+        if ($companyId) {
+            // the company's own designs, unless it deleted them
+            $q->orWhere(fn ($own) => $own->where($own->qualifyColumn('company_id'), $companyId)->whereNull($own->qualifyColumn('client_deleted_at')));
+        }
+
+        return $q;
+    }
+
+    /** Only templates everyone may see (public pages, marketplace). */
+    public function scopePublic($query)
+    {
+        return $query->where(fn ($q) => self::visibleWhere($q, null));
+    }
+
+    /** Templates a company may use (for code without a logged-in client, e.g. the Telegram bot). */
+    public function scopeVisibleTo($query, ?\App\Domain\Companies\Company $company)
+    {
+        return $query->where(fn ($q) => self::visibleWhere($q, $company?->id));
+    }
+
+    /** A client's own design it still keeps (counts toward the company's template_limit). */
+    public function scopeOwnedBy($query, int $companyId)
+    {
+        return $query->where('company_id', $companyId)->whereNull('client_deleted_at');
+    }
+
+    /** Super admin status of a client design: private / consent / global / deleted. */
+    public function clientStatus(): ?string
+    {
+        return match (true) {
+            $this->company_id === null => null,
+            $this->shared_at !== null => 'global',
+            $this->client_deleted_at !== null => 'deleted',
+            $this->share_consent => 'consent',
+            default => 'private',
+        };
+    }
+
+    public function isGlobal(): bool
+    {
+        return $this->company_id === null || $this->shared_at !== null;
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(\App\Domain\Companies\Company::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
+    }
 
     /**
      * The "markor.uz" mark: black 4 pt DejaVu Sans in the bottom-right corner, 0.5 mm inside the
@@ -74,14 +146,16 @@ HTML;
     }
 
     /**
-     * Templates offered to a company for PDF / printing: the ones it chose ("my templates"),
-     * or all templates while it has not chosen any. Default first, then by name.
+     * Templates offered to a company for PDF / printing: "Mine" — its own designs and the global
+     * templates it starred — or every template it may see while "Mine" is empty. Default first, then by name.
      */
     public static function forCompany(?\App\Domain\Companies\Company $company)
     {
-        $query = static::query()->orderByDesc('is_default')->orderBy('name');
-        if ($company && $company->labelTemplates()->exists()) {
-            $query->whereIn('id', $company->labelTemplates()->select('label_templates.id'));
+        $query = static::query()->visibleTo($company)->orderByDesc('is_default')->orderBy('name');
+        if ($company && ($company->labelTemplates()->exists() || static::query()->ownedBy($company->id)->exists())) {
+            // "Mine": the company's own designs and the global templates it starred
+            $query->where(fn ($q) => $q->whereIn('id', $company->labelTemplates()->select('label_templates.id'))
+                ->orWhere(fn ($own) => $own->where('company_id', $company->id)->whereNull('client_deleted_at')));
         }
 
         return $query;
@@ -97,6 +171,9 @@ HTML;
     {
         return [
             'is_default' => 'boolean',
+            'share_consent' => 'boolean',
+            'shared_at'  => 'datetime',
+            'client_deleted_at' => 'datetime',
             'watermark'  => 'boolean',
             'layout'     => 'array',
             'gap_mm'     => 'float',
