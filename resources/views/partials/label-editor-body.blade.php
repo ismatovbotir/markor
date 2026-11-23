@@ -40,6 +40,10 @@
                     <template x-if="el.type === 'text'">
                         <div class="overflow-hidden whitespace-pre-line break-words text-black pointer-events-none" :style="innerStyle(el) + textStyle(el)" x-text="preview(el)"></div>
                     </template>
+                    {{-- delete the selected element: × on its top-right corner (the Delete key does the same) --}}
+                    <button type="button" x-show="selectedId === el.id" x-on:pointerdown.stop x-on:click.stop="remove()"
+                            class="absolute -right-2.5 -top-2.5 z-20 w-5 h-5 flex items-center justify-center rounded-full bg-rose-600 hover:bg-rose-700 text-white shadow ring-2 ring-white cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-rose-700"
+                            title="{{ __('common.delete') }} (Delete)" aria-label="{{ __('common.delete') }}">@svg('heroicon-o-x-mark', 'w-3.5 h-3.5')</button>
                     <span x-show="selectedId === el.id" x-on:pointerdown.stop="start($event, el, 'resize')"
                           class="absolute -right-1.5 -bottom-1.5 w-3 h-3 bg-amber-600 border border-white rounded-sm cursor-nwse-resize"></span>
                 </div>

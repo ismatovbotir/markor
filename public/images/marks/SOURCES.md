@@ -25,5 +25,6 @@ their source and licence are also stored in `label_marks.source`.
 
 Conformity marks (EAC, РСТ, CE) may appear only on products that hold the matching certificate/declaration.
 
-Честный ЗНАК (`chestny_znak`) has a slot without a file: it is CRPT's trademark, licensed to registered marking
-participants for use in Russia (честныйзнак.рф/logo.consent). The owner uploads the official file in the admin.
+Честный ЗНАК (`chestny_znak`): CRPT's trademark, licensed to registered marking participants for use in Russia
+(честныйзнак.рф/logo.consent). The file was given by the Markor owner (cz-logo-new.svg, 23.11.2026); only the square sign is used, like the
+Asl Belgisi icon, in monochrome: black square with the white mark — thermal printers print one colour.

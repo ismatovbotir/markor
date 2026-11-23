@@ -75,6 +75,12 @@ class LabelMark extends Model
         return array_map(fn ($m) => self::urlOf($m), array_filter(self::cached(), fn ($m) => $m['path']));
     }
 
+    /** key => width / height, so the designer places a wide logo (Честный ЗНАК) at its real proportions. */
+    public static function ratios(): array
+    {
+        return array_map(fn ($m) => $m['width'] && $m['height'] ? round($m['width'] / $m['height'], 3) : 1, array_filter(self::cached(), fn ($m) => $m['path']));
+    }
+
     public static function label(array $m): string
     {
         return ($m['name_' . app()->getLocale()] ?? '') ?: $m['name_uz'];

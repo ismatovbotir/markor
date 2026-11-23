@@ -293,8 +293,11 @@ window.labelEditor = (initial, sampleDm, sample) => ({
             el = { type, x: 2, y: 2, w: 20, h: 20 };
         } else if (type === 'mark') {
             // a standard sign (Asl Belgisi…): square, 8 mm by default (6 mm is the smallest that prints clearly at 203 dpi)
+            // a wide logo (Честный ЗНАК) keeps its proportions: 8 mm high, as wide as it needs (within the label)
             const size = Math.max(6, Math.min(8, this.width - 4, this.height - 4));
-            el = { type, mark: text || 'aslbelgi', x: 2, y: 2, w: size, h: size };
+            const ratio = (window.labelMarkRatios || {})[text] || 1;
+            const w = Math.min(size * ratio, this.width - 4);
+            el = { type, mark: text || 'aslbelgi', x: 2, y: 2, w: Math.round(w * 10) / 10, h: Math.round(Math.max(3, w / ratio) * 10) / 10 };
         } else if (type === 'logo') {
             el = { type, x: 2, y: 2, w: Math.min(16, this.width - 4), h: Math.min(8, this.height - 4) };
         } else if (type === 'barcode') {

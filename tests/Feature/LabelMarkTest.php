@@ -35,7 +35,7 @@ class LabelMarkTest extends TestCase
     public function test_every_built_in_mark_has_an_image_three_names_and_prints(): void
     {
         $this->assertContains('aslbelgi', LabelMark::keys());
-        foreach (LabelMark::where('key', '!=', 'chestny_znak')->get() as $m) {
+        foreach (LabelMark::all() as $m) {
             $this->assertFileExists(public_path($m->path), $m->key);
             $this->assertNotEmpty($m->name_ru, $m->key);
             $this->assertNotEmpty($m->name_zh, $m->key);
@@ -53,13 +53,14 @@ class LabelMarkTest extends TestCase
         $this->assertNull(LayoutRenderer::mark('../../.env'));
     }
 
-    public function test_chestny_znak_waits_for_the_official_file(): void
+    public function test_chestny_znak_is_a_square_icon_in_the_marking_group(): void
     {
         $cz = LabelMark::where('key', 'chestny_znak')->first();
-        $this->assertNull($cz->path);
+        $this->assertSame('images/marks/chestny_znak.png', $cz->path);
         $this->assertStringContainsString('ЦРПТ', $cz->source);
-        $this->assertNotContains('chestny_znak', LabelMark::keys());
-        $this->assertArrayNotHasKey('chestny_znak', collect(LabelMark::menu())->flatten(1)->keyBy('key')->all());
+        $this->assertSame(['aslbelgi', 'chestny_znak'], collect(LabelMark::menu()['marking'])->pluck('key')->all());
+        $this->assertEquals(1, LabelMark::ratios()['chestny_znak']);
+        $this->assertEquals(1, LabelMark::ratios()['aslbelgi']);
     }
 
     public function test_designers_show_the_grouped_menu_with_asl_belgisi_inside(): void
@@ -125,11 +126,6 @@ class LabelMarkTest extends TestCase
         $this->assertFileExists(public_path('images/marks/eac.png')); // the old file stays
         $this->assertNotSame($before, LayoutRenderer::mark('eac')['uri']);
         $this->assertDatabaseHas('audit_logs', ['action' => 'label_mark.image_replaced', 'entity_id' => $eac->id]);
-
-        // the Честный ЗНАК slot gets its official file
-        $cz = LabelMark::where('key', 'chestny_znak')->first();
-        Livewire::test(LabelMarkForm::class, ['mark' => $cz])->set('photo', UploadedFile::fake()->image('cz.png', 400, 120))->call('save')->assertHasNoErrors();
-        $this->assertContains('chestny_znak', collect(LabelMark::menu()['marking'])->pluck('key')->all());
     }
 
     public function test_hidden_mark_leaves_the_menu_but_old_templates_still_print_it_and_nothing_deletes(): void
@@ -147,6 +143,12 @@ class LabelMarkTest extends TestCase
         $this->assertFalse(method_exists(LabelMarkForm::class, 'delete'));
         $this->get(route('admin.label-marks'))->assertOk()->assertSee(__('label_marks.no_delete'));
         $this->get(route('admin.label-marks.edit', $fragile))->assertOk();
+    }
+
+    public function test_selected_element_has_a_delete_button_on_its_top_right_corner(): void
+    {
+        $body = file_get_contents(resource_path('views/partials/label-editor-body.blade.php'));
+        $this->assertMatchesRegularExpression('/x-show="selectedId === el.id" x-on:pointerdown.stop x-on:click.stop="remove\(\)"\s+class="absolute -right-2.5 -top-2.5/', $body);
     }
 
     public function test_clients_cannot_open_the_icon_admin(): void
