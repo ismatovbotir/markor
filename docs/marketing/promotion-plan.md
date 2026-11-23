@@ -403,3 +403,9 @@ Assalomu alaykum. Biz O'zbekistonda etiketka printerlari va sarf materiallari so
 **UZ:** Etiketka printeringiz uchun drayver kerakmi? markor.uz/drivers — Zebra, Godex, Xprinter modellari: rasmiy saytdan yuklab olish havolasi, o'rnatish bosqichlari va kalibrlash bo'yicha maslahatlar. O'rnatishda yordam kerak bo'lsa — yozing.
 
 **RU:** Нужен драйвер для принтера этикеток? markor.uz/drivers — модели Zebra, Godex, Xprinter: ссылка на официальную загрузку, шаги установки и советы по калибровке. Нужна помощь — пишите.
+
+## Честный ЗНАК, PDF va belgilar (2026-11-23) — post uchun qoralama (faqat egasining roziligi bilan)
+
+**UZ:** Rossiyaga eksport qilasizmi? Markor endi Chestniy ZNAK kodlarini ham etiketkaga chiqaradi: CSV yuklaysiz, tizim kodlardan avtomatik aniqlanadi, narxi Asl Belgisi bilan bir xil — kod uchun 9 so'm. Kodlar faqat PDF da bo'lsa, «PDF dan o'qish» (beta) ularni brauzeringizda o'qib CSV beradi — PDF serverga yuklanmaydi. Etiketka dizaynerida yangi «Belgilar» menyusi: EAC, RST, CE, «Ehtiyot bo'ling», «Yuqori tomoni» va boshqalar. markor.uz
+
+**RU:** Экспортируете в Россию? Markor теперь печатает и коды Честный ЗНАК: загружаете CSV, система определяется по кодам автоматически, цена та же, что для Asl Belgisi, — 9 сумов за код. Если коды есть только в PDF, «Чтение кодов из PDF» (бета) прочитает их прямо в браузере и выдаст CSV — PDF на сервер не загружается. В дизайнере этикеток новое меню «Знаки»: EAC, РСТ, CE, «Хрупкое», «Верх» и другие. markor.uz

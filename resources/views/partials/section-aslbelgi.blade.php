@@ -3,7 +3,7 @@
 <section id="aslbelgi" class="bg-stone-900 text-stone-100 scroll-mt-16">
     <div class="max-w-6xl mx-auto px-4 py-20 grid lg:grid-cols-2 gap-12">
         <div>
-            <p class="font-mono text-xs uppercase tracking-widest text-amber-400">Asl Belgisi · GS1 DataMatrix</p>
+            <p class="font-mono text-xs uppercase tracking-widest text-amber-400">{{ __('home.aslbelgi.kicker') }}</p>
             <{{ $hTag }} class="font-display font-bold text-2xl sm:text-3xl text-white tracking-tight mt-3">{{ __('home.aslbelgi.title') }}</{{ $hTag }}>
             <p class="text-stone-300 mt-4 leading-relaxed">{{ __('home.aslbelgi.text') }}</p>
             <div class="flex flex-wrap items-center gap-4 mt-8">
@@ -21,7 +21,7 @@
             <p class="flex items-start gap-2 text-sm text-stone-300 mt-6">@svg('heroicon-o-paper-airplane', 'w-4 h-4 mt-0.5 shrink-0') {{ __('home.aslbelgi.telegram') }}</p>
         </div>
         <ol class="grid sm:grid-cols-2 auto-rows-fr gap-px bg-stone-700 rounded-2xl overflow-hidden self-stretch">
-            @foreach([1, 2, 3, 4] as $i)
+            @foreach([1, 2, 3, 4, 5, 6] as $i)
                 <li class="bg-stone-900 p-6">
                     <span class="font-mono text-xs text-amber-400">0{{ $i }}</span>
                     <h3 class="font-semibold text-white mt-2">{{ __("home.aslbelgi.point$i.title") }}</h3>

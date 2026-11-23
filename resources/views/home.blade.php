@@ -44,7 +44,7 @@
     $features = [
         'excel' => 'heroicon-o-table-cells', 'designer' => 'heroicon-o-cursor-arrow-rays',
         'codes' => 'heroicon-o-qr-code', 'rows' => 'heroicon-o-squares-2x2',
-        'rotate' => 'heroicon-o-arrow-path', 'overlap' => 'heroicon-o-exclamation-triangle',
+        'rotate' => 'heroicon-o-arrow-path', 'marks' => 'heroicon-o-check-badge',
         'generated' => 'heroicon-o-hashtag',
         'privacy' => 'heroicon-o-shield-check', 'autosave' => 'heroicon-o-bookmark-square',
         'print' => 'heroicon-o-printer', 'trial' => 'heroicon-o-gift', 'guide' => 'heroicon-o-book-open',

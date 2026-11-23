@@ -2,7 +2,7 @@
   "locales": {
     "uz": {
       "title": "Etiketka chop etish: Excel va Asl Belgisi kodlari | Markor",
-      "description": "Exceldan etiketka yarating va o'z printeringizda PDFsiz chop eting yoki PDF oling: QR, DataMatrix, shtrix-kod. Asl Belgisi kodlari — to'g'ri GS1 DataMatrix.",
+      "description": "Exceldan etiketka yarating va printerda PDFsiz chop eting yoki PDF oling: QR, DataMatrix, shtrix-kod. Asl Belgisi va Chestniy ZNAK kodlari — GS1 DataMatrix.",
       "h1": "Etiketka chop etish — Excel jadvalidan va Asl Belgisi kodlaridan",
       "og_title": "Markor — etiketka chop etish va Asl Belgisi kodlari",
       "og_description": "Bepul onlayn konstruktor: Excel jadvalidan etiketkalar, printerda darhol chop etish yoki PDF. Asl Belgisi kodlari CSV fayldan GS1 DataMatrix etiketkaga.",
@@ -24,7 +24,10 @@
         "etiketka printeri sotib olish",
         "yorliq yaratish onlayn",
         "этикетка чоп этиш",
-        "Асл Белгиси маркировка кодини чоп этиш"
+        "Асл Белгиси маркировка кодини чоп этиш",
+        "Chestniy ZNAK kodlarini chop etish",
+        "PDF dan markirovka kodlarini o'qish",
+        "etiketka belgilari EAC"
       ],
       "faq": [
         {
@@ -58,12 +61,16 @@
         {
           "q": "Xizmat bepulmi, ro'yxatdan o'tish kerakmi?",
           "a": "Etiketka dizayni bepul va ro'yxatdan o'tishsiz ishlaydi. Asl Belgisi bo'limi kompaniyalar uchun, hisobga kirish bilan: birinchi oy bepul, keyin har bir kod uchun 9 so'm, oldindan to'lov asosida."
+        },
+        {
+          "q": "Rossiyaga eksport uchun Chestniy ZNAK kodlarini chop etsa bo'ladimi? Kodlar faqat PDF da bo'lsa-chi?",
+          "a": "Ha. Asl Belgisi bo'limiga Chestniy ZNAK kodlarini ham CSV qilib yuklaysiz, tizim kodlardan avtomatik aniqlanadi, narxi xuddi shunday — kod uchun 9 so'm. Kodlar faqat PDF da bo'lsa, «PDF dan o'qish» sahifasi (beta) ularni brauzerda o'qib CSV beradi, PDF serverga yuklanmaydi."
         }
       ]
     },
     "ru": {
       "title": "Печать этикеток из Excel и кодов Asl Belgisi | Markor",
-      "description": "Создайте этикетки из Excel и печатайте на своём принтере без PDF или скачайте PDF: QR, DataMatrix, штрихкод. Коды Asl Belgisi — корректный GS1 DataMatrix.",
+      "description": "Этикетки из Excel: печать на свой принтер без PDF или PDF; QR, DataMatrix, штрихкод. Коды Asl Belgisi и Честный ЗНАК — корректный GS1 DataMatrix.",
       "h1": "Печать этикеток из Excel и кодов маркировки Asl Belgisi",
       "og_title": "Markor — печать этикеток и кодов маркировки Asl Belgisi",
       "og_description": "Бесплатный онлайн-конструктор: этикетки из таблицы Excel, печать прямо на принтер или PDF. Коды Asl Belgisi из CSV — в этикетки с GS1 DataMatrix.",
@@ -82,7 +89,11 @@
         "этикетки с порядковым номером",
         "шаблон этикетки 20x20",
         "принтер этикеток Ташкент",
-        "Асл Белгиси печать кодов"
+        "Асл Белгиси печать кодов",
+        "печать кодов Честный ЗНАК",
+        "коды маркировки из PDF в CSV",
+        "значки для этикетки EAC РСТ",
+        "манипуляционные знаки на этикетке"
       ],
       "faq": [
         {
@@ -116,12 +127,16 @@
         {
           "q": "Сервис бесплатный, нужна ли регистрация?",
           "a": "Дизайн этикеток бесплатный и работает без регистрации. Раздел Asl Belgisi — для компаний, со входом: первый месяц бесплатно, затем 9 сумов за код по предоплате."
+        },
+        {
+          "q": "Можно ли печатать коды Честный ЗНАК для экспорта в Россию? А если коды есть только в PDF?",
+          "a": "Да. Коды Честный ЗНАК загружаются в раздел Asl Belgisi так же, через CSV: система определяется по кодам автоматически, цена та же — 9 сумов за код. Если коды есть только в PDF, страница «Чтение кодов из PDF» (бета) прочитает их в браузере и выдаст CSV; PDF на сервер не загружается."
         }
       ]
     },
     "zh": {
       "title": "Markor — Excel标签打印与Asl Belgisi标识码打印",
-      "description": "用Excel表格制作标签，可直接用电脑上的打印机打印或下载PDF；支持二维码、DataMatrix、条形码。Asl Belgisi标识码按GS1 DataMatrix正确编码。",
+      "description": "用Excel制作标签，直接打印或下载PDF：二维码、DataMatrix、条形码。Asl Belgisi与Chestny ZNAK码按GS1 DataMatrix编码。",
       "h1": "标签打印：从Excel表格和Asl Belgisi标识码生成标签",
       "og_title": "Markor — 标签打印与Asl Belgisi标识码打印",
       "og_description": "免费在线标签设计器：Excel表格批量生成标签，直接打印或下载PDF。Asl Belgisi标识码CSV文件生成GS1 DataMatrix标签。",
@@ -139,7 +154,10 @@
         "乌兹别克斯坦强制标识",
         "乌兹别克斯坦进口家电标识",
         "20×20标签模板",
-        "标签打印机 塔什干"
+        "标签打印机 塔什干",
+        "Chestny ZNAK 标识码打印",
+        "PDF 读取标识码",
+        "标签 EAC 标志"
       ],
       "faq": [
         {
@@ -173,6 +191,10 @@
         {
           "q": "服务是否免费，需要注册吗？",
           "a": "标签设计免费，无需注册。Asl Belgisi板块面向企业，需要登录：首月免费，之后每个码9苏姆，预付费。"
+        },
+        {
+          "q": "可以打印出口俄罗斯用的 Chestny ZNAK 标识码吗？标识码只有 PDF 怎么办？",
+          "a": "可以。Chestny ZNAK 标识码同样以 CSV 上传到 Asl Belgisi 栏目，系统根据标识码自动识别，价格相同——每个码 9 苏姆。标识码只有 PDF 时，“从 PDF 读取”页面（测试版）会在浏览器中读取并生成 CSV，PDF 不会上传到服务器。"
         }
       ]
     }
@@ -242,7 +264,7 @@
         "uz": "Asl Belgisi kodlarini Xitoyda chop etish"
       }
     },
-    "updated": "2026-11-21: added direct print without PDF, design saved in browser Local Storage, Asl Belgisi codes recognised in the designer (first 10 free), /guide pages, Telegram bot as available, marketplace; FAQ extended to 8. | 2026-11-21: added china_landing (/uzbekistan-marking) for Chinese exporters: zh/ru/uz title, description, H1, 8 FAQ, keywords, Baidu notes."
+    "updated": "2026-11-21: added direct print without PDF, design saved in browser Local Storage, Asl Belgisi codes recognised in the designer (first 10 free), /guide pages, Telegram bot as available, marketplace; FAQ extended to 8. | 2026-11-21: added china_landing (/uzbekistan-marking) for Chinese exporters: zh/ru/uz title, description, H1, 8 FAQ, keywords, Baidu notes. | 2026-11-23: Честный ЗНАК codes (export to Russia), PDF code reader (beta), own client designs and product labels, label icons menu (EAC, РСТ, CE, handling, ecology); home FAQ extended to 10."
   },
   "china_landing": {
     "slug": "uzbekistan-marking",

@@ -33,10 +33,10 @@ class HomeController extends Controller
         ]);
     }
 
-    /** Home FAQ (home.faq.1..9) in the current language. */
+    /** Home FAQ (home.faq.1..10) in the current language. */
     public static function faq()
     {
-        return collect(range(1, 9))
+        return collect(range(1, 10))
             ->map(fn ($i) => ['q' => __("home.faq.$i.q"), 'a' => __("home.faq.$i.a")])
             ->reject(fn ($item) => str_starts_with($item['q'], 'home.faq.'))
             ->values();
