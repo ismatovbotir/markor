@@ -17,33 +17,8 @@ const MAX_TILE_PX = 4096; // canvas side limit kept well under mobile browser li
 const OVERLAP_MM = 40;   // tiles overlap by more than the largest expected code
 const READER = { formats: ['DataMatrix'], maxNumberOfSymbols: 255, textMode: 'Plain', returnErrors: true, tryHarder: true };
 
-/** Canonical stored form, same as MarkingCodeParser::normalize(). */
-export function normalize(text) {
-    let s = text.replace(/^[\s﻿]+|[\s﻿]+$/g, '');
-    if (/^\](d2|d1|C1)/.test(s)) s = s.slice(3);
-    return s.replace(/[\x1D\x1E\xE8]/g, '');
-}
-
-/** Port of MarkingCodeParser::split(): every product category whose structure fits the code. */
-export function matchStructures(code, groups) {
-    const found = [];
-    for (const g of groups) {
-        const s = g.structure || [];
-        const len = s.reduce((n, seg) => n + String(seg.ai ?? '').length + Number(seg.length), 0);
-        if (!s.length || code.length !== len) continue;
-        let pos = 0, gtin = '', ok = true;
-        for (const seg of s) {
-            const ai = String(seg.ai ?? '');
-            if (ai && code.substr(pos, ai.length) !== ai) { ok = false; break; }
-            pos += ai.length;
-            if (ai === '01') gtin = code.substr(pos, Number(seg.length));
-            pos += Number(seg.length);
-        }
-        if (ok && gtin && !/^\d+$/.test(gtin)) ok = false;
-        if (ok) found.push({ group: g, gtin });
-    }
-    return found;
-}
+// normalize / matchStructures are shared with the CSV upload check
+export { normalize, matchStructures } from '../marking-codes.js';
 
 /** Decodes one area of a page (in PDF points) at the given dpi; positions come back in points. */
 async function scanArea(page, dpi, x, y, w, h) {

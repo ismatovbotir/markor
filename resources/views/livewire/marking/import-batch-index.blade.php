@@ -232,17 +232,38 @@
                           const id = await $wire.queueUpload(); await promoWait(started);
                           clearInterval(timer); busy = false; if (id) $wire.releaseUpload(id)" class="space-y-4">
                     @php $rule = \App\Support\Uploads::forJs('codes'); @endphp
-                    <div x-data="{ fileError: '', sending: false, rule: @js($rule) }">
-                        {{-- checked here first (size, type); only a good file is sent to the server --}}
+                    {{-- checked here first: size, type, then the codes themselves (the same categories the server uses);
+                         a file without a single marking code is never sent. The server checks everything again. --}}
+                    <div x-data="{ fileError: '', sending: false, rule: @js($rule), groups: @js(\App\Domain\Catalog\Models\ProductGroup::forBrowser()), check: null,
+                                   t: @js(['none' => __('import.check_none'), 'gtins' => __('import.check_gtins'), 'unreadable' => __('import.check_unreadable')]) }">
                         <input type="file" accept="{{ collect($rule['extensions'])->map(fn ($e) => '.' . $e)->implode(',') }}"
-                               x-on:change="const f = $event.target.files[0]; fileError = window.checkUpload(f, rule);
+                               x-on:change="const f = $event.target.files[0]; check = null; fileError = window.checkUpload(f, rule);
+                                   if (!fileError && f) {
+                                       let text = null;
+                                       try { text = await f.text(); } catch (e) { fileError = t.unreadable; }
+                                       if (text !== null) {
+                                           check = window.checkCodesFile(text, groups);
+                                           if (!check.valid) { fileError = check.gtinOnly && check.gtinOnly * 2 >= check.invalid ? t.gtins : t.none; check = null; }
+                                       }
+                                   }
                                    if (!fileError && f) fileError = await $wire.checkFileName(f.name); // already loaded by this company?
-                                   if (fileError) { $event.target.value = ''; $wire.set('csvFile', null); return; }
+                                   if (fileError) { check = null; $event.target.value = ''; $wire.set('csvFile', null); return; }
                                    sending = true;
                                    $wire.upload('csvFile', $event.target.files[0], () => sending = false, () => { sending = false; fileError = rule.typeError })"
                                class="w-full text-sm text-stone-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200">
                         <p class="text-[11px] text-stone-400 mt-1">{{ $rule['hint'] }}</p>
-                        <p x-show="fileError" x-cloak x-text="fileError" class="text-rose-500 text-xs mt-1"></p>
+                        <p x-show="fileError" x-cloak x-text="fileError" class="text-rose-600 text-xs mt-1"></p>
+                        {{-- what the server will load: codes, GTIN (one) or number of GTINs, lines that will be skipped --}}
+                        <div x-show="check" x-cloak class="mt-2 text-xs rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-900 px-3 py-2 space-y-1">
+                            <div class="flex flex-wrap gap-x-4">
+                                <span>{{ __('import.check_codes') }}: <b class="tabular-nums" x-text="check && check.valid.toLocaleString('ru-RU')"></b></span>
+                                <span x-show="check && check.gtins.length === 1">GTIN: <b class="font-mono" x-text="check && check.gtins[0]"></b></span>
+                                <span x-show="check && check.gtins.length > 1">{{ __('pdfreader.gtins') }}: <b class="tabular-nums" x-text="check && check.gtins.length"></b></span>
+                            </div>
+                            <div x-show="check && check.invalid" class="text-amber-800"
+                                 x-text="check && @js(__('import.check_skipped')).replace(':n', check.invalid).replace(':lines', check.invalidLines.join(', ') + (check.invalid > check.invalidLines.length ? '…' : ''))"></div>
+                            <div x-show="check && check.repeated" class="text-stone-600" x-text="check && @js(__('import.check_repeated')).replace(':n', check.repeated)"></div>
+                        </div>
                         @error('csvFile') <p class="text-rose-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div x-show="busy" x-cloak>

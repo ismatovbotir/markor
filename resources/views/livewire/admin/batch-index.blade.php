@@ -9,6 +9,7 @@
             <option value="">{{ __('batches.origin.all') }}</option>
             <option value="csv">CSV</option>
             <option value="aslbelgi">Asl Belgisi API</option>
+            <option value="pdf">PDF</option>
         </select>
         <select wire:model.live="company" class="admin-input w-auto max-w-56 text-sm" aria-label="{{ __('nav.companies') }}">
             <option value="">{{ __('batches.all_companies') }}</option>
@@ -28,6 +29,7 @@
                     <a href="{{ route('admin.companies.show', $b->company_id) }}" class="hover:text-amber-800 underline-offset-2 hover:underline">{{ $b->company?->name ?? '—' }}</a>
                     · {{ number_format($b->processed_rows, 0, '.', ' ') }} {{ __('batches.codes') }}
                     @if($b->origin === 'aslbelgi')<span class="ml-1 px-1.5 py-0.5 rounded bg-teal-50 text-teal-800 text-[11px]">Asl Belgisi</span>@endif
+                    @if($b->origin === 'pdf')<span class="ml-1 px-1.5 py-0.5 rounded bg-sky-50 text-sky-800 text-[11px]">PDF</span>@endif
                     @if($printed)<span class="ml-1 px-1.5 py-0.5 rounded bg-stone-100 text-stone-700 text-[11px]">{{ __('batches.printed') }}</span>@endif
                 </x-slot:meta>
                 <x-slot:status>

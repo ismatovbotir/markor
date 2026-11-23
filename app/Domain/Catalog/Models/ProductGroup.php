@@ -73,6 +73,20 @@ class ProductGroup extends Model implements Auditable
         return $query->where('is_active', true);
     }
 
+    /**
+     * Category structures for the browser checks (CSV upload, PDF reader): the same categories, in the
+     * same order, as MarkingCodeParser uses on the server. Only names and structures, no codes.
+     */
+    public static function forBrowser(): array
+    {
+        $name = 'name_' . (app()->getLocale() === 'ru' ? 'ru' : 'uz');
+
+        return static::active()->whereNotNull('structure')->orderBy('sort_order')->orderBy('id')->get()
+            ->map(fn ($g) => ['id' => $g->id, 'name' => $g->{$name} ?: $g->name_uz,
+                'system' => $g->marking_system ?: \App\Domain\Marking\Support\MarkingSystem::ASLBELGISI, 'structure' => $g->structure])
+            ->values()->all();
+    }
+
     public function getNameAttribute(): string
     {
         return $this->{'name_' . app()->getLocale()} ?: $this->name_uz ?: (string) $this->name_ru;

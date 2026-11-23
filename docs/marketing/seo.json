@@ -64,7 +64,7 @@
         },
         {
           "q": "Rossiyaga eksport uchun Chestniy ZNAK kodlarini chop etsa bo'ladimi? Kodlar faqat PDF da bo'lsa-chi?",
-          "a": "Ha. Asl Belgisi bo'limiga Chestniy ZNAK kodlarini ham CSV qilib yuklaysiz, tizim kodlardan avtomatik aniqlanadi, narxi xuddi shunday — kod uchun 9 so'm. Kodlar faqat PDF da bo'lsa, «PDF dan o'qish» sahifasi (beta) ularni brauzerda o'qib CSV beradi, PDF serverga yuklanmaydi."
+          "a": "Ha. Asl Belgisi bo'limiga Chestniy ZNAK kodlarini ham CSV qilib yuklaysiz, tizim kodlardan avtomatik aniqlanadi, narxi xuddi shunday — kod uchun 9 so'm. Kodlar faqat PDF da bo'lsa, «PDF dan o'qish» sahifasi (beta) ularni brauzerda o'qib, bir tugma bilan bazaga import qiladi, PDF serverga yuklanmaydi."
         }
       ]
     },
@@ -130,7 +130,7 @@
         },
         {
           "q": "Можно ли печатать коды Честный ЗНАК для экспорта в Россию? А если коды есть только в PDF?",
-          "a": "Да. Коды Честный ЗНАК загружаются в раздел Asl Belgisi так же, через CSV: система определяется по кодам автоматически, цена та же — 9 сумов за код. Если коды есть только в PDF, страница «Чтение кодов из PDF» (бета) прочитает их в браузере и выдаст CSV; PDF на сервер не загружается."
+          "a": "Да. Коды Честный ЗНАК загружаются в раздел Asl Belgisi так же, через CSV: система определяется по кодам автоматически, цена та же — 9 сумов за код. Если коды есть только в PDF, страница «Чтение кодов из PDF» (бета) прочитает их в браузере и одной кнопкой импортирует в базу; PDF на сервер не загружается."
         }
       ]
     },
@@ -194,7 +194,7 @@
         },
         {
           "q": "可以打印出口俄罗斯用的 Chestny ZNAK 标识码吗？标识码只有 PDF 怎么办？",
-          "a": "可以。Chestny ZNAK 标识码同样以 CSV 上传到 Asl Belgisi 栏目，系统根据标识码自动识别，价格相同——每个码 9 苏姆。标识码只有 PDF 时，“从 PDF 读取”页面（测试版）会在浏览器中读取并生成 CSV，PDF 不会上传到服务器。"
+          "a": "可以。Chestny ZNAK 标识码同样以 CSV 上传到 Asl Belgisi 栏目，系统根据标识码自动识别，价格相同——每个码 9 苏姆。标识码只有 PDF 时，“从 PDF 读取”页面（测试版）会在浏览器中读取并一键导入数据库，PDF 不会上传到服务器。"
         }
       ]
     }

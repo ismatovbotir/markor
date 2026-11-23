@@ -68,14 +68,45 @@
                     {{ __('pdfreader.not_gs1') }}: <b x-text="notGs1"></b>
                 </div>
 
-                <div class="flex flex-wrap gap-3">
-                    <button type="button" x-on:click="download()" :disabled="!codes.length"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-700 text-white rounded-lg text-sm hover:bg-amber-800 disabled:opacity-40">
-                        @svg('heroicon-o-arrow-down-tray', 'w-4 h-4') {{ __('pdfreader.download') }}
-                    </button>
+                <div x-show="!codes.length" class="flex flex-wrap gap-3">
                     <button type="button" x-on:click="reset()" class="px-4 py-2 border border-stone-300 rounded-lg text-sm text-stone-700 hover:bg-stone-100">{{ __('pdfreader.again') }}</button>
                 </div>
-                <p class="mt-3 text-xs text-stone-500">{{ __('pdfreader.next_step') }}</p>
+            </div>
+
+            {{-- step 5: what goes into the database — first codes, total, GTIN(s), then Import --}}
+            <div x-show="codes.length" class="bg-white border border-stone-200 rounded-xl p-6">
+                <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 mb-3">
+                    <h2 class="text-sm font-semibold">{{ __('pdfreader.preview') }}</h2>
+                    <div class="text-sm text-stone-600 flex flex-wrap gap-x-5 gap-y-1">
+                        <span>{{ __('pdfreader.total') }}: <b class="tabular-nums text-stone-900" x-text="fmt(codes.length)"></b></span>
+                        <span x-show="gtins.length === 1">GTIN: <b class="font-mono text-stone-900" x-text="gtins[0]"></b></span>
+                        <span x-show="gtins.length > 1">{{ __('pdfreader.gtins') }}: <b class="tabular-nums text-stone-900" x-text="gtins.length"></b></span>
+                    </div>
+                </div>
+                <ol class="border border-stone-200 rounded-lg divide-y divide-stone-100 text-xs font-mono">
+                    <template x-for="(c, i) in codes.slice(0, 10)" :key="c.code">
+                        <li class="flex gap-3 px-3 py-1.5"><span class="text-stone-400 tabular-nums w-5 text-right shrink-0" x-text="i + 1"></span><span class="break-all" x-text="c.code"></span></li>
+                    </template>
+                </ol>
+                <p x-show="codes.length > 10" class="mt-2 text-xs text-stone-500" x-text="@js(__('pdfreader.preview_more')).replace(':n', fmt(codes.length - 10))"></p>
+
+                <p x-show="codes.length > {{ $max }}" class="mt-4 text-sm text-rose-800 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{{ __('pdfreader.import_too_many', ['max' => number_format($max, 0, '.', ' ')]) }}</p>
+                <p x-show="importError" x-text="importError" class="mt-4 text-sm text-rose-800 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2"></p>
+
+                <div class="mt-5 flex flex-wrap items-center gap-3">
+                    <button type="button" x-on:click="importCodes()" :disabled="importing || codes.length > {{ $max }}"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-700 text-white rounded-lg text-sm font-semibold hover:bg-amber-800 disabled:opacity-40">
+                        <span x-show="!importing">@svg('heroicon-o-circle-stack', 'w-5 h-5')</span>
+                        <svg x-show="importing" x-cloak class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-opacity=".3" stroke-width="3"/><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+                        <span x-text="@js(__('pdfreader.import')).replace(':n', fmt(codes.length))"></span>
+                    </button>
+                    <button type="button" x-on:click="download()" :disabled="importing"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 border border-stone-300 rounded-lg text-sm text-stone-700 hover:bg-stone-100 disabled:opacity-40">
+                        @svg('heroicon-o-arrow-down-tray', 'w-4 h-4') {{ __('pdfreader.download') }}
+                    </button>
+                    <button type="button" x-on:click="reset()" :disabled="importing" class="px-4 py-2 text-sm text-stone-600 hover:text-stone-900 disabled:opacity-40">{{ __('pdfreader.again') }}</button>
+                </div>
+                <p class="mt-3 text-xs text-stone-500">{{ __('pdfreader.import_hint') }}</p>
             </div>
 
             <div x-show="byGtin.length" class="bg-white border border-stone-200 rounded-xl overflow-hidden">

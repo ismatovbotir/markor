@@ -902,6 +902,10 @@ window.orderModal = (config) => ({
 // Super admin: the multilingual form (x-admin.i18n-form)
 import './admin/i18n-form.js';
 
+// Client: the codes file is checked in the browser before it is uploaded (the server checks again)
+import { checkCodesFile } from './marking-codes.js';
+window.checkCodesFile = checkCodesFile;
+
 // Client: read DataMatrix codes from the client's own PDF files, in the browser (the PDF is not
 // uploaded), and save them as a CSV for the normal import. Prototype (beta).
 window.pdfCodeReader = (groups, systems, fallback) => ({
@@ -916,6 +920,8 @@ window.pdfCodeReader = (groups, systems, fallback) => ({
     votes: {},      // system => codes that fit only that system
     hints: {},      // system => ambiguous codes whose GTIN prefix points to it (460–469 RU, 478 UZ)
     error: '',
+    importing: false,
+    importError: '',
     cancelled: false,
     started: 0,
     seconds: 0,
@@ -997,5 +1003,23 @@ window.pdfCodeReader = (groups, systems, fallback) => ({
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     },
 
-    reset() { Object.assign(this, { state: 'idle', files: [], pages: [], codes: [], rejected: [], error: '' }); },
+    // unique GTINs of the codes read: one is shown as is, several as a count
+    get gtins() { return [...new Set(this.codes.map((c) => c.gtin))]; },
+    fmt(n) { return Number(n).toLocaleString('ru-RU').replace(/ /g, ' '); },
+
+    // the codes go straight into a normal batch (same as uploading the CSV); the server redirects to the list
+    async importCodes() {
+        if (this.importing || !this.codes.length) return;
+        this.importing = true;
+        this.importError = '';
+        try {
+            const name = this.files.length === 1 ? this.files[0].name : this.files.map((f) => f.name).join(', ');
+            this.importError = await this.$wire.import(this.codes.map((c) => c.code), name) || '';
+        } catch (e) {
+            this.importError = e?.message || String(e);
+        }
+        if (this.importError) this.importing = false; // success: the page is leaving
+    },
+
+    reset() { Object.assign(this, { state: 'idle', files: [], pages: [], codes: [], rejected: [], error: '', importError: '', importing: false }); },
 });
