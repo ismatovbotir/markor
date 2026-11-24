@@ -138,7 +138,12 @@ class LabelPdfService
             }
             $body .= '</div>';
         }
-        // same line spacing as the editor (see LabelTemplate::PDF_LINE_HEIGHT_CSS)
+        // same line spacing as the editor (see LabelTemplate::PDF_LINE_HEIGHT_CSS): label fonts first, then DejaVu
+        $fonts = \App\Domain\Printing\LabelFonts::faceCss(true, $body);
+        if ($fonts !== '') {
+            \Illuminate\Support\Facades\File::ensureDirectoryExists(storage_path('fonts')); // dompdf's font cache
+        }
+        $body = \App\Domain\Printing\LabelFonts::pdfLineHeights($body);
         $body = str_replace(\App\Domain\Printing\Models\LabelTemplate::LINE_HEIGHT_CSS, \App\Domain\Printing\Models\LabelTemplate::PDF_LINE_HEIGHT_CSS, $body);
 
         $html = <<<HTML
@@ -150,7 +155,7 @@ class LabelPdfService
   .__page { position: relative; width: {$pageW}mm; height: {$h}mm; overflow: hidden; page-break-after: always; }
   .__page:last-child { page-break-after: auto; }
   .__label { position: absolute; top: 0; width: {$w}mm; height: {$h}mm; overflow: hidden; }
-{$css}
+{$fonts}{$css}
 </style></head>
 <body>{$body}</body></html>
 HTML;
@@ -187,6 +192,7 @@ HTML;
 
         return '<!DOCTYPE html><html><head><meta charset="utf-8"><style>'
             . 'html,body{margin:0;padding:0;background:#fff;overflow:hidden}img{image-rendering:pixelated}'
+            . \App\Domain\Printing\LabelFonts::faceCss(false, $label)
             . $css
             . '</style></head><body><div style="position:relative;width:' . $template->width_mm . 'mm;height:' . $template->height_mm . 'mm;overflow:hidden">'
             . $label . '</div></body></html>';

@@ -1,5 +1,7 @@
 {{-- Canvas + properties panel of the label editor. Must be inside an x-data built on labelEditor(). --}}
 @php $input = 'w-full border border-stone-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white'; @endphp
+{{-- label fonts: the browser downloads a file only when some text uses it --}}
+<style>{!! \App\Domain\Printing\LabelFonts::faceCss() !!}</style>
 <p x-show="overlapping.size" x-cloak class="mb-3 flex items-center gap-2 text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
     @svg('heroicon-o-exclamation-triangle', 'w-4 h-4 shrink-0') {{ __('templates.overlap_warning') }}
 </p>
@@ -161,6 +163,16 @@
                         <div x-show="!selected.source">
                             <label class="block text-xs font-medium text-stone-600 mb-1">{{ __('templates.text') }}</label>
                             <textarea x-model="selected.text" maxlength="2000" rows="2" class="{{ $input }}"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-stone-600 mb-1">{{ __('templates.font') }}</label>
+                            {{-- empty value = DejaVu Sans (no "font" key saved); the list is LabelFonts::FONTS --}}
+                            <select x-model="selected.font" @change="if (!selected.font) delete selected.font"
+                                    :style="selected.font ? `font-family:lbl-${selected.font},sans-serif` : ''" class="{{ $input }}">
+                                @foreach(\App\Domain\Printing\LabelFonts::options() as $font)
+                                    <option value="{{ $font['value'] }}" style="font-family: {{ $font['value'] ? 'lbl-' . $font['value'] . ',' : '' }}'DejaVu Sans',sans-serif">{{ $font['label'] }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>

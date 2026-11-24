@@ -121,7 +121,7 @@ window.labelEditor = (initial, sampleDm, sample) => ({
         if (kind === this.kindOf(el)) return;
         if (kind === 'marking') {
             el.type = 'datamatrix';
-            ['symbology', 'source', 'text', 'caption', 'font_size', 'bold', 'align'].forEach((k) => delete el[k]);
+            ['symbology', 'source', 'text', 'caption', 'font_size', 'bold', 'align', 'font'].forEach((k) => delete el[k]);
             el.w = el.h = Math.max(14, Math.min(el.w, el.h));
             this.clamp(el);
             return;
@@ -186,7 +186,9 @@ window.labelEditor = (initial, sampleDm, sample) => ({
     },
     textStyle(el) {
         // 1pt = 0.3528 mm
-        return `font-size:${(Number(el.font_size) || 7) * 0.3528 * this.scale}px;line-height:1.2;`
+        // label fonts (LabelFonts.php): the same files as the PDF, CSS family "lbl-<key>"
+        const family = el.font ? `font-family:lbl-${el.font},'DejaVu Sans',Verdana,sans-serif;` : '';
+        return `${family}font-size:${(Number(el.font_size) || 7) * 0.3528 * this.scale}px;line-height:1.2;`
             + `font-weight:${el.bold ? 700 : 400};text-align:${el.align || 'left'};`;
     },
     // Generated values: the print date/time in a chosen format, and a running number per label.

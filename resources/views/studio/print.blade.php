@@ -24,6 +24,9 @@
   @media print { .bar { display: none; } }
 </style>
 @if(!empty($css))<style>{!! $css !!}</style>@endif
+{{-- one print = one template, so the first label names every font it uses --}}
+@php($labelFonts = \App\Domain\Printing\LabelFonts::faceCss(false, (string) ($pages[0][0] ?? '')))
+@if($labelFonts !== '')<style>{!! $labelFonts !!}</style>@endif
 </head>
 <body>
 <div class="bar">

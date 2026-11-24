@@ -132,6 +132,7 @@ class LabelTemplateIndex extends Component
             'elements.*.text'      => 'nullable|string|max:2000',
             'elements.*.font_size' => 'nullable|numeric|min:3|max:72',
             'elements.*.bold'      => 'nullable|boolean',
+            'elements.*.font'      => ['nullable', \Illuminate\Validation\Rule::in(\App\Domain\Printing\LabelFonts::keys())], // empty = DejaVu Sans
             'elements.*.align'     => 'nullable|in:left,center,right',
             'elements.*.rotation'  => 'nullable|integer|in:0,90,180,270',
             'elements.*.hrt'       => 'nullable|boolean',             // EAN-13 / Code 128: digits under the bars

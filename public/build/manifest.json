@@ -17,7 +17,7 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-CkwkaYoa.js",
+    "file": "assets/app-Cy7PEDq-.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -26,7 +26,7 @@
     ]
   },
   "resources/js/pdf-code-reader/decoder.js": {
-    "file": "assets/decoder-D8Luxzng.js",
+    "file": "assets/decoder-Bf_EjHOG.js",
     "name": "decoder",
     "src": "resources/js/pdf-code-reader/decoder.js",
     "isDynamicEntry": true,

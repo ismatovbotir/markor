@@ -231,8 +231,9 @@ HTML;
     public static function textCss(array $el): string
     {
         // word-wrap: long words without spaces break inside the box, like in the editor (break-words)
+        // the font family stays right before the line-height: LabelFonts::pdfLineHeights() matches the pair
         return sprintf(
-            'overflow:hidden;font-size:%spt;' . self::LINE_HEIGHT_CSS . 'word-wrap:break-word;overflow-wrap:break-word;font-weight:%s;text-align:%s;',
+            'overflow:hidden;font-size:%spt;' . \App\Domain\Printing\LabelFonts::familyCss($el['font'] ?? null) . self::LINE_HEIGHT_CSS . 'word-wrap:break-word;overflow-wrap:break-word;font-weight:%s;text-align:%s;',
             self::mm($el['font_size'] ?? 7),
             !empty($el['bold']) ? 'bold' : 'normal',
             in_array($el['align'] ?? 'left', ['left', 'center', 'right'], true) ? ($el['align'] ?? 'left') : 'left'

@@ -138,6 +138,7 @@ class LayoutRenderer
             if ($source !== '' && !$generated && !empty($el['caption'])) {
                 $value = ($captions[$source] ?? $source) . ': ' . $value;
             }
+            $value = \App\Domain\Printing\LabelFonts::text($value, $el['font'] ?? null);
             $html .= LabelTemplate::elementBox($el, LabelTemplate::textCss($el), nl2br(e($value), false));
         }
 

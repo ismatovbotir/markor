@@ -40,7 +40,7 @@
         },
         {
           "q": "Etiketkaga QR kod, DataMatrix yoki shtrix-kod qo'shsa bo'ladimi?",
-          "a": "Ha. Konstruktorda matn, QR kod, DataMatrix, Code 128 va EAN-13 (chiziqlar ostida raqamli yoki raqamsiz) bor, qiymatlari jadval ustunidan olinadi. Chop etish sanasi va tartib raqamini ham qo'shish mumkin."
+          "a": "Ha. Konstruktorda matn, QR kod, DataMatrix, Code 128 va EAN-13 (chiziqlar ostida raqamli yoki raqamsiz) bor, qiymatlari jadval ustunidan olinadi. Chop etish sanasi va tartib raqamini ham qo'shish mumkin. Matn uchun 10 ta shrift bor (Roboto, Montserrat, PT Sans, Oswald va boshqalar), lotin va kirill harflari bilan."
         },
         {
           "q": "Asl Belgisi markirovka kodlarini etiketkaga qanday chiqarish mumkin?",
@@ -106,7 +106,7 @@
         },
         {
           "q": "Можно ли добавить на этикетку QR-код, DataMatrix или штрихкод?",
-          "a": "Да. В конструкторе есть текст, QR-код, DataMatrix, Code 128 и EAN-13 (с цифрами под штрихами или без), значения берутся из столбцов таблицы. Можно добавить дату печати и порядковый номер."
+          "a": "Да. В конструкторе есть текст, QR-код, DataMatrix, Code 128 и EAN-13 (с цифрами под штрихами или без), значения берутся из столбцов таблицы. Можно добавить дату печати и порядковый номер. Для текста есть 10 шрифтов (Roboto, Montserrat, PT Sans, Oswald и другие) с латиницей и кириллицей."
         },
         {
           "q": "Как распечатать коды маркировки Asl Belgisi на этикетках?",
@@ -170,7 +170,7 @@
         },
         {
           "q": "标签上可以添加二维码、DataMatrix或条形码吗？",
-          "a": "可以。设计器提供文本、二维码、DataMatrix、Code 128和EAN-13（条下可显示或不显示数字），内容取自表格列。还可以添加打印日期和序号。"
+          "a": "可以。设计器提供文本、二维码、DataMatrix、Code 128和EAN-13（条下可显示或不显示数字），内容取自表格列。还可以添加打印日期和序号。文本有10种字体可选（Roboto、Montserrat、PT Sans、Oswald等），支持拉丁和西里尔字母。"
         },
         {
           "q": "如何把Asl Belgisi标识码打印成标签？",
