@@ -7,17 +7,28 @@ use App\Domain\Marking\Services\ImportBatchService;
 use App\Domain\Printing\Models\LabelTemplate;
 use App\Jobs\SendBatchPdfToTelegram;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 /**
  * Handles one Telegram update.
- *   /start <token>  → ask to share the phone; phone must match the cabinet → the cabinet shows a
- *                     6-digit code → the client types it here → linked.
+ *   linking         → /start → the bot asks for the phone (button). The client's own profile phone, of exactly
+ *                     one active account → linked at once. Otherwise → the bot asks for the 6-digit code from
+ *                     the cabinet (made on the server, lives 30 s, then a new one; shown only in the logged-in
+ *                     cabinet). The code works at any moment. 5 wrong codes per chat → 10 minutes' pause.
  *   linked users    → send a CSV (queued like a web upload), /status, PDF buttons, /help.
  * Messages use the language set in the client's cabinet.
  */
 class BotHandler
 {
+    /** Wrong codes a chat may type before a pause, and the pause (seconds). */
+    public const CODE_TRIES = 5;
+    public const CODE_PAUSE = 600;
+
+    /** Language of a chat not linked yet: the Telegram app language when it is one of ours. */
+    private ?string $guestLocale = null;
+
     public function __construct(private TelegramApi $api, private ImportBatchService $batches) {}
 
     public function handle(array $update): void
@@ -34,23 +45,22 @@ class BotHandler
 
         $chatId = (string) $message['chat']['id'];
         $text = trim($message['text'] ?? '');
+        $lang = substr((string) ($message['from']['language_code'] ?? ''), 0, 2);
+        $this->guestLocale = in_array($lang, ['uz', 'ru', 'zh'], true) ? $lang : null;
         $user = User::where('telegram_chat_id', $chatId)->where('is_active', true)->first();
-        $link = TelegramLink::where('chat_id', $chatId)->whereIn('status', ['started', 'phone_ok'])->latest('id')->first();
 
-        if (str_starts_with($text, '/start')) {
-            $this->start($chatId, trim(Str::after($text, '/start')), $user, $message['from'] ?? []);
+        // a 6-digit code from the cabinet (spaces / dashes allowed: "123 456")
+        $digits = preg_replace('/[\s\-]/u', '', $text);
+        if (preg_match('/^\d{6}$/', $digits)) {
+            $this->code($chatId, $digits, $message['from'] ?? [], $user);
             return;
         }
-        if (isset($message['contact'])) {
-            $this->contact($chatId, $message, $link);
-            return;
-        }
-        if ($link && $link->status === 'phone_ok' && preg_match('/^\d{6}$/', $text)) {
-            $this->code($chatId, $text, $link);
+        if (!$user && (str_starts_with($text, '/start') || isset($message['contact']))) {
+            isset($message['contact']) ? $this->contact($chatId, $message) : $this->askPhone($chatId);
             return;
         }
         if (!$user) {
-            $this->say($chatId, null, 'bot.not_linked');
+            $this->askPhone($chatId);
             return;
         }
 
@@ -65,105 +75,75 @@ class BotHandler
 
     // ---------- linking ----------
 
-    private function start(string $chatId, string $token, ?User $user, array $from = []): void
+    private function askPhone(string $chatId): void
     {
-        if ($token === '') {
-            $user ? $this->say($chatId, $user, 'bot.instructions', ['name' => e($user->name)]) : $this->say($chatId, null, 'bot.not_linked');
-            return;
-        }
-
-        $link = TelegramLink::with('user')->where('token', $token)->first();
-        if (!$link || !$link->isOpen()) {
-            $this->say($chatId, $link?->user, 'bot.link_expired');
-            return;
-        }
-
-        $link->update([
-            'chat_id' => $chatId, 'status' => 'started',
-            'tg_username' => $from['username'] ?? null,
-            'tg_name' => trim(($from['first_name'] ?? '') . ' ' . ($from['last_name'] ?? '')) ?: null,
-        ]);
-        $this->api->sendMessage($chatId, $this->t($link->user, 'bot.share_phone'), [
-            'keyboard'          => [[['text' => $this->t($link->user, 'bot.share_phone_button'), 'request_contact' => true]]],
+        $this->api->sendMessage($chatId, $this->t(null, 'bot.share_phone'), [
+            'keyboard'          => [[['text' => $this->t(null, 'bot.share_phone_button'), 'request_contact' => true]]],
             'resize_keyboard'   => true,
             'one_time_keyboard' => true,
         ]);
     }
 
-    private function contact(string $chatId, array $message, ?TelegramLink $link): void
+    /** The client's own number: their profile phone of exactly one active account → linked; else → the code. */
+    private function contact(string $chatId, array $message): void
     {
-        // only the sender's own contact counts
         if (($message['contact']['user_id'] ?? null) !== ($message['from']['id'] ?? false)) {
-            $this->say($chatId, $link?->user, 'bot.own_phone_only');
+            $this->say($chatId, null, 'bot.own_phone_only');
             return;
         }
 
-        if (!$link || !$link->isOpen()) {
-            // The QR's /start never arrived (START not pressed, or an old "Send number" button from an earlier
-            // attempt). If exactly one open QR belongs to a user with this number, continue with it: the
-            // 6-digit code is still shown only in that user's logged-in cabinet.
-            $link = $this->openLinkByPhone((string) ($message['contact']['phone_number'] ?? ''));
-            if (!$link) {
-                $this->say($chatId, null, 'bot.scan_first', [], removeKeyboard: true);
-                return;
-            }
-            $from = $message['from'] ?? [];
-            $link->update([
-                'chat_id' => $chatId, 'status' => 'started',
-                'tg_username' => $from['username'] ?? null,
-                'tg_name' => trim(($from['first_name'] ?? '') . ' ' . ($from['last_name'] ?? '')) ?: null,
-            ]);
-        }
+        $phone = '+' . ltrim((string) ($message['contact']['phone_number'] ?? ''), '+');
+        Cache::put('tg-phone:' . $chatId, $phone, now()->addHour()); // shown to the super admin if the code links later
 
-        $user = $link->user;
-        $link->update(['shared_phone' => '+' . ltrim((string) ($message['contact']['phone_number'] ?? ''), '+')]);
-        $phones = [$user->phone, $user->company?->phone];
-        if (!collect($phones)->contains(fn ($p) => TelegramLink::samePhone($p, $message['contact']['phone_number'] ?? ''))) {
-            $link->update(['status' => 'phone_mismatch']);
-            $this->say($chatId, $user, 'bot.phone_mismatch', [], removeKeyboard: true);
+        $suffix = substr(preg_replace('/\D/', '', $phone), -9);
+        $users = strlen($suffix) === 9
+            ? User::where('is_active', true)->where('role', '!=', 'admin')->whereNotNull('phone')->get(['id', 'phone'])
+                ->filter(fn (User $u) => TelegramLink::samePhone($u->phone, $phone))
+            : collect();
+
+        if ($users->count() !== 1) {
+            $this->say($chatId, null, 'bot.enter_cabinet_code', [], removeKeyboard: true);
             return;
         }
 
-        $link->update(['status' => 'phone_ok', 'code' => str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT), 'attempts' => 0]);
-        $this->say($chatId, $user, 'bot.enter_code', [], removeKeyboard: true);
+        $this->linkChat($chatId, User::find($users->first()->id), $message['from'] ?? [], $phone, 'linked');
     }
 
-    /** The only open, not yet opened QR whose user (or company) has this phone; null when none or several. */
-    private function openLinkByPhone(string $phone): ?TelegramLink
+    private function code(string $chatId, string $code, array $from, ?User $current): void
     {
-        $links = TelegramLink::with('user.company')->where('status', 'pending')->whereNull('chat_id')
-            ->where('expires_at', '>', now())->latest('id')->limit(200)->get()
-            ->filter(fn (TelegramLink $l) => $l->user?->is_active
-                && collect([$l->user->phone, $l->user->company?->phone])->contains(fn ($p) => TelegramLink::samePhone($p, $phone)));
+        $key = 'tg-code:' . $chatId;
+        if (RateLimiter::tooManyAttempts($key, self::CODE_TRIES)) {
+            $this->say($chatId, $current, 'bot.too_many_attempts', ['min' => (int) ceil(RateLimiter::availableIn($key) / 60)]);
+            return;
+        }
 
-        return $links->count() === 1 ? $links->first() : null;
+        $link = TelegramLink::findByCode($code);
+        if (!$link || !$link->user?->is_active) {
+            RateLimiter::hit($key, self::CODE_PAUSE);
+            $this->say($chatId, $current, $current ? 'bot.wrong_code_linked' : 'bot.wrong_code');
+            return;
+        }
+        RateLimiter::clear($key);
+
+        $this->linkChat($chatId, $link->user, $from, Cache::get('tg-phone:' . $chatId), 'linked', $link);
     }
 
-    private function code(string $chatId, string $code, TelegramLink $link): void
+    /** Links the chat to the account (one chat per account and one account per chat) and says so. */
+    private function linkChat(string $chatId, User $user, array $from, ?string $phone, string $status, ?TelegramLink $link = null): void
     {
-        if (!$link->isOpen()) {
-            $this->say($chatId, $link->user, 'bot.link_expired');
-            return;
-        }
+        User::where('telegram_chat_id', $chatId)->where('id', '!=', $user->id)->update(['telegram_chat_id' => null]);
+        $user->update(['telegram_chat_id' => $chatId]);
+        // the attempt stays as history for the super admin (Admin → Telegram)
+        $values = [
+            'status' => $status, 'code' => null, 'chat_id' => $chatId, 'shared_phone' => $phone,
+            'tg_username' => $from['username'] ?? null,
+            'tg_name' => trim(($from['first_name'] ?? '') . ' ' . ($from['last_name'] ?? '')) ?: null,
+        ];
+        $link ? $link->update($values) : TelegramLink::create($values + ['user_id' => $user->id, 'token' => Str::random(32), 'expires_at' => now()]);
+        Cache::forget('tg-phone:' . $chatId);
 
-        if (!hash_equals((string) $link->code, $code)) {
-            $link->increment('attempts');
-            if ($link->attempts >= 5) {
-                $link->update(['status' => 'failed']);
-                $this->say($chatId, $link->user, 'bot.too_many_attempts');
-            } else {
-                $this->say($chatId, $link->user, 'bot.wrong_code');
-            }
-            return;
-        }
-
-        // one chat per account and one account per chat
-        User::where('telegram_chat_id', $chatId)->where('id', '!=', $link->user_id)->update(['telegram_chat_id' => null]);
-        $link->user->update(['telegram_chat_id' => $chatId]);
-        $link->update(['status' => 'linked', 'code' => null]);
-
-        $this->say($chatId, $link->user, 'bot.linked', ['name' => e($link->user->name)]);
-        $this->say($chatId, $link->user, 'bot.instructions', ['name' => e($link->user->name)]);
+        $this->say($chatId, $user, 'bot.linked', ['name' => e($user->name)], removeKeyboard: true);
+        $this->say($chatId, $user, 'bot.instructions', ['name' => e($user->name)]);
     }
 
     // ---------- working with batches ----------
@@ -310,6 +290,6 @@ class BotHandler
     /** Translation in the user's cabinet language. */
     public function t(?User $user, string $key, array $replace = []): string
     {
-        return __($key, $replace, $user?->locale ?: config('app.locale'));
+        return __($key, $replace, $user?->locale ?: $this->guestLocale ?: config('app.locale'));
     }
 }

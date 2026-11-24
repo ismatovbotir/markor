@@ -2,8 +2,7 @@
 
 namespace App\Http\Livewire\Admin;
 
-use App\Domain\Reporting\AuditLog;
-use App\Domain\Telegram\BotHandler;
+use App\Domain\Telegram\AdminLinker;
 use App\Domain\Telegram\TelegramApi;
 use App\Domain\Telegram\TelegramLink;
 use App\Models\User;
@@ -26,29 +25,15 @@ class TelegramPage extends Component
     public function updatingTab(): void { $this->resetPage(); }
 
     /** Links an unmatched attempt by hand: the same result as a correct code in the bot (status admin_linked). */
-    public function link(int $linkId, TelegramApi $api, BotHandler $bot): void
+    public function link(int $linkId, AdminLinker $linker): void
     {
         abort_unless(auth()->user()?->isAdmin(), 403);
-        $link = TelegramLink::with('user')->whereKey($linkId)->where('status', 'phone_mismatch')->whereNotNull('chat_id')->first();
-        $user = $link?->user;
-        if (!$user || !$user->is_active || $user->isAdmin()) {
+        $link = TelegramLink::with('user')->find($linkId);
+        if (!$link || !$linker->link($link, 'button')) {
             $this->dispatch('notify', type: 'error', message: __('tg_admin.link_unavailable'));
             return;
         }
-
-        \Illuminate\Support\Facades\DB::transaction(function () use ($link, $user) {
-            // one chat per account and one account per chat (as in the bot)
-            User::where('telegram_chat_id', $link->chat_id)->where('id', '!=', $user->id)->update(['telegram_chat_id' => null]);
-            $user->update(['telegram_chat_id' => $link->chat_id]);
-            $link->update(['status' => 'admin_linked', 'code' => null]);
-            AuditLog::record('telegram.admin_linked', 'user', $user->id, [
-                'link_id' => $link->id, 'shared_phone' => $link->shared_phone, 'cabinet_phone' => $user->phone, 'tg_username' => $link->tg_username,
-            ]);
-        });
-
-        $api->sendMessage($link->chat_id, $bot->t($user, 'bot.admin_linked', ['name' => e($user->name)]), ['remove_keyboard' => true]);
-        $api->sendMessage($link->chat_id, $bot->t($user, 'bot.instructions', ['name' => e($user->name)]));
-        $this->dispatch('notify', type: 'success', message: __('tg_admin.linked_done', ['name' => $user->name]));
+        $this->dispatch('notify', type: 'success', message: __('tg_admin.linked_done', ['name' => $link->user->name]));
     }
 
     public function render(TelegramApi $api)

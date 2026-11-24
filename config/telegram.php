@@ -5,7 +5,6 @@
 return [
     'token'          => env('TELEGRAM_BOT_TOKEN'),
     'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
-    'link_ttl'       => 15,   // minutes a QR link stays valid
     // Set in .env only (shown read-only in Sozlamalar):
     // super admin chat for system alerts (user id or group id -100…); empty = the super admin's linked Telegram
     'admin_chat'     => env('TELEGRAM_ADMIN_CHAT_ID'),
