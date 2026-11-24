@@ -510,7 +510,7 @@
     "tg_admin.tab_unfinished": "Tugallanmagan",
     "tg_admin.hint_clients": "Telegram bot ulangan foydalanuvchilar.",
     "tg_admin.hint_matched": "Telefon raqami kabinetdagisiga mos kelib, kod bilan tasdiqlangan ulanishlar.",
-    "tg_admin.hint_unmatched": "Botda yuborilgan raqam kabinetdagi raqamga mos kelmagan urinishlar — mijozga qo'ng'iroq qilib yordam bering.",
+    "tg_admin.hint_unmatched": "Botda yuborilgan raqam kabinetdagi raqamga mos kelmagan urinishlar. Mijozga qo'ng'iroq qiling; raqam uniki bo'lsa — «Bog'lash» tugmasini bosing.",
     "tg_admin.hint_unfinished": "Botni ochgan, lekin raqam yoki kodni yubormagan urinishlar.",
     "tg_admin.cabinet_phone": "Kabinetdagi telefon",
     "tg_admin.shared_phone": "Botda yuborgan",
@@ -1681,5 +1681,12 @@
     "import.check_gtins": "Faylda GTIN (mahsulot shtrix-kodlari) bor, markirovka kodlari emas. Markirovka kodlari Asl Belgisi / Chestniy ZNAK da buyurtma qilinadi va 01…21… ko'rinishidagi kodlar bilan CSV bo'lib keladi.",
     "import.check_unreadable": "Faylni o'qib bo'lmadi.",
     "import.check_skipped": ":n ta qator markirovka kodi emas va o'tkazib yuboriladi (qatorlar: :lines).",
-    "import.check_repeated": "Takrorlangan kodlar: :n (bir marta olinadi)."
+    "import.check_repeated": "Takrorlangan kodlar: :n (bir marta olinadi).",
+    "tg_admin.link": "Bog'lash",
+    "tg_admin.link_confirm": ":name ning Telegram hisobini qo'lda ulaysizmi? Botda yuborilgan raqam: :phone, kabinetdagi: :cabinet. Avval mijozga qo'ng'iroq qilib, bu uning raqami ekanini tekshiring.",
+    "tg_admin.linked_done": ":name Telegram botga ulandi.",
+    "tg_admin.link_unavailable": "Bu urinishni ulab bo'lmaydi (foydalanuvchi faol emas yoki urinish allaqachon yopilgan).",
+    "tg_admin.status.admin_linked": "Administrator uladi",
+    "bot.admin_linked": "✅ :name, akkauntingiz administrator tomonidan ulandi.",
+    "bot.scan_first": "Avval saytdagi QR kodni skanerlang (Profil → Telegram bot → Ulash) va botda START tugmasini bosing. Shundan keyin raqamni yangi tugma bilan yuboring."
 }

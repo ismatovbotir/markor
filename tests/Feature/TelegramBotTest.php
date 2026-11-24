@@ -141,4 +141,70 @@ class TelegramBotTest extends TestCase
         $this->assertSame(1, ImportBatch::withoutGlobalScope('owner')->count(), 'second file with the same name is not loaded');
         $this->assertStringContainsString('#' . ImportBatch::withoutGlobalScope('owner')->value('id'), $this->lastText());
     }
+
+    public function test_super_admin_links_an_unmatched_attempt_by_hand(): void
+    {
+        $user = $this->client('+998 90 111 22 33');
+        $link = TelegramLink::create(['user_id' => $user->id, 'token' => 'tok', 'expires_at' => now()->addMinutes(15)]);
+        $this->update(['text' => '/start tok']);
+        $this->update(['contact' => ['phone_number' => '998901754001', 'user_id' => 555]]);
+        $this->assertSame('phone_mismatch', $link->fresh()->status);
+
+        $admin = User::create(['name' => 'Admin', 'email' => 'adm@t.uz', 'password' => 'secret123', 'role' => 'admin', 'locale' => 'uz', 'is_active' => true]);
+        $this->actingAs($admin);
+        Livewire::test(\App\Http\Livewire\Admin\TelegramPage::class)->set('tab', 'unmatched')
+            ->assertSee('+998901754001')->assertSeeHtml('wire:click="link(' . $link->id . ')"')
+            ->call('link', $link->id);
+
+        $this->assertSame('555', $user->fresh()->telegram_chat_id);
+        $this->assertSame('admin_linked', $link->fresh()->status);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'telegram.admin_linked', 'entity_id' => $user->id, 'user_id' => $admin->id]);
+        $this->assertTrue(collect($this->sent)->contains(fn ($m) => str_contains($m['text'] ?? '', 'администратор'))); // the client is told, in his language
+
+        // only unmatched attempts, only once
+        Livewire::test(\App\Http\Livewire\Admin\TelegramPage::class)->call('link', $link->id);
+        $this->assertSame('admin_linked', $link->fresh()->status);
+        Livewire::test(\App\Http\Livewire\Admin\TelegramPage::class)->set('tab', 'matched')->assertSee(__('tg_admin.status.admin_linked'));
+    }
+
+    public function test_only_the_super_admin_can_link_by_hand(): void
+    {
+        $user = $this->client();
+        $link = TelegramLink::create(['user_id' => $user->id, 'token' => 'tok2', 'chat_id' => '555', 'status' => 'phone_mismatch', 'expires_at' => now()->addMinutes(15)]);
+        $this->actingAs($user);
+
+        Livewire::test(\App\Http\Livewire\Admin\TelegramPage::class)->call('link', $link->id)->assertForbidden();
+        $this->assertNull($user->fresh()->telegram_chat_id);
+    }
+
+    public function test_number_without_the_qr_start_continues_with_the_open_qr_of_that_phone(): void
+    {
+        $user = $this->client('+998901754001');
+        $link = TelegramLink::create(['user_id' => $user->id, 'token' => 'tok', 'expires_at' => now()->addMinutes(15)]); // QR shown, START never sent
+
+        $this->update(['contact' => ['phone_number' => '998901754001', 'user_id' => 555]]);
+        $link->refresh();
+        $this->assertSame(['phone_ok', '555'], [$link->status, $link->chat_id]);   // goes on to the 6-digit code
+        $this->update(['text' => $link->code]);
+        $this->assertSame('555', $user->fresh()->telegram_chat_id);
+    }
+
+    public function test_old_send_number_button_without_an_open_qr_says_scan_first(): void
+    {
+        $user = $this->client('+998901754001');
+        TelegramLink::create(['user_id' => $user->id, 'token' => 'old', 'chat_id' => '555', 'status' => 'phone_mismatch', 'expires_at' => now()->addMinutes(15)]);
+
+        $this->update(['contact' => ['phone_number' => '998901754001', 'user_id' => 555]]);
+        $this->assertStringContainsString('START', $this->lastText());
+        $this->assertTrue(end($this->sent)['reply_markup']['remove_keyboard'] ?? false); // the stale button goes away
+        $this->assertNull($user->fresh()->telegram_chat_id);
+
+        // two open QRs with the same number (company phone shared): never guessed
+        $other = $this->client('+998 90 175 40 01');
+        TelegramLink::create(['user_id' => $user->id, 'token' => 'a', 'expires_at' => now()->addMinutes(15)]);
+        TelegramLink::create(['user_id' => $other->id, 'token' => 'b', 'expires_at' => now()->addMinutes(15)]);
+        $this->update(['contact' => ['phone_number' => '998901754001', 'user_id' => 555]]);
+        $this->assertStringContainsString('START', $this->lastText());
+        $this->assertSame(0, TelegramLink::where('status', 'phone_ok')->count());
+    }
 }

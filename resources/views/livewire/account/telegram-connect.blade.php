@@ -50,7 +50,7 @@
                     <p class="text-sm text-emerald-700 mt-3 flex items-center justify-center gap-1.5">@svg('heroicon-o-check-circle', 'w-5 h-5') {{ __('telegram.phone_ok') }}</p>
                     <p class="text-sm text-stone-600 mt-4">{{ __('telegram.type_code') }}</p>
                     <p class="font-mono text-4xl font-bold tracking-[0.35em] text-stone-900 my-4">{{ $link->code }}</p>
-                @elseif($link->status === 'linked')
+                @elseif(in_array($link->status, ['linked', 'admin_linked'], true))
                     <p class="text-emerald-700 mt-4 flex items-center justify-center gap-2 font-medium">@svg('heroicon-o-check-circle', 'w-6 h-6') {{ __('telegram.success') }}</p>
                     <p class="text-sm text-stone-600 mt-2">{{ __('telegram.success_hint') }}</p>
                 @elseif($link->status === 'phone_mismatch')
@@ -63,7 +63,7 @@
                     @if(in_array($link->status, ['phone_mismatch', 'failed', 'expired']))
                         <button wire:click="start" class="px-4 py-2 bg-sky-600 text-white rounded-lg text-sm">{{ __('import.retry') }}</button>
                     @endif
-                    <button wire:click="close" class="px-4 py-2 text-sm text-stone-600 hover:text-stone-800">{{ $link->status === 'linked' ? 'OK' : __('common.cancel') }}</button>
+                    <button wire:click="close" class="px-4 py-2 text-sm text-stone-600 hover:text-stone-800">{{ in_array($link->status, ['linked', 'admin_linked'], true) ? 'OK' : __('common.cancel') }}</button>
                 </div>
             </div>
         </div>

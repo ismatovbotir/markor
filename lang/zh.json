@@ -510,7 +510,7 @@
     "tg_admin.tab_unfinished": "未完成",
     "tg_admin.hint_clients": "已绑定 Telegram 机器人的用户。",
     "tg_admin.hint_matched": "号码与个人中心一致并通过验证码确认的绑定。",
-    "tg_admin.hint_unmatched": "机器人中发送的号码与个人中心不一致的尝试——请致电客户协助。",
+    "tg_admin.hint_unmatched": "机器人中发送的号码与个人中心不一致的尝试。请致电客户；如确认是其本人号码，点击“连接”。",
     "tg_admin.hint_unfinished": "打开了机器人但未发送号码或验证码。",
     "tg_admin.cabinet_phone": "个人中心电话",
     "tg_admin.shared_phone": "机器人中发送",
@@ -1681,5 +1681,12 @@
     "import.check_gtins": "文件中是 GTIN（商品条码），不是标识码。标识码需在 Asl Belgisi / Chestny ZNAK 订购，以 CSV 文件提供，格式为 01…21…",
     "import.check_unreadable": "无法读取文件。",
     "import.check_skipped": ":n 行不是标识码，将被跳过（行号：:lines）。",
-    "import.check_repeated": "重复的码：:n（只取一次）。"
+    "import.check_repeated": "重复的码：:n（只取一次）。",
+    "tg_admin.link": "连接",
+    "tg_admin.link_confirm": "手动连接 :name 的 Telegram？机器人中发送的号码：:phone，账户中的号码：:cabinet。请先致电客户，确认这是其本人号码。",
+    "tg_admin.linked_done": ":name 已连接 Telegram 机器人。",
+    "tg_admin.link_unavailable": "无法连接此尝试（用户未激活或尝试已关闭）。",
+    "tg_admin.status.admin_linked": "管理员已连接",
+    "bot.admin_linked": "✅ :name，您的账户已由管理员连接。",
+    "bot.scan_first": "请先扫描网站上的二维码（个人资料 → Telegram 机器人 → 连接），并在机器人中点击 START。然后用新的按钮发送号码。"
 }

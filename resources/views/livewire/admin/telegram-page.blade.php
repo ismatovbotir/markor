@@ -1,4 +1,4 @@
-@php $statusColor = ['linked' => 'emerald', 'phone_mismatch' => 'rose', 'phone_ok' => 'sky', 'started' => 'amber', 'pending' => 'stone', 'failed' => 'rose', 'expired' => 'stone']; @endphp
+@php $statusColor = ['linked' => 'emerald', 'admin_linked' => 'emerald', 'phone_mismatch' => 'rose', 'phone_ok' => 'sky', 'started' => 'amber', 'pending' => 'stone', 'failed' => 'rose', 'expired' => 'stone']; @endphp
 <div class="space-y-6">
     <h1 class="text-xl font-semibold">Telegram</h1>
 
@@ -29,6 +29,7 @@
                         <th class="text-left px-4 py-3 font-medium text-stone-600">Chat ID</th>
                     @endif
                     <th class="text-left px-4 py-3 font-medium text-stone-600">{{ __('common.date') }}</th>
+                    @if($tab === 'unmatched')<th class="px-4 py-3"></th>@endif
                 </tr>
             </thead>
             <tbody class="divide-y divide-stone-100">
@@ -53,6 +54,17 @@
                             <td class="px-4 py-3 font-mono text-xs">{{ $row->telegram_chat_id }}</td>
                         @endif
                         <td class="px-4 py-3 text-stone-500 whitespace-nowrap">{{ $row->updated_at?->format('d.m.Y H:i') }}</td>
+                        @if($tab === 'unmatched')
+                            <td class="px-4 py-3 text-right whitespace-nowrap">
+                                @if($person && $person->is_active && $row->chat_id)
+                                    <button type="button" wire:click="link({{ $row->id }})"
+                                            wire:confirm="{{ __('tg_admin.link_confirm', ['name' => $person->name, 'phone' => $row->shared_phone ?: '—', 'cabinet' => $person->phone ?: '—']) }}"
+                                            class="inline-flex items-center gap-1 px-3 py-1.5 bg-sky-600 text-white rounded-lg text-xs font-medium hover:bg-sky-700">
+                                        @svg('heroicon-o-link', 'w-3.5 h-3.5') {{ __('tg_admin.link') }}
+                                    </button>
+                                @endif
+                            </td>
+                        @endif
                     </tr>
                 @empty
                     <tr><td colspan="7" class="px-4 py-8 text-center text-stone-400">{{ __('common.no_data') }}</td></tr>

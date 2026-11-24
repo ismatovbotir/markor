@@ -92,15 +92,27 @@ class BotHandler
 
     private function contact(string $chatId, array $message, ?TelegramLink $link): void
     {
-        if (!$link || !$link->isOpen()) {
-            $this->say($chatId, $link?->user, 'bot.link_expired', [], removeKeyboard: true);
+        // only the sender's own contact counts
+        if (($message['contact']['user_id'] ?? null) !== ($message['from']['id'] ?? false)) {
+            $this->say($chatId, $link?->user, 'bot.own_phone_only');
             return;
         }
 
-        // only the sender's own contact counts
-        if (($message['contact']['user_id'] ?? null) !== ($message['from']['id'] ?? false)) {
-            $this->say($chatId, $link->user, 'bot.own_phone_only');
-            return;
+        if (!$link || !$link->isOpen()) {
+            // The QR's /start never arrived (START not pressed, or an old "Send number" button from an earlier
+            // attempt). If exactly one open QR belongs to a user with this number, continue with it: the
+            // 6-digit code is still shown only in that user's logged-in cabinet.
+            $link = $this->openLinkByPhone((string) ($message['contact']['phone_number'] ?? ''));
+            if (!$link) {
+                $this->say($chatId, null, 'bot.scan_first', [], removeKeyboard: true);
+                return;
+            }
+            $from = $message['from'] ?? [];
+            $link->update([
+                'chat_id' => $chatId, 'status' => 'started',
+                'tg_username' => $from['username'] ?? null,
+                'tg_name' => trim(($from['first_name'] ?? '') . ' ' . ($from['last_name'] ?? '')) ?: null,
+            ]);
         }
 
         $user = $link->user;
@@ -114,6 +126,17 @@ class BotHandler
 
         $link->update(['status' => 'phone_ok', 'code' => str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT), 'attempts' => 0]);
         $this->say($chatId, $user, 'bot.enter_code', [], removeKeyboard: true);
+    }
+
+    /** The only open, not yet opened QR whose user (or company) has this phone; null when none or several. */
+    private function openLinkByPhone(string $phone): ?TelegramLink
+    {
+        $links = TelegramLink::with('user.company')->where('status', 'pending')->whereNull('chat_id')
+            ->where('expires_at', '>', now())->latest('id')->limit(200)->get()
+            ->filter(fn (TelegramLink $l) => $l->user?->is_active
+                && collect([$l->user->phone, $l->user->company?->phone])->contains(fn ($p) => TelegramLink::samePhone($p, $phone)));
+
+        return $links->count() === 1 ? $links->first() : null;
     }
 
     private function code(string $chatId, string $code, TelegramLink $link): void
