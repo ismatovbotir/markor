@@ -259,4 +259,16 @@ class TelegramBotTest extends TestCase
         Livewire::test(\App\Http\Livewire\Admin\TelegramPage::class)->call('link', $link->id)->assertForbidden();
         $this->assertNull($user->fresh()->telegram_chat_id);
     }
+
+    public function test_the_ad_in_the_code_window_has_a_fixed_height_and_stays_while_the_code_refreshes(): void
+    {
+        $category = \App\Domain\Offers\Models\OfferCategory::create(['slug' => 'printers-t', 'name_uz' => 'Printerlar', 'is_active' => true]);
+        \App\Domain\Offers\Models\Offer::create(['offer_category_id' => $category->id, 'slug' => 'xp-t', 'category' => 'printers-t',
+            'title_uz' => 'Xprinter XP-365B juda uzun nom bilan', 'description_uz' => str_repeat('Uzun tavsif. ', 30), 'is_active' => true, 'action' => 'order']);
+        $this->actingAs($this->client());
+
+        Livewire::test(TelegramConnect::class)->call('start')
+            ->assertSeeHtml('wire:ignore class="mb-5 h-24 overflow-hidden')   // fixed height, not redrawn by the 1 s refresh
+            ->assertSee('Xprinter XP-365B');
+    }
 }

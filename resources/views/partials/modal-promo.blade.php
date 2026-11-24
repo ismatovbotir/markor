@@ -1,11 +1,12 @@
-{{-- A random product of ours, for client and visitor modals. Re-rolled every time the modal is rendered/opened. --}}
+{{-- A random product of ours, for client and visitor modals. Picked when the modal opens; fixed height and
+     wire:ignore, so a modal that refreshes itself (Telegram code every second) never moves its content. --}}
 @php
     $promoItems = once(fn () => \App\Domain\Offers\Models\Offer::active()->orderBy('sort_order')->get());
     $promo = $promoItems->shuffle()->first();
     $promoPhone = config('contact.phone');
 @endphp
 @if($promo && !auth()->user()?->isAdmin())
-    <div class="mb-5 border border-amber-200 bg-amber-50 rounded-xl p-3 flex items-center gap-3 text-left">
+    <div wire:ignore class="mb-5 h-24 overflow-hidden border border-amber-200 bg-amber-50 rounded-xl p-3 flex items-center gap-3 text-left">
         @if($promo->image_url)
             <img src="{{ $promo->image_url }}" alt="" class="w-14 h-14 object-contain rounded-lg bg-white shrink-0">
         @else
@@ -13,7 +14,7 @@
         @endif
         <div class="min-w-0 flex-1">
             <p class="text-[10px] font-semibold uppercase tracking-wide text-amber-700">{{ __('nav.offers') }}</p>
-            <p class="font-semibold text-sm text-stone-900 leading-tight">{{ $promo->title }}</p>
+            <p class="font-semibold text-sm text-stone-900 leading-tight line-clamp-1">{{ $promo->title }}</p>
             <p class="text-xs text-stone-600 mt-0.5 line-clamp-2">{{ $promo->description }}</p>
         </div>
         @if($promo->url)
